@@ -38,20 +38,23 @@ export function MainNav() {
     <SidebarMenu>
       {menuItems.map((item) => (
         <SidebarMenuItem key={item.path}>
-          <Link href={item.path} legacyBehavior passHref>
+          <Link href={item.path} passHref>
             <SidebarMenuButton
+              asChild
               isActive={pathname === item.path}
               tooltip={item.label}
               className="justify-start"
             >
-              <item.icon className="h-5 w-5" />
-              <span
-                className={cn(
-                  "group-data-[collapsible=icon]:hidden group-data-[collapsible=offcanvas]:hidden"
-                )}
-              >
-                {item.label}
-              </span>
+              <div>
+                <item.icon className="h-5 w-5" />
+                <span
+                  className={cn(
+                    "group-data-[collapsible=icon]:hidden group-data-[collapsible=offcanvas]:hidden"
+                  )}
+                >
+                  {item.label}
+                </span>
+              </div>
             </SidebarMenuButton>
           </Link>
         </SidebarMenuItem>
