@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "website-template-1",
+      "description": "Elegant wedding website template with floral design",
+      "imageUrl": "https://picsum.photos/seed/101/800/600",
+      "imageHint": "wedding website"
+    },
+    {
+      "id": "website-template-2",
+      "description": "Modern minimalist wedding website template",
+      "imageUrl": "https://picsum.photos/seed/102/800/600",
+      "imageHint": "minimalist wedding"
+    },
+    {
+      "id": "invitation-template-1",
+      "description": "Classic digital invitation with calligraphy",
+      "imageUrl": "https://picsum.photos/seed/103/400/600",
+      "imageHint": "wedding invitation"
+    },
+    {
+      "id": "registry-item-1",
+      "description": "Honeymoon fund donation image",
+      "imageUrl": "https://picsum.photos/seed/104/300/300",
+      "imageHint": "tropical beach"
+    },
+    {
+      "id": "registry-item-2",
+      "description": "Kitchenware set for wedding registry",
+      "imageUrl": "https://picsum.photos/seed/105/300/300",
+      "imageHint": "kitchenware"
+    },
+    {
+      "id": "registry-item-3",
+      "description": "Cozy home decor item for registry",
+      "imageUrl": "https://picsum.photos/seed/106/300/300",
+      "imageHint": "home decor"
+    }
+  ]
 }
