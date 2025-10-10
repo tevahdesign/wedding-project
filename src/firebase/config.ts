@@ -20,19 +20,6 @@ import type { FirebaseOptions } from 'firebase/app';
  * @throws {Error} If the Firebase configuration is not available.
  */
 export function getFirebaseConfig(): FirebaseOptions {
-  if (typeof window !== 'undefined' && (window as any).firebase) {
-    // When running in a Firebase hosting environment, the SDK is automatically
-    // initialized and we can just use the config from the SDK.
-    const firebaseApp = (window as any).firebase.app();
-    if (firebaseApp) {
-      return firebaseApp.options;
-    }
-  }
-  
-  if (process.env.NEXT_PUBLIC_FIREBASE_CONFIG) {
-    return JSON.parse(process.env.NEXT_PUBLIC_FIREBASE_CONFIG);
-  }
-
   // During server-side rendering or in a development environment where
   // the app is not hosted on Firebase, we can use a mock configuration.
   if (typeof window === 'undefined') {
@@ -46,6 +33,18 @@ export function getFirebaseConfig(): FirebaseOptions {
     };
   }
 
+  if ((window as any).firebase) {
+    // When running in a Firebase hosting environment, the SDK is automatically
+    // initialized and we can just use the config from the SDK.
+    const firebaseApp = (window as any).firebase.app();
+    if (firebaseApp) {
+      return firebaseApp.options;
+    }
+  }
+  
+  if (process.env.NEXT_PUBLIC_FIREBASE_CONFIG) {
+    return JSON.parse(process.env.NEXT_PUBLIC_FIREBASE_CONFIG);
+  }
 
   // If the firebase config is not available, we throw an error.
   throw new Error(
