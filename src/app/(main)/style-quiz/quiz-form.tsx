@@ -19,7 +19,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Loader2, Sparkles, Wand2 } from "lucide-react"
-import { submitQuiz } from "./actions"
+import { submitQuiz, type QuizState } from "./actions"
 
 const quizOptions = {
   colorPreference: ["Pastels (Blush, Mint)", "Bold & Vibrant (Ruby, Navy)", "Earthy Tones (Terracotta, Sage)", "Monochromatic (All White, Black & White)"],
@@ -49,7 +49,7 @@ function SubmitButton() {
 }
 
 export function QuizForm() {
-  const initialState = { suggestions: null, error: null }
+  const initialState: QuizState = { suggestions: null, error: null, fieldErrors: {} }
   const [state, formAction] = useFormState(submitQuiz, initialState)
 
   if (state.suggestions) {

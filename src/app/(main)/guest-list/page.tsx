@@ -1,3 +1,6 @@
+"use client"
+
+import { useMemo } from "react"
 import { PageHeader } from "@/components/app/page-header"
 import { Button } from "@/components/ui/button"
 import {
@@ -35,21 +38,25 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
-
-const guests = [
-  { name: "Eleanor Vance", email: "eleanor@example.com", status: "Attending", group: "Bride's Family" },
-  { name: "Marcus Thorne", email: "marcus@example.com", status: "Attending", group: "Groom's Family" },
-  { name: "Isabella Rossi", email: "isabella@example.com", status: "Pending", group: "Friends" },
-  { name: "Julian Croft", email: "julian@example.com", status: "Declined", group: "Friends" },
-  { name: "Sophia Chen", email: "sophia@example.com", status: "Attending", group: "Bride's Family" },
-  { name: "Liam Gallagher", email: "liam@example.com", status: "Pending", group: "Work" },
-]
+import { useAuth, useCollection, useFirestore } from "@/firebase"
+import { collection } from "firebase/firestore"
 
 export default function GuestListPage() {
+  const { user } = useAuth()
+  const firestore = useFirestore()
+  const guestsRef = useMemo(() => {
+    if (!user || !firestore) return null
+    return collection(firestore, `users/${user.uid}/guests`)
+  }, [user, firestore])
+
+  const { data: guests, loading } = useCollection(guestsRef)
+
   return (
     <>
-      <PageHeader title="Guest List Manager" description="Organize your guests and track RSVPs.">
+      <PageHeader
+        title="Guest List Manager"
+        description="Organize your guests and track RSVPs."
+      >
         <Dialog>
           <DialogTrigger asChild>
             <Button>
@@ -66,16 +73,35 @@ export default function GuestListPage() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">Name</Label>
-                <Input id="name" placeholder="Guest's full name" className="col-span-3" />
+                <Label htmlFor="name" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="name"
+                  placeholder="Guest's full name"
+                  className="col-span-3"
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="text-right">Email</Label>
-                <Input id="email" type="email" placeholder="guest@example.com" className="col-span-3" />
+                <Label htmlFor="email" className="text-right">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="guest@example.com"
+                  className="col-span-3"
+                />
               </div>
-               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="group" className="text-right">Group</Label>
-                <Input id="group" placeholder="e.g., Bride's Family" className="col-span-3" />
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="group" className="text-right">
+                  Group
+                </Label>
+                <Input
+                  id="group"
+                  placeholder="e.g., Bride's Family"
+                  className="col-span-3"
+                />
               </div>
             </div>
             <DialogFooter>
@@ -88,7 +114,7 @@ export default function GuestListPage() {
         <CardHeader>
           <CardTitle>All Guests</CardTitle>
           <CardDescription>
-            A total of {guests.length} guests have been invited.
+            A total of {guests?.length || 0} guests have been invited.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -98,38 +124,69 @@ export default function GuestListPage() {
                 <TableHead>Name</TableHead>
                 <TableHead className="hidden md:table-cell">Group</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead><span className="sr-only">Actions</span></TableHead>
+                <TableHead>
+                  <span className="sr-only">Actions</span>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {guests.map((guest) => (
-                <TableRow key={guest.email}>
+              {loading && (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center">
+                    Loading guests...
+                  </TableCell>
+                </TableRow>
+              )}
+              {guests?.map((guest) => (
+                <TableRow key={guest.id}>
                   <TableCell>
                     <div className="font-medium">{guest.name}</div>
-                    <div className="text-sm text-muted-foreground md:hidden">{guest.group}</div>
+                    <div className="text-sm text-muted-foreground md:hidden">
+                      {guest.group}
+                    </div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">{guest.group}</TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    {guest.group}
+                  </TableCell>
                   <TableCell>
-                    <Badge variant={guest.status === 'Attending' ? 'default' : guest.status === 'Pending' ? 'secondary' : 'destructive'} 
-                           className={guest.status === 'Attending' ? 'bg-green-500/20 text-green-700' : ''}>
+                    <Badge
+                      variant={
+                        guest.status === "Attending"
+                          ? "default"
+                          : guest.status === "Pending"
+                          ? "secondary"
+                          : "destructive"
+                      }
+                      className={
+                        guest.status === "Attending"
+                          ? "bg-green-500/20 text-green-700"
+                          : ""
+                      }
+                    >
                       {guest.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button aria-haspopup="true" size="icon" variant="ghost">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Toggle menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
-                          <DropdownMenuItem>Send Reminder</DropdownMenuItem>
-                           <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          aria-haspopup="true"
+                          size="icon"
+                          variant="ghost"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">Toggle menu</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuItem>Send Reminder</DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}

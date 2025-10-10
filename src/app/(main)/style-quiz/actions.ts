@@ -15,9 +15,10 @@ const QuizSchema = z.object({
   budgetPreference: z.string().min(1, "Please select a budget."),
 })
 
-type QuizState = {
+export type QuizState = {
   suggestions: WeddingStyleSuggestionOutput | null;
   error?: string | null;
+  fieldErrors?: { [key: string]: string[] | undefined };
 }
 
 export async function submitQuiz(
@@ -36,15 +37,16 @@ export async function submitQuiz(
     if (!validatedFields.success) {
       return {
         suggestions: null,
-        error: validatedFields.error.flatten().fieldErrors.toString(),
+        error: "Please fill out all fields.",
+        fieldErrors: validatedFields.error.flatten().fieldErrors,
       }
     }
 
     const suggestions = await getWeddingStyleSuggestions(validatedFields.data as WeddingStyleQuizInput)
 
-    return { suggestions, error: null }
+    return { suggestions, error: null, fieldErrors: {} }
   } catch (error) {
     console.error(error);
-    return { suggestions: null, error: "An unexpected error occurred. Please try again." }
+    return { suggestions: null, error: "An unexpected error occurred. Please try again.", fieldErrors: {} }
   }
 }

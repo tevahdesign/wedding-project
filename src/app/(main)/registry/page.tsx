@@ -1,3 +1,5 @@
+"use client"
+
 import Image from "next/image"
 import { PageHeader } from "@/components/app/page-header"
 import { Button } from "@/components/ui/button"
@@ -12,44 +14,31 @@ import {
 import { PlusCircle } from "lucide-react"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { Progress } from "@/components/ui/progress"
-
-const registryItems = [
-  {
-    id: "item-1",
-    title: "Honeymoon Fund",
-    description: "Contribute to our dream getaway!",
-    store: "Cash Fund",
-    price: "Varies",
-    image: PlaceHolderImages.find(img => img.id === 'registry-item-1'),
-    purchased: true,
-  },
-  {
-    id: "item-2",
-    title: "Deluxe Kitchenware Set",
-    description: "Pots, pans, and everything we need to cook.",
-    store: "Crate & Barrel",
-    price: "$499.99",
-    image: PlaceHolderImages.find(img => img.id === 'registry-item-2'),
-    purchased: false,
-  },
-  {
-    id: "item-3",
-    title: "Cozy Throw Blanket",
-    description: "For movie nights on the couch.",
-    store: "West Elm",
-    price: "$129.00",
-    image: PlaceHolderImages.find(img => img.id === 'registry-item-3'),
-    purchased: false,
-  },
-]
+import { useAuth, useCollection, useFirestore } from "@/firebase"
+import { useMemo } from "react"
+import { collection } from "firebase/firestore"
 
 export default function RegistryPage() {
-  const purchasedCount = registryItems.filter(item => item.purchased).length;
-  const progress = (purchasedCount / registryItems.length) * 100;
+  const { user } = useAuth()
+  const firestore = useFirestore()
+
+  const registryItemsRef = useMemo(() => {
+    if (!user || !firestore) return null
+    return collection(firestore, `users/${user.uid}/registryItems`)
+  }, [user, firestore])
+
+  const { data: registryItems, loading } = useCollection(registryItemsRef)
+
+  const purchasedCount = registryItems?.filter((item) => item.purchased).length || 0
+  const totalItems = registryItems?.length || 0
+  const progress = totalItems > 0 ? (purchasedCount / totalItems) * 100 : 0
 
   return (
     <>
-      <PageHeader title="Wedding Registry" description="All your wishes in one place.">
+      <PageHeader
+        title="Wedding Registry"
+        description="All your wishes in one place."
+      >
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Item or Link
@@ -58,17 +47,39 @@ export default function RegistryPage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
         <div className="lg:col-span-3">
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {registryItems.map((item) => (
+            {loading &&
+              Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i}>
+                  <div className="aspect-square bg-muted animate-pulse" />
+                  <CardHeader>
+                    <div className="h-6 bg-muted rounded w-3/4 animate-pulse" />
+                    <div className="h-4 bg-muted rounded w-1/2 animate-pulse mt-2" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-6 bg-muted rounded w-1/4 animate-pulse" />
+                  </CardContent>
+                  <CardFooter>
+                    <Button className="w-full" disabled>
+                      Loading...
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            {registryItems?.map((item) => {
+               const itemImage = PlaceHolderImages.find(
+                (img) => img.id === item.imageId
+              )
+              return (
               <Card key={item.id} className="overflow-hidden">
-                {item.image && (
+                {itemImage && (
                   <div className="aspect-square bg-muted">
                     <Image
-                      src={item.image.imageUrl}
-                      alt={item.image.description}
+                      src={itemImage.imageUrl}
+                      alt={itemImage.description}
                       width={300}
                       height={300}
                       className="w-full h-full object-cover"
-                      data-ai-hint={item.image.imageHint}
+                      data-ai-hint={itemImage.imageHint}
                     />
                   </div>
                 )}
@@ -80,25 +91,32 @@ export default function RegistryPage() {
                   <p className="text-lg font-semibold">{item.price}</p>
                 </CardContent>
                 <CardFooter>
-                   <Button className="w-full" disabled={item.purchased}>
+                  <Button className="w-full" disabled={item.purchased}>
                     {item.purchased ? "Purchased" : "View & Purchase"}
                   </Button>
                 </CardFooter>
               </Card>
-            ))}
+            )})}
           </div>
         </div>
         <div className="lg:col-span-1 sticky top-8">
-           <Card>
+          <Card>
             <CardHeader>
               <CardTitle>Registry Progress</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Progress value={progress} aria-label={`${Math.round(progress)}% of gifts purchased`} />
-               <p className="text-sm text-muted-foreground">{purchasedCount} of {registryItems.length} gifts purchased.</p>
+              <Progress
+                value={progress}
+                aria-label={`${Math.round(progress)}% of gifts purchased`}
+              />
+              <p className="text-sm text-muted-foreground">
+                {purchasedCount} of {totalItems} gifts purchased.
+              </p>
             </CardContent>
             <CardFooter>
-              <Button variant="outline" className="w-full">Share Your Registry</Button>
+              <Button variant="outline" className="w-full">
+                Share Your Registry
+              </Button>
             </CardFooter>
           </Card>
         </div>

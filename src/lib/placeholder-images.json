@@ -19,19 +19,19 @@
       "imageHint": "wedding invitation"
     },
     {
-      "id": "registry-item-1",
+      "id": "registry-item-honeymoon",
       "description": "Honeymoon fund donation image",
       "imageUrl": "https://picsum.photos/seed/104/300/300",
       "imageHint": "tropical beach"
     },
     {
-      "id": "registry-item-2",
+      "id": "registry-item-kitchenware",
       "description": "Kitchenware set for wedding registry",
       "imageUrl": "https://picsum.photos/seed/105/300/300",
       "imageHint": "kitchenware"
     },
     {
-      "id": "registry-item-3",
+      "id": "registry-item-blanket",
       "description": "Cozy home decor item for registry",
       "imageUrl": "https://picsum.photos/seed/106/300/300",
       "imageHint": "home decor"

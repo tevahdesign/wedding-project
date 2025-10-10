@@ -1,0 +1,92 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Represents a user's profile information.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user's unique ID." },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name."
+        },
+        "photoURL": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the user's profile picture."
+        }
+      },
+      "required": ["uid", "email"]
+    },
+    "Guest": {
+      "title": "Guest",
+      "description": "Represents a wedding guest.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "The guest's full name." },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The guest's email address."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Attending", "Pending", "Declined"],
+          "description": "The guest's RSVP status."
+        },
+        "group": { "type": "string", "description": "The group the guest belongs to (e.g., Bride's Family, Friends)." }
+      },
+      "required": ["name", "status"]
+    },
+    "BudgetItem": {
+      "title": "Budget Item",
+      "description": "Represents an item in the wedding budget.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the budget category." },
+        "budget": { "type": "number", "description": "The allocated budget for this category." },
+        "spent": { "type": "number", "description": "The amount spent in this category." }
+      },
+      "required": ["name", "budget", "spent"]
+    },
+    "RegistryItem": {
+      "title": "Registry Item",
+      "description": "Represents an item in the wedding registry.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "The title of the registry item." },
+        "store": { "type": "string", "description": "The store where the item can be purchased." },
+        "price": { "type": "string", "description": "The price of the item." },
+        "imageId": { "type": "string", "description": "The ID of the placeholder image for the item." },
+        "purchased": { "type": "boolean", "description": "Whether the item has been purchased." }
+      },
+      "required": ["title", "price", "purchased"]
+    }
+  },
+  "auth": {
+    "providers": ["Google"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Stores user profile information."
+    },
+    "/users/{userId}/guests/{guestId}": {
+      "schema": { "$ref": "#/entities/Guest" },
+      "description": "Stores the guest list for a specific user."
+    },
+    "/users/{userId}/budgetItems/{itemId}": {
+      "schema": { "$ref": "#/entities/BudgetItem" },
+      "description": "Stores budget items for a specific user."
+    },
+    "/users/{userId}/registryItems/{itemId}": {
+      "schema": { "$ref": "#/entities/RegistryItem" },
+      "description": "Stores registry items for a specific user."
+    }
+  }
+}

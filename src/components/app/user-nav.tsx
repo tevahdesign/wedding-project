@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Avatar,
   AvatarFallback,
@@ -13,44 +15,57 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useAuth } from "@/firebase"
+import { getAuth, signOut } from "firebase/auth"
 
 export function UserNav() {
+  const { user } = useAuth()
+
+  const handleLogout = async () => {
+    const auth = getAuth()
+    await signOut(auth)
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-full justify-start gap-2">
-           <Avatar className="h-8 w-8">
-            <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="@user" />
-            <AvatarFallback>U</AvatarFallback>
+        <Button
+          variant="ghost"
+          className="relative h-10 w-full justify-start gap-2"
+        >
+          <Avatar className="h-8 w-8">
+            <AvatarImage
+              src={user?.photoURL || ""}
+              alt={user?.displayName || ""}
+            />
+            <AvatarFallback>
+              {user?.displayName?.charAt(0) || user?.email?.charAt(0) || "U"}
+            </AvatarFallback>
           </Avatar>
           <div className="text-left group-data-[collapsible=icon]:hidden">
-            <p className="text-sm font-medium">The Couple</p>
-            <p className="text-xs text-muted-foreground">the.couple@example.com</p>
+            <p className="text-sm font-medium">{user?.displayName}</p>
+            <p className="text-xs text-muted-foreground">{user?.email}</p>
           </div>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">The Couple</p>
+            <p className="text-sm font-medium leading-none">
+              {user?.displayName}
+            </p>
             <p className="text-xs leading-none text-muted-foreground">
-              the.couple@example.com
+              {user?.email}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            Profile
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            Settings
-          </DropdownMenuItem>
+          <DropdownMenuItem>Profile</DropdownMenuItem>
+          <DropdownMenuItem>Settings</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          Log out
-        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
