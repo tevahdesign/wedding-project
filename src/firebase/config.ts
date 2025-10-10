@@ -1,12 +1,5 @@
 // src/firebase/config.ts
 
-// This file is not intended to be modified.
-//
-// This file is a stub for the Firebase configuration. Because Firebase is
-// initialized on the client, we don't need to expose the server-side
-// credentials to the client. Instead, we can rely on the Firebase SDK to
-// initialize itself from the browser's environment.
-
 import type { FirebaseOptions } from 'firebase/app';
 
 /**
@@ -20,9 +13,12 @@ import type { FirebaseOptions } from 'firebase/app';
  * @throws {Error} If the Firebase configuration is not available.
  */
 export function getFirebaseConfig(): FirebaseOptions {
-  // During server-side rendering or in a development environment where
-  // the app is not hosted on Firebase, we can use a mock configuration.
   if (typeof window === 'undefined') {
+    // During server-side rendering, use the environment variable.
+    if (process.env.NEXT_PUBLIC_FIREBASE_CONFIG) {
+      return JSON.parse(process.env.NEXT_PUBLIC_FIREBASE_CONFIG);
+    }
+    // Fallback to a mock configuration for server-side rendering if the env var is not set.
     return {
       apiKey: 'mock-key',
       authDomain: 'mock.firebaseapp.com',
@@ -33,15 +29,15 @@ export function getFirebaseConfig(): FirebaseOptions {
     };
   }
 
+  // On the client side, try to get the config from the window object first.
   if ((window as any).firebase) {
-    // When running in a Firebase hosting environment, the SDK is automatically
-    // initialized and we can just use the config from the SDK.
     const firebaseApp = (window as any).firebase.app();
     if (firebaseApp) {
       return firebaseApp.options;
     }
   }
-  
+
+  // If not on the window, use the environment variable.
   if (process.env.NEXT_PUBLIC_FIREBASE_CONFIG) {
     return JSON.parse(process.env.NEXT_PUBLIC_FIREBASE_CONFIG);
   }
