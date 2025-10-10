@@ -67,6 +67,19 @@
         "purchased": { "type": "boolean", "description": "Whether the item has been purchased." }
       },
       "required": ["title", "price", "purchased"]
+    },
+    "WeddingWebsite": {
+      "title": "Wedding Website",
+      "description": "Stores the configuration for a user's wedding website.",
+      "type": "object",
+      "properties": {
+        "coupleNames": { "type": "string", "description": "The names of the couple." },
+        "weddingDate": { "type": "string", "format": "date-time", "description": "The date and time of the wedding." },
+        "welcomeMessage": { "type": "string", "description": "A welcome message for the guests." },
+        "vanityUrl": { "type": "string", "description": "The custom vanity URL for the website." },
+        "templateId": { "type": "string", "description": "The ID of the chosen website template." }
+      },
+      "required": ["coupleNames", "weddingDate"]
     }
   },
   "auth": {
@@ -88,6 +101,10 @@
     "/users/{userId}/registryItems/{itemId}": {
       "schema": { "$ref": "#/entities/RegistryItem" },
       "description": "Stores registry items for a specific user."
+    },
+    "/users/{userId}/website/details": {
+      "schema": { "$ref": "#/entities/WeddingWebsite" },
+      "description": "Stores the details for a user's single wedding website."
     }
   }
 }

@@ -1,16 +1,99 @@
-import Image from "next/image"
-import { PageHeader } from "@/components/app/page-header"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
-import { DatePicker } from "@/components/ui/date-picker"
-import { PlaceHolderImages } from "@/lib/placeholder-images"
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
+import { doc, setDoc } from 'firebase/firestore'
+import { format } from 'date-fns'
+
+import { PageHeader } from '@/components/app/page-header'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
+import { DatePicker } from '@/components/ui/date-picker'
+import { PlaceHolderImages } from '@/lib/placeholder-images'
+import { useAuth, useDoc, useFirestore } from '@/firebase'
+import { useToast } from '@/hooks/use-toast'
+import { Loader2 } from 'lucide-react'
 
 export default function WebsiteBuilderPage() {
-  const template1 = PlaceHolderImages.find(img => img.id === 'website-template-1');
-  const template2 = PlaceHolderImages.find(img => img.id === 'website-template-2');
+  const { user } = useAuth()
+  const firestore = useFirestore()
+  const { toast } = useToast()
+
+  const [coupleNames, setCoupleNames] = useState('Alex & Jordan')
+  const [weddingDate, setWeddingDate] = useState<Date | undefined>(new Date())
+  const [welcomeMessage, setWelcomeMessage] = useState(
+    'We can\'t wait to celebrate our special day with you! Join us as we say "I do".'
+  )
+  const [vanityUrl, setVanityUrl] = useState('alex-and-jordan')
+  const [selectedTemplate, setSelectedTemplate] = useState('template-1')
+  const [isSaving, setIsSaving] = useState(false)
+
+  const template1 = PlaceHolderImages.find(
+    (img) => img.id === 'website-template-1'
+  )
+  const template2 = PlaceHolderImages.find(
+    (img) => img.id === 'website-template-2'
+  )
+  const previewImage =
+    selectedTemplate === 'template-1' ? template1 : template2
+
+  const websiteRef = useMemo(() => {
+    if (!user || !firestore) return null
+    return doc(firestore, `users/${user.uid}/website/details`)
+  }, [user, firestore])
+
+  const { data: websiteData, loading } = useDoc(websiteRef)
+
+  useEffect(() => {
+    if (websiteData) {
+      setCoupleNames(websiteData.coupleNames || 'Alex & Jordan')
+      setWeddingDate(websiteData.weddingDate?.toDate() || new Date())
+      setWelcomeMessage(
+        websiteData.welcomeMessage ||
+          'We can\'t wait to celebrate our special day with you! Join us as we say "I do".'
+      )
+      setVanityUrl(websiteData.vanityUrl || 'alex-and-jordan')
+      setSelectedTemplate(websiteData.templateId || 'template-1')
+    }
+  }, [websiteData])
+
+  const handleSave = async () => {
+    if (!websiteRef) return
+    setIsSaving(true)
+    try {
+      await setDoc(websiteRef, {
+        coupleNames,
+        weddingDate,
+        welcomeMessage,
+        vanityUrl,
+        templateId: selectedTemplate,
+      })
+      toast({
+        title: 'Website Saved!',
+        description: 'Your wedding website has been updated.',
+      })
+    } catch (error) {
+      console.error('Error saving website:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'Could not save your website details.',
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const formattedDate = weddingDate ? format(weddingDate, 'MMMM do, yyyy') : 'Select a date'
 
   return (
     <>
@@ -18,58 +101,178 @@ export default function WebsiteBuilderPage() {
         title="Wedding Website Builder"
         description="Craft a beautiful home for your wedding story."
       />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <div className="lg:col-span-1 space-y-6 sticky top-8">
           <Card>
             <CardHeader>
               <CardTitle>Your Website Details</CardTitle>
-              <CardDescription>Fill in the details for your personal wedding website. You can always change this later.</CardDescription>
+              <CardDescription>
+                Fill in the details for your personal wedding website.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="couple-names">Couple's Names</Label>
-                <Input id="couple-names" placeholder="e.g., Alex & Jordan" />
+                <Input
+                  id="couple-names"
+                  placeholder="e.g., Alex & Jordan"
+                  value={coupleNames}
+                  onChange={(e) => setCoupleNames(e.target.value)}
+                  disabled={loading}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="wedding-date">Wedding Date</Label>
-                <DatePicker />
+                <DatePicker
+                  date={weddingDate}
+                  setDate={setWeddingDate}
+                  disabled={loading}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="welcome-message">Welcome Message</Label>
-                <Textarea id="welcome-message" placeholder="Share a message with your guests..." />
+                <Textarea
+                  id="welcome-message"
+                  placeholder="Share a message with your guests..."
+                  value={welcomeMessage}
+                  onChange={(e) => setWelcomeMessage(e.target.value)}
+                  disabled={loading}
+                />
               </div>
-               <div className="space-y-2">
+              <div className="space-y-2">
                 <Label htmlFor="vanity-url">Your Custom URL</Label>
                 <div className="flex items-center">
-                  <span className="text-sm text-muted-foreground bg-muted px-3 py-2 rounded-l-md border border-r-0">wed-ease.com/</span>
-                  <Input id="vanity-url" placeholder="alex-and-jordan" className="rounded-l-none" />
+                  <span className="text-sm text-muted-foreground bg-muted px-3 py-2.5 rounded-l-md border border-r-0 h-10 flex items-center">
+                    wed-ease.com/
+                  </span>
+                  <Input
+                    id="vanity-url"
+                    placeholder="alex-and-jordan"
+                    className="rounded-l-none"
+                    value={vanityUrl}
+                    onChange={(e) => setVanityUrl(e.target.value)}
+                    disabled={loading}
+                  />
                 </div>
               </div>
             </CardContent>
           </Card>
-        </div>
-        <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Choose a Template</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="flex gap-4">
               {template1 && (
-                <div className="relative border-2 border-primary rounded-lg overflow-hidden cursor-pointer">
-                  <Image src={template1.imageUrl} alt={template1.description} width={800} height={600} className="w-full" data-ai-hint={template1.imageHint}/>
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <span className="text-white bg-primary px-3 py-1 rounded-full text-sm">Selected</span>
-                  </div>
+                <div
+                  className={`relative border-2 rounded-lg overflow-hidden cursor-pointer ${
+                    selectedTemplate === 'template-1'
+                      ? 'border-primary'
+                      : 'border-transparent'
+                  }`}
+                  onClick={() => setSelectedTemplate('template-1')}
+                >
+                  <Image
+                    src={template1.imageUrl}
+                    alt={template1.description}
+                    width={200}
+                    height={150}
+                    className="w-full"
+                    data-ai-hint={template1.imageHint}
+                  />
+                  {selectedTemplate === 'template-1' && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <span className="text-white bg-primary px-3 py-1 rounded-full text-sm">
+                        Selected
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
               {template2 && (
-                <div className="relative border-2 border-transparent rounded-lg overflow-hidden cursor-pointer hover:border-primary transition-colors">
-                  <Image src={template2.imageUrl} alt={template2.description} width={800} height={600} className="w-full opacity-70" data-ai-hint={template2.imageHint} />
+                <div
+                  className={`relative border-2 rounded-lg overflow-hidden cursor-pointer hover:border-primary transition-colors ${
+                    selectedTemplate === 'template-2'
+                      ? 'border-primary'
+                      : 'border-transparent'
+                  }`}
+                  onClick={() => setSelectedTemplate('template-2')}
+                >
+                  <Image
+                    src={template2.imageUrl}
+                    alt={template2.description}
+                    width={200}
+                    height={150}
+                    className="w-full"
+                    data-ai-hint={template2.imageHint}
+                  />
+                  {selectedTemplate === 'template-2' && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <span className="text-white bg-primary px-3 py-1 rounded-full text-sm">
+                        Selected
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
           </Card>
-          <Button className="w-full" size="lg">Save & View Website</Button>
+          <Button
+            className="w-full"
+            size="lg"
+            onClick={handleSave}
+            disabled={isSaving || loading}
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
+              </>
+            ) : (
+              'Save & Publish Website'
+            )}
+          </Button>
+        </div>
+        <div className="lg:col-span-2">
+          <Card className="sticky top-8">
+            <CardHeader>
+              <CardTitle>Live Preview</CardTitle>
+              <CardDescription>
+                This is how your website will appear to your guests.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="w-full aspect-[4/3] bg-muted rounded-lg border overflow-hidden">
+                {previewImage && (
+                  <div className="relative w-full h-full text-white bg-slate-800">
+                    <Image
+                      src={previewImage.imageUrl}
+                      alt={previewImage.description}
+                      fill
+                      className="object-cover opacity-30"
+                      data-ai-hint={previewImage.imageHint}
+                    />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+                      <h1 className="font-headline text-5xl md:text-7xl font-bold">
+                        {coupleNames}
+                      </h1>
+                      <p className="mt-4 text-lg md:text-xl uppercase tracking-widest">
+                        Are getting married!
+                      </p>
+                      <div className="w-24 h-px bg-white my-8" />
+                      <p className="text-xl md:text-2xl font-semibold">
+                        {formattedDate}
+                      </p>
+                      <p className="mt-8 max-w-md text-base md:text-lg">
+                        {welcomeMessage}
+                      </p>
+                      <Button variant="outline" className="mt-12 text-black">
+                        RSVP
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </>
