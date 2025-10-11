@@ -79,7 +79,7 @@
         "vanityUrl": { "type": "string", "description": "The custom vanity URL for the website." },
         "templateId": { "type": "string", "description": "The ID of the chosen website template." }
       },
-      "required": ["coupleNames", "weddingDate"]
+      "required": ["coupleNames", "weddingDate", "templateId"]
     }
   },
   "auth": {
