@@ -62,7 +62,7 @@ export default function WebsiteBuilderPage() {
   useEffect(() => {
     if (websiteData) {
       setCoupleNames(websiteData.coupleNames || 'Alex & Jordan')
-      if (websiteData.weddingDate) {
+      if (websiteData.weddingDate && typeof websiteData.weddingDate.toDate === 'function') {
          setWeddingDate(websiteData.weddingDate.toDate())
       }
       setWelcomeMessage(
@@ -84,7 +84,7 @@ export default function WebsiteBuilderPage() {
         welcomeMessage,
         vanityUrl,
         templateId: selectedTemplate,
-      })
+      }, { merge: true }) // Using merge to create or update
       toast({
         title: 'Website Saved!',
         description: 'Your wedding website has been updated.',
