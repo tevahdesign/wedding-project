@@ -21,6 +21,8 @@ import {
 import { useAuth, useFirestore } from "@/firebase"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
+import { errorEmitter } from "@/firebase/error-emitter"
+import { FirestorePermissionError } from "@/firebase/errors"
 
 const guestSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -61,29 +63,39 @@ export function GuestForm({ setDialogOpen }: GuestFormProps) {
 
     setIsSubmitting(true)
 
-    try {
-      const guestsRef = collection(firestore, `users/${user.uid}/guests`)
-      await addDoc(guestsRef, {
-        ...data,
-        status: "Pending",
-      })
-
-      toast({
-        title: "Guest Added!",
-        description: `${data.name} has been added to your guest list.`,
-      })
-      form.reset()
-      setDialogOpen(false)
-    } catch (error) {
-      console.error("Error adding guest:", error)
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "Could not add guest. Please try again.",
-      })
-    } finally {
-      setIsSubmitting(false)
+    const guestData = {
+      ...data,
+      status: "Pending",
     }
+    const guestsRef = collection(firestore, `users/${user.uid}/guests`)
+
+    addDoc(guestsRef, guestData)
+      .then(() => {
+        toast({
+          title: "Guest Added!",
+          description: `${data.name} has been added to your guest list.`,
+        })
+        form.reset()
+        setDialogOpen(false)
+      })
+      .catch((serverError) => {
+        const permissionError = FirestorePermissionError({
+          path: guestsRef.path,
+          operation: 'create',
+          requestResourceData: guestData,
+        });
+
+        errorEmitter.emit('permission-error', permissionError);
+
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: "Could not add guest. Please try again.",
+        })
+      })
+      .finally(() => {
+        setIsSubmitting(false)
+      })
   }
 
   return (

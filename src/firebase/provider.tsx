@@ -7,6 +7,8 @@ import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
 
 import { useUser } from './auth/use-user';
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
+
 export { useUser as useAuth };
 
 type FirebaseContextValue = {
@@ -46,6 +48,7 @@ export function FirebaseProvider({
         firestore,
       }}
     >
+      {process.env.NODE_ENV === 'development' && <FirebaseErrorListener />}
       {children}
     </FirebaseContext.Provider>
   );
