@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -33,7 +34,7 @@ export default function MainLayout({
 
   if (loading || !user) {
     return (
-      <div className="flex h-screen items-center justify-center bg-secondary">
+      <div className="flex h-screen items-center justify-center bg-secondary/30">
         <Heart className="w-12 h-12 animate-spin text-primary" />
       </div>
     )
@@ -57,7 +58,7 @@ export default function MainLayout({
           <UserNav />
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset className="flex flex-col bg-secondary/50">
+      <SidebarInset className="flex flex-col bg-secondary/30">
         <header className="flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
           <div className="md:hidden">
             <SidebarTrigger />

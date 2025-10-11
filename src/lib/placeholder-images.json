@@ -35,6 +35,12 @@
       "description": "Cozy home decor item for registry",
       "imageUrl": "https://picsum.photos/seed/106/300/300",
       "imageHint": "home decor"
+    },
+    {
+      "id": "landing-hero",
+      "description": "A happy couple on their wedding day, dressed in traditional Indian attire",
+      "imageUrl": "https://picsum.photos/seed/hero-couple/500/600",
+      "imageHint": "wedding couple"
     }
   ]
 }
