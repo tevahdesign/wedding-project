@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sidebar"
 import { MainNav } from "@/components/app/main-nav"
 import { UserNav } from "@/components/app/user-nav"
-import { Gem } from "lucide-react"
+import { Heart } from "lucide-react"
 import { useAuth } from "@/firebase"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
@@ -33,8 +33,8 @@ export default function MainLayout({
 
   if (loading || !user) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Gem className="w-12 h-12 animate-spin text-primary" />
+      <div className="flex h-screen items-center justify-center bg-secondary">
+        <Heart className="w-12 h-12 animate-spin text-primary" />
       </div>
     )
   }
@@ -42,10 +42,10 @@ export default function MainLayout({
   return (
     <SidebarProvider>
       <Sidebar>
-        <SidebarHeader className="p-4">
+        <SidebarHeader className="p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-2">
-            <Gem className="w-7 h-7 text-primary" />
-            <span className="text-xl font-headline font-semibold group-data-[collapsible=icon]:hidden group-data-[collapsible=offcanvas]:hidden">
+            <Heart className="w-7 h-7 text-primary" />
+            <span className="text-2xl font-headline font-bold group-data-[collapsible=icon]:hidden group-data-[collapsible=offcanvas]:hidden">
               WedEase
             </span>
           </div>
@@ -57,8 +57,8 @@ export default function MainLayout({
           <UserNav />
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset className="flex flex-col">
-        <header className="flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6">
+      <SidebarInset className="flex flex-col bg-secondary/50">
+        <header className="flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
           <div className="md:hidden">
             <SidebarTrigger />
           </div>

@@ -17,7 +17,6 @@ import {
   PiggyBank,
   Mail,
   Gift,
-  Gem,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -35,7 +34,7 @@ export function MainNav() {
   const pathname = usePathname()
 
   return (
-    <SidebarMenu>
+    <SidebarMenu className="p-2">
       {menuItems.map((item) => (
         <SidebarMenuItem key={item.path}>
           <Link href={item.path} passHref>
@@ -43,7 +42,8 @@ export function MainNav() {
               asChild
               isActive={pathname === item.path}
               tooltip={item.label}
-              className="justify-start"
+              className="justify-start text-base"
+              size="lg"
             >
               <div>
                 <item.icon className="h-5 w-5" />
