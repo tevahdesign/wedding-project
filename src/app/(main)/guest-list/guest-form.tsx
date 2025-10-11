@@ -55,14 +55,18 @@ export function GuestForm({ setDialogOpen, guestToEdit }: GuestFormProps) {
   })
 
   useEffect(() => {
-    if (isEditMode) {
+    if (isEditMode && guestToEdit) {
       form.reset({
         name: guestToEdit.name,
         email: guestToEdit.email,
         group: guestToEdit.group,
       })
     } else {
-      form.reset()
+        form.reset({
+            name: "",
+            email: "",
+            group: "",
+        })
     }
   }, [isEditMode, guestToEdit, form])
 
@@ -92,7 +96,7 @@ export function GuestForm({ setDialogOpen, guestToEdit }: GuestFormProps) {
             setDialogOpen(false)
           })
           .catch((serverError) => {
-            const permissionError = FirestorePermissionError({
+            const permissionError = new FirestorePermissionError({
               path: guestRef.path,
               operation: 'update',
               requestResourceData: guestData,
@@ -123,7 +127,7 @@ export function GuestForm({ setDialogOpen, guestToEdit }: GuestFormProps) {
             setDialogOpen(false)
           })
           .catch((serverError) => {
-            const permissionError = FirestorePermissionError({
+            const permissionError = new FirestorePermissionError({
               path: guestsRef.path,
               operation: 'create',
               requestResourceData: guestData,

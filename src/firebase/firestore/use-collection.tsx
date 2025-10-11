@@ -1,6 +1,6 @@
-// src/firebase/firestore/use-collection.tsx
-'use client';
-import { useEffect, useState } from 'react';
+"use client";
+
+import { useEffect, useState, useMemo } from 'react';
 import type {
   CollectionReference,
   DocumentData,
@@ -8,6 +8,8 @@ import type {
 } from 'firebase/firestore';
 import { onSnapshot } from 'firebase/firestore';
 import { useFirestore } from '../provider';
+import { errorEmitter } from '../error-emitter';
+import { FirestorePermissionError } from '../errors';
 
 type Options = {
   deps?: any[];
@@ -22,8 +24,11 @@ export function useCollection<T = DocumentData>(
   const [error, setError] = useState<Error | null>(null);
   const firestore = useFirestore();
 
+  const memoizedQuery = useMemo(() => query, [JSON.stringify(query)]);
+
+
   useEffect(() => {
-    if (!firestore || !query) {
+    if (!firestore || !memoizedQuery) {
       setData(null);
       setLoading(false);
       return;
@@ -32,7 +37,7 @@ export function useCollection<T = DocumentData>(
     setLoading(true);
 
     const unsubscribe = onSnapshot(
-      query,
+      memoizedQuery,
       (snapshot) => {
         const data = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -40,16 +45,21 @@ export function useCollection<T = DocumentData>(
         })) as T[];
         setData(data);
         setLoading(false);
+        setError(null);
       },
-      (error) => {
-        console.error('Error fetching collection:', error);
-        setError(error);
+      (err) => {
+        const permissionError = new FirestorePermissionError({
+          path: 'path' in memoizedQuery ? memoizedQuery.path : 'unknown path',
+          operation: 'list',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        setError(permissionError);
         setLoading(false);
       }
     );
 
     return () => unsubscribe();
-  }, [firestore, query, ...(options?.deps || [])]);
+  }, [firestore, memoizedQuery, ...(options?.deps || [])]);
 
   return { data, loading, error };
 }

@@ -33,7 +33,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -93,22 +92,22 @@ export default function GuestListPage() {
   }
 
   const handleDeleteConfirm = async () => {
-    if (!user || !firestore || !selectedGuest) return
+    if (!user || !firestore || !selectedGuest) return;
 
-    setIsDeleting(true)
-    const guestRef = doc(firestore, `users/${user.uid}/guests`, selectedGuest.id)
+    setIsDeleting(true);
+    const guestRef = doc(firestore, `users/${user.uid}/guests`, selectedGuest.id);
 
     deleteDoc(guestRef)
       .then(() => {
         toast({
           title: "Guest Deleted",
           description: `${selectedGuest.name} has been removed from your list.`,
-        })
-        setIsDeleteAlertOpen(false)
-        setSelectedGuest(null)
+        });
+        setIsDeleteAlertOpen(false);
+        setSelectedGuest(null);
       })
       .catch((serverError) => {
-        const permissionError = FirestorePermissionError({
+        const permissionError = new FirestorePermissionError({
           path: guestRef.path,
           operation: 'delete',
         });
@@ -117,12 +116,12 @@ export default function GuestListPage() {
           variant: "destructive",
           title: "Delete Failed",
           description: "Could not delete guest. Please try again.",
-        })
+        });
       })
       .finally(() => {
-        setIsDeleting(false)
-      })
-  }
+        setIsDeleting(false);
+      });
+  };
 
   return (
     <>
