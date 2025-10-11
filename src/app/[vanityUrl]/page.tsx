@@ -1,7 +1,6 @@
-
 'use client'
 
-import { useEffect, useState, use } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import {
   collectionGroup,
@@ -17,14 +16,12 @@ import { useFirestore } from '@/firebase'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { Gem } from 'lucide-react'
 
-// The params object is a Promise, so we need to type it accordingly.
 type PublicWebsitePageProps = {
   params: { vanityUrl: string }
 }
 
 export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
-  // We use React.use() to unwrap the Promise and get the actual params object.
-  const { vanityUrl } = use(Promise.resolve(params))
+  const { vanityUrl } = params
   const firestore = useFirestore()
   const [websiteData, setWebsiteData] = useState<DocumentData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -86,6 +83,7 @@ export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
   }
 
   if (!websiteData) {
+    // This case should be covered by the error state, but as a fallback:
     return (
       <div className="flex h-screen items-center justify-center text-center bg-background p-4">
         <div>
@@ -98,6 +96,7 @@ export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
       </div>
     )
   }
+
 
   const { coupleNames, weddingDate, welcomeMessage, templateId } = websiteData
   const formattedDate = weddingDate?.toDate()
