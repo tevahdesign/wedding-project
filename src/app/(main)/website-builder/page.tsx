@@ -21,7 +21,8 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { useAuth, useDoc, useFirestore } from '@/firebase'
 import { useToast } from '@/hooks/use-toast'
-import { Loader2 } from 'lucide-react'
+import { Copy, Link as LinkIcon, Loader2, Check } from 'lucide-react'
+import Link from 'next/link'
 
 export default function WebsiteBuilderPage() {
   const { user } = useAuth()
@@ -36,6 +37,11 @@ export default function WebsiteBuilderPage() {
   const [vanityUrl, setVanityUrl] = useState('alex-and-jordan')
   const [selectedTemplate, setSelectedTemplate] = useState('template-1')
   const [isSaving, setIsSaving] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
+  
+  const websiteOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+  const shareableUrl = `${websiteOrigin}/${vanityUrl}`;
+
 
   const template1 = PlaceHolderImages.find(
     (img) => img.id === 'website-template-1'
@@ -56,7 +62,9 @@ export default function WebsiteBuilderPage() {
   useEffect(() => {
     if (websiteData) {
       setCoupleNames(websiteData.coupleNames || 'Alex & Jordan')
-      setWeddingDate(websiteData.weddingDate?.toDate() || new Date())
+      if (websiteData.weddingDate) {
+         setWeddingDate(websiteData.weddingDate.toDate())
+      }
       setWelcomeMessage(
         websiteData.welcomeMessage ||
           'We can\'t wait to celebrate our special day with you! Join us as we say "I do".'
@@ -92,6 +100,17 @@ export default function WebsiteBuilderPage() {
       setIsSaving(false)
     }
   }
+
+  const handleCopyToClipboard = () => {
+    navigator.clipboard.writeText(shareableUrl).then(() => {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+       toast({
+        title: "Link Copied!",
+        description: "Your website URL is now in your clipboard.",
+      });
+    });
+  };
 
   const formattedDate = weddingDate ? format(weddingDate, 'MMMM do, yyyy') : 'Select a date'
 
@@ -143,7 +162,7 @@ export default function WebsiteBuilderPage() {
                 <Label htmlFor="vanity-url">Your Custom URL</Label>
                 <div className="flex items-center">
                   <span className="text-sm text-muted-foreground bg-muted px-3 py-2.5 rounded-l-md border border-r-0 h-10 flex items-center">
-                    wed-ease.com/
+                    {websiteOrigin}/
                   </span>
                   <Input
                     id="vanity-url"
@@ -216,6 +235,26 @@ export default function WebsiteBuilderPage() {
               )}
             </CardContent>
           </Card>
+           {websiteData && !loading && (
+             <Card>
+                <CardHeader>
+                    <CardTitle>Your Link is Ready!</CardTitle>
+                    <CardDescription>Share your beautiful website with your guests.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                        <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                        <Link href={shareableUrl} target="_blank" className="text-sm font-medium text-primary hover:underline truncate">
+                            {shareableUrl}
+                        </Link>
+                    </div>
+                    <Button onClick={handleCopyToClipboard} className="w-full">
+                        {isCopied ? <Check className="mr-2" /> : <Copy className="mr-2" />}
+                        {isCopied ? 'Copied!' : 'Copy Link'}
+                    </Button>
+                </CardContent>
+             </Card>
+           )}
           <Button
             className="w-full"
             size="lg"
