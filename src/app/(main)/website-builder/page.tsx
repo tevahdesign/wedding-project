@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
-import { doc, setDoc } from 'firebase/firestore'
+import { doc, setDoc, Timestamp } from 'firebase/firestore'
 import { format } from 'date-fns'
 
 import { PageHeader } from '@/components/app/page-header'
@@ -29,12 +29,10 @@ export default function WebsiteBuilderPage() {
   const firestore = useFirestore()
   const { toast } = useToast()
 
-  const [coupleNames, setCoupleNames] = useState('Alex & Jordan')
-  const [weddingDate, setWeddingDate] = useState<Date | undefined>(new Date())
-  const [welcomeMessage, setWelcomeMessage] = useState(
-    'We can\'t wait to celebrate our special day with you! Join us as we say "I do".'
-  )
-  const [vanityUrl, setVanityUrl] = useState('alex-and-jordan')
+  const [coupleNames, setCoupleNames] = useState('')
+  const [weddingDate, setWeddingDate] = useState<Date | undefined>(undefined)
+  const [welcomeMessage, setWelcomeMessage] = useState('')
+  const [vanityUrl, setVanityUrl] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState('template-1')
   const [isSaving, setIsSaving] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
@@ -64,6 +62,8 @@ export default function WebsiteBuilderPage() {
       setCoupleNames(websiteData.coupleNames || 'Alex & Jordan')
       if (websiteData.weddingDate && typeof websiteData.weddingDate.toDate === 'function') {
          setWeddingDate(websiteData.weddingDate.toDate())
+      } else {
+         setWeddingDate(new Date())
       }
       setWelcomeMessage(
         websiteData.welcomeMessage ||
@@ -71,8 +71,14 @@ export default function WebsiteBuilderPage() {
       )
       setVanityUrl(websiteData.vanityUrl || 'alex-and-jordan')
       setSelectedTemplate(websiteData.templateId || 'template-1')
+    } else if (!loading) {
+        setCoupleNames('Alex & Jordan');
+        setWeddingDate(new Date());
+        setWelcomeMessage('We can\'t wait to celebrate our special day with you! Join us as we say "I do".');
+        setVanityUrl('alex-and-jordan');
+        setSelectedTemplate('template-1');
     }
-  }, [websiteData])
+  }, [websiteData, loading])
 
   const handleSave = async () => {
     if (!websiteRef) {
@@ -85,13 +91,16 @@ export default function WebsiteBuilderPage() {
     }
     setIsSaving(true)
     try {
-      await setDoc(websiteRef, {
+      // Convert Date to Firestore Timestamp before saving
+      const dataToSave = {
         coupleNames,
-        weddingDate,
+        weddingDate: weddingDate ? Timestamp.fromDate(weddingDate) : null,
         welcomeMessage,
         vanityUrl,
         templateId: selectedTemplate,
-      }, { merge: true }) 
+      };
+
+      await setDoc(websiteRef, dataToSave, { merge: true }) 
       toast({
         title: 'Website Published!',
         description: 'Your changes are live and the link is ready to share.',
@@ -176,7 +185,7 @@ export default function WebsiteBuilderPage() {
                     placeholder="alex-and-jordan"
                     className="rounded-l-none"
                     value={vanityUrl}
-                    onChange={(e) => setVanityUrl(e.target.value)}
+                    onChange={(e) => setVanityUrl(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
                     disabled={loading}
                   />
                 </div>
@@ -324,3 +333,5 @@ export default function WebsiteBuilderPage() {
     </>
   )
 }
+
+    

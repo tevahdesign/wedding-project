@@ -33,6 +33,7 @@ export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
 
       try {
         setLoading(true)
+        // This query now correctly looks for the document within the 'website' subcollection group
         const detailsCollection = collectionGroup(firestore, 'website')
         const websiteQuery = query(
           detailsCollection,
@@ -142,3 +143,5 @@ export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
     </div>
   )
 }
+
+    
