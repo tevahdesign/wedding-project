@@ -75,7 +75,14 @@ export default function WebsiteBuilderPage() {
   }, [websiteData])
 
   const handleSave = async () => {
-    if (!websiteRef) return
+    if (!websiteRef) {
+       toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Cannot save. User not authenticated.',
+      })
+      return;
+    }
     setIsSaving(true)
     try {
       await setDoc(websiteRef, {
@@ -84,17 +91,17 @@ export default function WebsiteBuilderPage() {
         welcomeMessage,
         vanityUrl,
         templateId: selectedTemplate,
-      }, { merge: true }) // Using merge to create or update
+      }, { merge: true }) 
       toast({
-        title: 'Website Saved!',
-        description: 'Your wedding website has been updated.',
+        title: 'Website Published!',
+        description: 'Your changes are live and the link is ready to share.',
       })
     } catch (error) {
       console.error('Error saving website:', error)
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
-        description: 'Could not save your website details.',
+        description: 'Your website details could not be saved. Please try again.',
       })
     } finally {
       setIsSaving(false)
