@@ -23,7 +23,7 @@ export function FirebaseErrorListener() {
 
     return () => {
       // Clean up the event listener when the component unmounts.
-      errorEmitter.emit('permission-error', handlePermissionError);
+      errorEmitter.off('permission-error', handlePermissionError);
     };
   }, []);
 
