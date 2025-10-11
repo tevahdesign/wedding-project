@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { PageHeader } from "@/components/app/page-header"
 import { Button } from "@/components/ui/button"
 import {
@@ -30,20 +30,19 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { useAuth, useCollection, useFirestore } from "@/firebase"
 import { collection } from "firebase/firestore"
+import { GuestForm } from "./guest-form"
 
 export default function GuestListPage() {
   const { user } = useAuth()
   const firestore = useFirestore()
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
   const guestsRef = useMemo(() => {
     if (!user || !firestore) return null
     return collection(firestore, `users/${user.uid}/guests`)
@@ -57,7 +56,7 @@ export default function GuestListPage() {
         title="Guest List Manager"
         description="Organize your guests and track RSVPs."
       >
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -67,46 +66,8 @@ export default function GuestListPage() {
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Add New Guest</DialogTitle>
-              <DialogDescription>
-                Add a new guest to your list. Click save when you're done.
-              </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  placeholder="Guest's full name"
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="text-right">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="guest@example.com"
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="group" className="text-right">
-                  Group
-                </Label>
-                <Input
-                  id="group"
-                  placeholder="e.g., Bride's Family"
-                  className="col-span-3"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit">Save Guest</Button>
-            </DialogFooter>
+            <GuestForm setDialogOpen={setIsDialogOpen} />
           </DialogContent>
         </Dialog>
       </PageHeader>
@@ -159,7 +120,7 @@ export default function GuestListPage() {
                       }
                       className={
                         guest.status === "Attending"
-                          ? "bg-green-500/20 text-green-700"
+                          ? "bg-green-500/20 text-green-700 hover:bg-green-500/30"
                           : ""
                       }
                     >
