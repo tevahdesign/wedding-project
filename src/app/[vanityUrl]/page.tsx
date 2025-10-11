@@ -4,7 +4,7 @@
 import { useEffect, useState, use } from 'react'
 import Image from 'next/image'
 import {
-  collection,
+  collectionGroup,
   query,
   where,
   getDocs,
@@ -19,12 +19,12 @@ import { Gem } from 'lucide-react'
 
 // The params object is a Promise, so we need to type it accordingly.
 type PublicWebsitePageProps = {
-  params: Promise<{ vanityUrl: string }>
+  params: { vanityUrl: string }
 }
 
 export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
   // We use React.use() to unwrap the Promise and get the actual params object.
-  const { vanityUrl } = use(params)
+  const { vanityUrl } = use(Promise.resolve(params))
   const firestore = useFirestore()
   const [websiteData, setWebsiteData] = useState<DocumentData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -36,8 +36,11 @@ export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
 
       try {
         setLoading(true)
-        const websitesRef = collection(firestore, 'websites')
-        const websiteQuery = query(websitesRef, where('vanityUrl', '==', vanityUrl))
+        const detailsCollection = collectionGroup(firestore, 'website')
+        const websiteQuery = query(
+          detailsCollection,
+          where('vanityUrl', '==', vanityUrl)
+        )
         const websiteSnapshot = await getDocs(websiteQuery)
 
         if (!websiteSnapshot.empty) {
