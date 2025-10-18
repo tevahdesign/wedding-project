@@ -14,6 +14,8 @@ import {
   XCircle,
   Download,
   Mail,
+  Copy,
+  Check,
 } from "lucide-react"
 
 import { PageHeader } from "@/components/app/page-header"
@@ -45,6 +47,8 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -63,6 +67,7 @@ import { useList } from "@/firebase/database/use-list"
 import { GuestForm } from "./guest-form"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
+import { Textarea } from "@/components/ui/textarea"
 
 type GuestStatus = "Attending" | "Pending" | "Declined"
 
@@ -88,8 +93,10 @@ export default function GuestListPage() {
 
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
+  const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false)
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
 
   const guestsRef = useMemo(() => {
     if (!user || !database) return null
@@ -97,6 +104,16 @@ export default function GuestListPage() {
   }, [user, database])
 
   const { data: guests, loading } = useList<Guest>(guestsRef)
+  
+  const attendeesWithEmail = useMemo(() => {
+      if (!guests) return [];
+      return guests.filter(g => g.status === 'Attending' && g.email);
+  }, [guests]);
+
+  const attendeeEmails = useMemo(() => {
+      return attendeesWithEmail.map(g => g.email).join(', ');
+  }, [attendeesWithEmail]);
+
 
   const handleAddClick = () => {
     setSelectedGuest(null)
@@ -160,19 +177,8 @@ export default function GuestListPage() {
     }
   }
   
-  const handleSendEmailToAttendees = () => {
-    if (!guests) {
-        toast({
-            variant: "destructive",
-            title: "Guest list not loaded",
-            description: "Please wait for the guest list to load before sending emails.",
-        });
-        return;
-    }
-
-    const attendees = guests.filter(g => g.status === 'Attending' && g.email);
-    
-    if (attendees.length === 0) {
+  const handleOpenEmailDialog = () => {
+    if (attendeesWithEmail.length === 0) {
       toast({
         variant: "destructive",
         title: "No Attendees to Email",
@@ -180,9 +186,18 @@ export default function GuestListPage() {
       });
       return;
     }
-
-    const bccEmails = attendees.map(g => g.email).join(',');
-    window.location.href = `mailto:?bcc=${encodeURIComponent(bccEmails)}`;
+    setIsEmailDialogOpen(true);
+  };
+  
+  const handleCopyToClipboard = () => {
+    navigator.clipboard.writeText(attendeeEmails).then(() => {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+       toast({
+        title: "Emails Copied!",
+        description: "Attendee email addresses are in your clipboard.",
+      });
+    });
   };
 
   const getStatusBadgeClasses = (status: GuestStatus) => {
@@ -284,7 +299,7 @@ export default function GuestListPage() {
         description="Organize your guests and track RSVPs."
       >
         <div className="flex gap-2">
-            <Button variant="outline" onClick={handleSendEmailToAttendees}>
+            <Button variant="outline" onClick={handleOpenEmailDialog}>
                 <Mail className="mr-2 h-4 w-4" />
                 Email Attendees
             </Button>
@@ -313,6 +328,31 @@ export default function GuestListPage() {
             </Button>
         </div>
       </PageHeader>
+      
+      <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Email Attending Guests</DialogTitle>
+            <DialogDescription>
+              Copy the email addresses below and paste them into the BCC field of your email client.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Textarea
+              readOnly
+              value={attendeeEmails}
+              rows={5}
+              className="bg-muted"
+            />
+          </div>
+          <DialogFooter>
+            <Button onClick={handleCopyToClipboard} className="w-full">
+              {isCopied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+              {isCopied ? 'Copied!' : 'Copy Emails'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="sm:max-w-[425px]">
@@ -473,5 +513,3 @@ export default function GuestListPage() {
     </>
   )
 }
-
-    
