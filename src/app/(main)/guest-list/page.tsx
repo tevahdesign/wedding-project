@@ -3,6 +3,8 @@
 
 import { useMemo, useState } from "react"
 import { ref, remove, update } from "firebase/database"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 import {
   PlusCircle,
   MoreHorizontal,
@@ -198,13 +200,51 @@ export default function GuestListPage() {
     document.body.removeChild(link);
   };
 
-  const handleDownload = (filter?: 'Bride' | 'Groom') => {
+  const downloadAsPDF = (data: Guest[], filename: string, title: string) => {
+    if (!data || data.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No Data",
+        description: "There is no guest data to download.",
+      });
+      return;
+    }
+
+    const doc = new jsPDF();
+    doc.text(title, 14, 16);
+
+    autoTable(doc, {
+      startY: 22,
+      head: [['Name', 'Email', 'Group', 'Status']],
+      body: data.map(guest => [
+        guest.name,
+        guest.email || 'N/A',
+        guest.group || 'N/A',
+        guest.status,
+      ]),
+      headStyles: { fillColor: [100, 84, 144] }, // Primary color
+    });
+
+    doc.save(filename);
+  };
+
+  const handleDownload = (format: 'csv' | 'pdf', filter?: 'Bride' | 'Groom') => {
     if (!guests) return;
+    
+    let data = guests;
+    let title = "Full Guest List";
+    let baseFilename = "full-guest-list";
+
     if (filter) {
-        const filteredGuests = guests.filter(g => g.group === filter);
-        downloadAsCSV(filteredGuests, `guest-list-${filter.toLowerCase()}.csv`);
+        data = guests.filter(g => g.group === filter);
+        title = `${filter}'s Guest List`;
+        baseFilename = `guest-list-${filter.toLowerCase()}`;
+    }
+
+    if (format === 'csv') {
+        downloadAsCSV(data, `${baseFilename}.csv`);
     } else {
-        downloadAsCSV(guests, 'full-guest-list.csv');
+        downloadAsPDF(data, `${baseFilename}.pdf`, title);
     }
   };
 
@@ -223,11 +263,15 @@ export default function GuestListPage() {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                    <DropdownMenuLabel>Download Options</DropdownMenuLabel>
+                    <DropdownMenuLabel>CSV Downloads</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => handleDownload('csv')}>Download Full List (CSV)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDownload('csv', 'Bride')}>Download Bride's List (CSV)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDownload('csv', 'Groom')}>Download Groom's List (CSV)</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => handleDownload()}>Download Full List (CSV)</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDownload('Bride')}>Download Bride's List (CSV)</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDownload('Groom')}>Download Groom's List (CSV)</DropdownMenuItem>
+                    <DropdownMenuLabel>PDF Downloads</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => handleDownload('pdf')}>Download Full List (PDF)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDownload('pdf', 'Bride')}>Download Bride's List (PDF)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDownload('pdf', 'Groom')}>Download Groom's List (PDF)</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
             <Button onClick={handleAddClick}>
