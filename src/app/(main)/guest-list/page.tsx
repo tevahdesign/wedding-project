@@ -161,18 +161,28 @@ export default function GuestListPage() {
   }
   
   const handleSendEmailToAttendees = () => {
-    if (!guests) return;
+    if (!guests) {
+        toast({
+            variant: "destructive",
+            title: "Guest list not loaded",
+            description: "Please wait for the guest list to load before sending emails.",
+        });
+        return;
+    }
+
     const attendees = guests.filter(g => g.status === 'Attending' && g.email);
+    
     if (attendees.length === 0) {
       toast({
         variant: "destructive",
-        title: "No Attendees",
-        description: "There are no attending guests with email addresses to send an email to.",
+        title: "No Attendees to Email",
+        description: "There are no attending guests with email addresses.",
       });
       return;
     }
+
     const bccEmails = attendees.map(g => g.email).join(',');
-    window.location.href = `mailto:?bcc=${bccEmails}`;
+    window.location.href = `mailto:?bcc=${encodeURIComponent(bccEmails)}`;
   };
 
   const getStatusBadgeClasses = (status: GuestStatus) => {
@@ -463,3 +473,5 @@ export default function GuestListPage() {
     </>
   )
 }
+
+    
