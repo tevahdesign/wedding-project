@@ -7,7 +7,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-const { firebaseApp, firestore, auth } = initializeFirebase();
+const { firebaseApp, firestore, auth, database } = initializeFirebase();
 
 /**
  * A client-side provider that initializes Firebase and provides it to the rest of the app.
@@ -24,6 +24,7 @@ export function FirebaseClientProvider({ children }: Props): JSX.Element {
       firebaseApp={firebaseApp}
       firestore={firestore}
       auth={auth}
+      database={database}
     >
       {children}
     </FirebaseProvider>

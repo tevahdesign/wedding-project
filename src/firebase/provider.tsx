@@ -5,6 +5,8 @@ import { createContext, useContext } from 'react';
 import type { FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
+import type { Database } from 'firebase/database';
+
 
 import { useUser } from './auth/use-user';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
@@ -15,6 +17,7 @@ type FirebaseContextValue = {
   firebaseApp: FirebaseApp;
   auth: Auth;
   firestore: Firestore;
+  database: Database;
 };
 
 const FirebaseContext = createContext<FirebaseContextValue | undefined>(
@@ -26,6 +29,7 @@ type Props = {
   firebaseApp: FirebaseApp;
   auth: Auth;
   firestore: Firestore;
+  database: Database;
 };
 
 /**
@@ -39,6 +43,7 @@ export function FirebaseProvider({
   firebaseApp,
   auth,
   firestore,
+  database,
 }: Props): JSX.Element {
   return (
     <FirebaseContext.Provider
@@ -46,6 +51,7 @@ export function FirebaseProvider({
         firebaseApp,
         auth,
         firestore,
+        database
       }}
     >
       {process.env.NODE_ENV === 'development' && <FirebaseErrorListener />}
@@ -91,4 +97,17 @@ export function useFirestore(): Firestore {
     throw new Error('useFirestore must be used within a FirebaseProvider');
   }
   return context.firestore;
+}
+
+/**
+ * Hook to get the Firebase Realtime Database instance.
+ *
+ * @returns The Database instance.
+ */
+export function useDatabase(): Database {
+  const context = useContext(FirebaseContext);
+  if (context === undefined) {
+    throw new Error('useDatabase must be used within a FirebaseProvider');
+  }
+  return context.database;
 }

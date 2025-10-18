@@ -5,10 +5,13 @@ import type { Auth } from 'firebase/auth';
 import { getAuth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
+import type { Database } from 'firebase/database';
+import { getDatabase } from 'firebase/database';
+
 
 import { getFirebaseConfig } from './config';
 import { useUser } from './auth/use-user';
-import { FirebaseProvider, useFirebaseApp, useAuth as useFirebaseAuth, useFirestore } from './provider';
+import { FirebaseProvider, useFirebaseApp, useAuth as useFirebaseAuth, useFirestore, useDatabase } from './provider';
 import { FirebaseClientProvider } from './client-provider';
 import { useCollection } from './firestore/use-collection';
 import { useDoc } from './firestore/use-doc';
@@ -17,6 +20,7 @@ type FirebaseInstances = {
   firebaseApp: FirebaseApp;
   auth: Auth;
   firestore: Firestore;
+  database: Database;
 };
 
 let instances: FirebaseInstances;
@@ -40,11 +44,13 @@ export function initializeFirebase(): FirebaseInstances {
 
   const auth = getAuth(app);
   const firestore = getFirestore(app);
+  const database = getDatabase(app);
 
   instances = {
     firebaseApp: app,
     auth,
     firestore,
+    database,
   };
   return instances;
 }
@@ -58,6 +64,7 @@ export {
   useUser,
   useFirestore,
   useFirebaseAuth,
+  useDatabase,
   useCollection,
   useDoc,
   FirebaseProvider,
