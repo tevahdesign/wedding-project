@@ -3,44 +3,50 @@
     {
       "id": "website-template-1",
       "description": "Elegant wedding website template with floral design",
-      "imageUrl": "https://picsum.photos/seed/101/800/600",
+      "imageUrl": "https://images.unsplash.com/photo-1731515672558-cb0f0b48e183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx3ZWRkaW5nJTIwd2Vic2l0ZXxlbnwwfHx8fDE3NjA3Nzg5NjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "wedding website"
     },
     {
       "id": "website-template-2",
       "description": "Modern minimalist wedding website template",
-      "imageUrl": "https://picsum.photos/seed/102/800/600",
+      "imageUrl": "https://images.unsplash.com/photo-1621847793270-3f14c3829fae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtaW5pbWFsaXN0JTIwd2VkZGluZ3xlbnwwfHx8fDE3NjA3NTkwOTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "minimalist wedding"
     },
     {
       "id": "invitation-template-1",
       "description": "Classic digital invitation with calligraphy",
-      "imageUrl": "https://picsum.photos/seed/103/400/600",
+      "imageUrl": "https://images.unsplash.com/photo-1732649124686-3bab54f79aa3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx3ZWRkaW5nJTIwaW52aXRhdGlvbnxlbnwwfHx8fDE3NjA3Nzg5NjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "wedding invitation"
     },
     {
       "id": "registry-item-honeymoon",
       "description": "Honeymoon fund donation image",
-      "imageUrl": "https://picsum.photos/seed/104/300/300",
+      "imageUrl": "https://images.unsplash.com/photo-1571043281665-9debfed10719?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8dHJvcGljYWwlMjBiZWFjaHxlbnwwfHx8fDE3NjA3MzM0Njl8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "tropical beach"
     },
     {
       "id": "registry-item-kitchenware",
       "description": "Kitchenware set for wedding registry",
-      "imageUrl": "https://picsum.photos/seed/105/300/300",
+      "imageUrl": "https://images.unsplash.com/photo-1556910633-5099dc3971e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxraXRjaGVud2FyZXxlbnwwfHx8fDE3NjA3Nzg5NjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "kitchenware"
     },
     {
       "id": "registry-item-blanket",
       "description": "Cozy home decor item for registry",
-      "imageUrl": "https://picsum.photos/seed/106/300/300",
+      "imageUrl": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxob21lJTIwZGVjb3J8ZW58MHx8fHwxNzYwNzMzODU0fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "home decor"
     },
     {
       "id": "landing-hero",
-      "description": "A happy couple on their wedding day, dressed in traditional Indian attire",
-      "imageUrl": "https://picsum.photos/seed/hero-couple/500/600",
-      "imageHint": "wedding couple"
+      "description": "A happy couple smiling at their wedding",
+      "imageUrl": "https://images.unsplash.com/photo-1541679368093-5c967ac6de11?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxoYXBweSUyMGNvdXBsZXxlbnwwfHx8fDE3NjA3NTQ5MTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "happy couple"
+    },
+    {
+      "id": "landing-feature",
+      "description": "A beautiful wedding venue setup",
+      "imageUrl": "https://images.unsplash.com/photo-1505944357431-27579db47558?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8d2VkZGluZyUyMHZlbnVlfGVufDB8fHx8MTc2MDc3ODk2MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wedding venue"
     }
   ]
 }

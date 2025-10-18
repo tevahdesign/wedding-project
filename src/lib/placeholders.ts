@@ -1,21 +1,21 @@
 
-import { Gem, Grape, PartyPopper } from "lucide-react";
+import { Gem, Users, Wand2 } from "lucide-react";
 
 export const features = [
   {
-    title: "Best Wedding Planner",
-    description: "We have a team of experts who will help you to plan your wedding from start to finish.",
+    title: "AI Style Discovery",
+    description: "Use our AI-powered quiz to find your perfect wedding theme and color palette.",
+    icon: Wand2
+  },
+  {
+    title: "Smart Guest List",
+    description: "Manage your guests, RSVPs, and groups all in one place, effortlessly.",
+    icon: Users
+  },
+  {
+    title: "Website Builder",
+    description: "Create a beautiful, personalized wedding website in minutes. No coding required.",
     icon: Gem
-  },
-  {
-    title: "Groom & Bride Gowns",
-    description: "We have a wide range of gowns for the bride and groom. You can choose from a variety of designs.",
-    icon: Grape
-  },
-  {
-    title: "Perfect Decoration",
-    description: "We have a team of experts who will help you to decorate your wedding venue.",
-    icon: PartyPopper
   }
 ];
 
@@ -89,21 +89,18 @@ export const packages = [
 
 export const testimonials = [
   {
-    quote: "WedEase made planning our wedding so much less stressful. The AI style quiz was spookily accurate! The team was amazing and helped us every step of the way.",
-    name: "Jessica Miller",
-    role: "Happy Client",
+    quote: "WedEase made planning our wedding so much less stressful. The AI style quiz was spookily accurate and the guest list manager was a lifesaver!",
+    name: "Jessica & Tom",
     avatar: "https://i.pravatar.cc/60?img=1",
   },
   {
     quote: "Our wedding website was beautiful and so easy to set up. Our guests loved it! I highly recommend WedEase to anyone planning a wedding.",
-    name: "Sarah Davis",
-    role: "Happy Client",
+    name: "Sarah & David",
     avatar: "https://i.pravatar.cc/60?img=2",
   },
   {
-    quote: "I don't know how we would have managed our guest list without this. A total lifesaver and the best decision we made for our wedding.",
-    name: "Emily White",
-    role: "Happy Client",
+    quote: "An indispensable tool for modern wedding planning. It's intuitive, beautiful, and genuinely helpful. A total game-changer for us.",
+    name: "Emily & James",
     avatar: "https://i.pravatar.cc/60?img=3",
   },
 ];
