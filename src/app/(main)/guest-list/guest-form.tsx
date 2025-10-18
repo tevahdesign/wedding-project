@@ -57,6 +57,8 @@ export function GuestForm({ setDialogOpen, guestToEdit, existingGroups }: GuestF
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+
 
   const isEditMode = !!guestToEdit;
 
@@ -193,18 +195,19 @@ export function GuestForm({ setDialogOpen, guestToEdit, existingGroups }: GuestF
                   </PopoverTrigger>
                   <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                     <Command>
-                      <CommandInput placeholder="Search group or create new..." />
+                      <CommandInput 
+                        placeholder="Search group or create new..."
+                        value={inputValue}
+                        onValueChange={setInputValue}
+                       />
                        <CommandList>
-                        <CommandEmpty onSelect={() => {
-                            const inputValue = (document.querySelector(
-                              'input[aria-label="Command input"]'
-                            ) as HTMLInputElement)?.value;
+                        <CommandEmpty
+                          onSelect={() => {
                             form.setValue("group", inputValue);
                             setPopoverOpen(false);
-                          }}>
-                           <div className="cursor-pointer p-2">Create new group: &quot;{(document.querySelector(
-                              'input[aria-label="Command input"]'
-                            ) as HTMLInputElement)?.value}&quot;</div>
+                          }}
+                        >
+                           <div className="cursor-pointer p-2">Create new group: &quot;{inputValue}&quot;</div>
                         </CommandEmpty>
                         <CommandGroup>
                           {existingGroups.map((group) => (
