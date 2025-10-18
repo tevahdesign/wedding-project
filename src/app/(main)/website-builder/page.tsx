@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
-import { set, ref } from 'firebase/database'
+import { set, ref, remove } from 'firebase/database'
 import { format } from 'date-fns'
 
 import { PageHeader } from '@/components/app/page-header'
@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -23,8 +24,9 @@ import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { useAuth, useDatabase } from '@/firebase'
 import { useObjectValue } from '@/firebase/database/use-object-value'
 import { useToast } from '@/hooks/use-toast'
-import { Copy, Link as LinkIcon, Loader2, Check } from 'lucide-react'
+import { Copy, Link as LinkIcon, Loader2, Check, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 
 export default function WebsiteBuilderPage() {
   const { user } = useAuth()
@@ -37,6 +39,7 @@ export default function WebsiteBuilderPage() {
   const [vanityUrl, setVanityUrl] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState('template-1')
   const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
   
   const websiteOrigin = typeof window !== 'undefined' ? window.location.origin : '';
@@ -52,12 +55,20 @@ export default function WebsiteBuilderPage() {
   const previewImage =
     selectedTemplate === 'template-1' ? template1 : template2
 
-  const websiteRef = useMemo(() => {
+  const websiteDetailsRef = useMemo(() => {
     if (!user || !database) return null
     return ref(database, `users/${user.uid}/website/details`)
   }, [user, database])
 
-  const { data: websiteData, loading } = useObjectValue(websiteRef)
+  const { data: websiteData, loading } = useObjectValue(websiteDetailsRef)
+
+  const resetFormToDefaults = () => {
+    setCoupleNames('Alex & Jordan');
+    setWeddingDate(new Date());
+    setWelcomeMessage('We can\'t wait to celebrate our special day with you! Join us as we say "I do".');
+    setVanityUrl('alex-and-jordan');
+    setSelectedTemplate('template-1');
+  }
 
   useEffect(() => {
     if (websiteData) {
@@ -71,16 +82,12 @@ export default function WebsiteBuilderPage() {
       setVanityUrl(websiteData.vanityUrl || 'alex-and-jordan')
       setSelectedTemplate(websiteData.templateId || 'template-1')
     } else if (!loading) {
-        setCoupleNames('Alex & Jordan');
-        setWeddingDate(new Date());
-        setWelcomeMessage('We can\'t wait to celebrate our special day with you! Join us as we say "I do".');
-        setVanityUrl('alex-and-jordan');
-        setSelectedTemplate('template-1');
+        resetFormToDefaults();
     }
   }, [websiteData, loading])
 
   const handleSave = async () => {
-    if (!websiteRef) {
+    if (!websiteDetailsRef) {
        toast({
         variant: 'destructive',
         title: 'Error',
@@ -98,7 +105,7 @@ export default function WebsiteBuilderPage() {
         templateId: selectedTemplate,
       };
 
-      await set(websiteRef, dataToSave) 
+      await set(websiteDetailsRef, dataToSave) 
       toast({
         title: 'Website Published!',
         description: 'Your changes are live and the link is ready to share.',
@@ -113,6 +120,29 @@ export default function WebsiteBuilderPage() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const handleDelete = async () => {
+      if (!user || !database) return;
+      const wholeWebsiteRef = ref(database, `users/${user.uid}/website`);
+      setIsDeleting(true);
+      try {
+        await remove(wholeWebsiteRef);
+        toast({
+            title: "Website Deleted",
+            description: "Your wedding website has been successfully deleted.",
+        });
+        resetFormToDefaults();
+      } catch (error) {
+          toast({
+            variant: "destructive",
+            title: "Delete Failed",
+            description: "Your website could not be deleted. Please try again.",
+          });
+      } finally {
+          setIsDeleting(false);
+      }
+
   }
 
   const handleCopyToClipboard = () => {
@@ -267,6 +297,32 @@ export default function WebsiteBuilderPage() {
                         {isCopied ? 'Copied!' : 'Copy Link'}
                     </Button>
                 </CardContent>
+                <CardFooter>
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" className="w-full" disabled={isDeleting}>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Website
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete your
+                                    wedding website and all of its data.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                                    {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Continue
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </CardFooter>
              </Card>
            )}
           <Button

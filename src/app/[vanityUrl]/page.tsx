@@ -35,19 +35,29 @@ export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
 
       try {
         setLoading(true)
-        const websitesRef = ref(database, 'users')
+        // Reference the `users` node where all user data is stored
+        const usersRef = ref(database, 'users')
+        // Query users to find the one with the matching vanityUrl
         const websiteQuery = query(
-          websitesRef,
+          usersRef,
           orderByChild('website/details/vanityUrl'),
           equalTo(vanityUrl)
         )
-        const websiteSnapshot = await get(websiteQuery)
+        
+        const snapshot = await get(websiteQuery);
 
-        if (websiteSnapshot.exists()) {
-          // Since there should only be one, get the first one
-           websiteSnapshot.forEach((userSnapshot) => {
-            setWebsiteData(userSnapshot.val().website.details);
-          });
+        if (snapshot.exists()) {
+          // The result of the query is an object where keys are user IDs
+          // We need to get the first (and only) user object from the results
+          const usersData = snapshot.val();
+          const userId = Object.keys(usersData)[0];
+          const userData = usersData[userId];
+          
+          if (userData.website && userData.website.details) {
+            setWebsiteData(userData.website.details);
+          } else {
+             setError('This wedding website does not exist or is incomplete.')
+          }
         } else {
           setError('This wedding website does not exist.')
         }
