@@ -17,6 +17,7 @@ import { Heart } from "lucide-react"
 import { useAuth } from "@/firebase"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
+import { Button } from "@/components/ui/button"
 
 export default function MainLayout({
   children,
