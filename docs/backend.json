@@ -36,6 +36,10 @@
           "format": "email",
           "description": "The guest's email address."
         },
+        "phoneNumber": {
+          "type": "string",
+          "description": "The guest's phone number."
+        },
         "status": {
           "type": "string",
           "enum": ["Attending", "Pending", "Declined"],

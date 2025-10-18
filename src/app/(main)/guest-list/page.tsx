@@ -13,6 +13,7 @@ import {
   Circle,
   XCircle,
   Download,
+  Mail,
 } from "lucide-react"
 
 import { PageHeader } from "@/components/app/page-header"
@@ -69,6 +70,7 @@ type Guest = {
   id: string
   name: string
   email?: string
+  phoneNumber?: string
   group?: string
   status: GuestStatus
 }
@@ -157,6 +159,21 @@ export default function GuestListPage() {
       setIsDeleting(false)
     }
   }
+  
+  const handleSendEmailToAttendees = () => {
+    if (!guests) return;
+    const attendees = guests.filter(g => g.status === 'Attending' && g.email);
+    if (attendees.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No Attendees",
+        description: "There are no attending guests with email addresses to send an email to.",
+      });
+      return;
+    }
+    const bccEmails = attendees.map(g => g.email).join(',');
+    window.location.href = `mailto:?bcc=${bccEmails}`;
+  };
 
   const getStatusBadgeClasses = (status: GuestStatus) => {
     return cn({
@@ -176,13 +193,14 @@ export default function GuestListPage() {
       return;
     }
 
-    const headers = ["ID", "Name", "Email", "Group", "Status"];
+    const headers = ["ID", "Name", "Email", "Phone Number", "Group", "Status"];
     const csvContent = [
       headers.join(","),
       ...data.map(item => [
         item.id,
         `"${item.name}"`,
         `"${item.email || ''}"`,
+        `"${item.phoneNumber || ''}"`,
         `"${item.group || ''}"`,
         item.status
       ].join(","))
@@ -215,10 +233,11 @@ export default function GuestListPage() {
 
     autoTable(doc, {
       startY: 22,
-      head: [['Name', 'Email', 'Group', 'Status']],
+      head: [['Name', 'Email', 'Phone', 'Group', 'Status']],
       body: data.map(guest => [
         guest.name,
         guest.email || 'N/A',
+        guest.phoneNumber || 'N/A',
         guest.group || 'N/A',
         guest.status,
       ]),
@@ -255,6 +274,10 @@ export default function GuestListPage() {
         description="Organize your guests and track RSVPs."
       >
         <div className="flex gap-2">
+            <Button variant="outline" onClick={handleSendEmailToAttendees}>
+                <Mail className="mr-2 h-4 w-4" />
+                Email Attendees
+            </Button>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline">

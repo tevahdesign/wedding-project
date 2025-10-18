@@ -31,6 +31,7 @@ import {
 const guestSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email." }).optional().or(z.literal('')),
+  phoneNumber: z.string().optional(),
   group: z.string().optional(),
 })
 
@@ -56,6 +57,7 @@ export function GuestForm({ setDialogOpen, guestToEdit }: GuestFormProps) {
     defaultValues: {
       name: "",
       email: "",
+      phoneNumber: "",
       group: "",
     },
   })
@@ -65,12 +67,14 @@ export function GuestForm({ setDialogOpen, guestToEdit }: GuestFormProps) {
       form.reset({
         name: guestToEdit.name,
         email: guestToEdit.email,
+        phoneNumber: guestToEdit.phoneNumber,
         group: guestToEdit.group,
       })
     } else {
         form.reset({
             name: "",
             email: "",
+            phoneNumber: "",
             group: "",
         })
     }
@@ -149,6 +153,23 @@ export function GuestForm({ setDialogOpen, guestToEdit }: GuestFormProps) {
                   <Input
                     type="email"
                     placeholder="guest@example.com"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="phoneNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone Number (Optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="tel"
+                    placeholder="(123) 456-7890"
                     {...field}
                   />
                 </FormControl>
