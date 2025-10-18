@@ -31,7 +31,10 @@ export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
 
   useEffect(() => {
     const fetchWebsiteData = async () => {
-      if (!database || !vanityUrl) return
+      if (!database || !vanityUrl) {
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true)
