@@ -89,6 +89,6 @@
     "providers": ["Google", "Email"]
   },
   "database": {
-    "rules": "database.rules.json"
+    "rules": "rules.json"
   }
 }

@@ -35,9 +35,7 @@ export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
 
       try {
         setLoading(true)
-        // Reference the `users` node where all user data is stored
         const usersRef = ref(database, 'users')
-        // Query users to find the one with the matching vanityUrl
         const websiteQuery = query(
           usersRef,
           orderByChild('website/details/vanityUrl'),
@@ -47,23 +45,29 @@ export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
         const snapshot = await get(websiteQuery);
 
         if (snapshot.exists()) {
-          // The result of the query is an object where keys are user IDs
-          // We need to get the first (and only) user object from the results
-          const usersData = snapshot.val();
-          const userId = Object.keys(usersData)[0];
-          const userData = usersData[userId];
-          
-          if (userData.website && userData.website.details) {
-            setWebsiteData(userData.website.details);
+          let foundData = null;
+          snapshot.forEach((childSnapshot) => {
+            const userData = childSnapshot.val();
+            if (userData.website && userData.website.details) {
+              foundData = userData.website.details;
+            }
+          });
+
+          if (foundData) {
+            setWebsiteData(foundData);
           } else {
-             setError('This wedding website does not exist or is incomplete.')
+            setError('This wedding website does not exist or is incomplete.')
           }
         } else {
           setError('This wedding website does not exist.')
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching website data:', err)
-        setError('Could not load the wedding website. Please try again later.')
+        if (err.message.includes('permission_denied') || err.message.includes('Index not defined')) {
+             setError('This wedding website could not be loaded due to a configuration issue. Please contact the couple.');
+        } else {
+            setError('Could not load the wedding website. Please try again later.')
+        }
       } finally {
         setLoading(false)
       }
@@ -98,7 +102,6 @@ export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
   }
 
   if (!websiteData) {
-    // This case should be covered by the error state, but as a fallback:
     return (
       <div className="flex h-screen items-center justify-center text-center bg-background p-4">
         <div>
