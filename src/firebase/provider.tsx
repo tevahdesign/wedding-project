@@ -1,3 +1,4 @@
+
 // src/firebase/provider.tsx
 'use client';
 
@@ -42,7 +43,7 @@ export function FirebaseProvider({
   children,
   firebaseApp,
   auth,
-  firestore,
+firestore,
   database,
 }: Props): JSX.Element {
   return (
@@ -51,7 +52,7 @@ export function FirebaseProvider({
         firebaseApp,
         auth,
         firestore,
-        database
+        database,
       }}
     >
       {process.env.NODE_ENV === 'development' && <FirebaseErrorListener />}

@@ -1,18 +1,20 @@
+
 'use client'
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import {
-  collectionGroup,
   query,
-  where,
-  getDocs,
-  DocumentData,
-} from 'firebase/firestore'
+  orderByChild,
+  equalTo,
+  get,
+  ref,
+  DataSnapshot,
+} from 'firebase/database'
 import { format } from 'date-fns'
 
 import { Button } from '@/components/ui/button'
-import { useFirestore } from '@/firebase'
+import { useDatabase } from '@/firebase'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { Gem } from 'lucide-react'
 
@@ -22,28 +24,30 @@ type PublicWebsitePageProps = {
 
 export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
   const { vanityUrl } = params
-  const firestore = useFirestore()
-  const [websiteData, setWebsiteData] = useState<DocumentData | null>(null)
+  const database = useDatabase()
+  const [websiteData, setWebsiteData] = useState<any | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchWebsiteData = async () => {
-      if (!firestore || !vanityUrl) return
+      if (!database || !vanityUrl) return
 
       try {
         setLoading(true)
-        // This query now correctly looks for the document within the 'website' subcollection group
-        const detailsCollection = collectionGroup(firestore, 'website')
+        const websitesRef = ref(database, 'users')
         const websiteQuery = query(
-          detailsCollection,
-          where('vanityUrl', '==', vanityUrl)
+          websitesRef,
+          orderByChild('website/details/vanityUrl'),
+          equalTo(vanityUrl)
         )
-        const websiteSnapshot = await getDocs(websiteQuery)
+        const websiteSnapshot = await get(websiteQuery)
 
-        if (!websiteSnapshot.empty) {
-          const websiteDoc = websiteSnapshot.docs[0]
-          setWebsiteData(websiteDoc.data())
+        if (websiteSnapshot.exists()) {
+          // Since there should only be one, get the first one
+           websiteSnapshot.forEach((userSnapshot) => {
+            setWebsiteData(userSnapshot.val().website.details);
+          });
         } else {
           setError('This wedding website does not exist.')
         }
@@ -56,7 +60,7 @@ export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
     }
 
     fetchWebsiteData()
-  }, [firestore, vanityUrl])
+  }, [database, vanityUrl])
 
   if (loading) {
     return (
@@ -98,10 +102,9 @@ export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
     )
   }
 
-
   const { coupleNames, weddingDate, welcomeMessage, templateId } = websiteData
-  const formattedDate = weddingDate?.toDate()
-    ? format(weddingDate.toDate(), 'MMMM do, yyyy')
+  const formattedDate = weddingDate
+    ? format(new Date(weddingDate), 'MMMM do, yyyy')
     : 'Date to be announced'
   const template1 = PlaceHolderImages.find(
     (img) => img.id === 'website-template-1'
@@ -143,5 +146,3 @@ export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
     </div>
   )
 }
-
-    

@@ -1,3 +1,4 @@
+
 "use client"
 
 import Image from "next/image"
@@ -14,20 +15,21 @@ import {
 import { PlusCircle } from "lucide-react"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { Progress } from "@/components/ui/progress"
-import { useAuth, useCollection, useFirestore } from "@/firebase"
+import { useAuth, useDatabase } from "@/firebase"
 import { useMemo } from "react"
-import { collection } from "firebase/firestore"
+import { useList } from "@/firebase/database/use-list"
+import { ref } from "firebase/database"
 
 export default function RegistryPage() {
   const { user } = useAuth()
-  const firestore = useFirestore()
+  const database = useDatabase()
 
   const registryItemsRef = useMemo(() => {
-    if (!user || !firestore) return null
-    return collection(firestore, `users/${user.uid}/registryItems`)
-  }, [user, firestore])
+    if (!user || !database) return null
+    return ref(database, `users/${user.uid}/registryItems`)
+  }, [user, database])
 
-  const { data: registryItems, loading } = useCollection(registryItemsRef)
+  const { data: registryItems, loading } = useList(registryItemsRef)
 
   const purchasedCount = registryItems?.filter((item) => item.purchased).length || 0
   const totalItems = registryItems?.length || 0

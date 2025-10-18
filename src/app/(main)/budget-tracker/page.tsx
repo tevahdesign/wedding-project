@@ -1,3 +1,4 @@
+
 "use client"
 
 import { PageHeader } from "@/components/app/page-header"
@@ -27,8 +28,9 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 import { useMemo } from "react"
-import { useAuth, useCollection, useFirestore } from "@/firebase"
-import { collection } from "firebase/firestore"
+import { useAuth, useDatabase } from "@/firebase"
+import { useList } from "@/firebase/database/use-list"
+import { ref } from "firebase/database"
 
 const chartConfig = {
   spent: { label: "Spent", color: "hsl(var(--primary))" },
@@ -37,14 +39,14 @@ const chartConfig = {
 
 export default function BudgetTrackerPage() {
   const { user } = useAuth()
-  const firestore = useFirestore()
+  const database = useDatabase()
 
   const budgetItemsRef = useMemo(() => {
-    if (!user || !firestore) return null
-    return collection(firestore, `users/${user.uid}/budgetItems`)
-  }, [user, firestore])
+    if (!user || !database) return null
+    return ref(database, `users/${user.uid}/budgetItems`)
+  }, [user, database])
 
-  const { data: budgetData, loading } = useCollection(budgetItemsRef)
+  const { data: budgetData, loading } = useList(budgetItemsRef)
 
   const { totalBudget, totalSpent } = useMemo(() => {
     if (!budgetData) return { totalBudget: 0, totalSpent: 0 }

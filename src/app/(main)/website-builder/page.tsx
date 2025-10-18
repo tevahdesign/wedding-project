@@ -1,8 +1,9 @@
+
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
-import { doc, setDoc, Timestamp } from 'firebase/firestore'
+import { set, ref } from 'firebase/database'
 import { format } from 'date-fns'
 
 import { PageHeader } from '@/components/app/page-header'
@@ -19,14 +20,15 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { useAuth, useDoc, useFirestore } from '@/firebase'
+import { useAuth, useDatabase } from '@/firebase'
+import { useObjectValue } from '@/firebase/database/use-object-value'
 import { useToast } from '@/hooks/use-toast'
 import { Copy, Link as LinkIcon, Loader2, Check } from 'lucide-react'
 import Link from 'next/link'
 
 export default function WebsiteBuilderPage() {
   const { user } = useAuth()
-  const firestore = useFirestore()
+  const database = useDatabase()
   const { toast } = useToast()
 
   const [coupleNames, setCoupleNames] = useState('')
@@ -51,20 +53,17 @@ export default function WebsiteBuilderPage() {
     selectedTemplate === 'template-1' ? template1 : template2
 
   const websiteRef = useMemo(() => {
-    if (!user || !firestore) return null
-    return doc(firestore, `users/${user.uid}/website/details`)
-  }, [user, firestore])
+    if (!user || !database) return null
+    return ref(database, `users/${user.uid}/website/details`)
+  }, [user, database])
 
-  const { data: websiteData, loading } = useDoc(websiteRef)
+  const { data: websiteData, loading } = useObjectValue(websiteRef)
 
   useEffect(() => {
     if (websiteData) {
       setCoupleNames(websiteData.coupleNames || 'Alex & Jordan')
-      if (websiteData.weddingDate && typeof websiteData.weddingDate.toDate === 'function') {
-         setWeddingDate(websiteData.weddingDate.toDate())
-      } else {
-         setWeddingDate(new Date())
-      }
+      // RTDB stores dates as ISO strings
+      setWeddingDate(websiteData.weddingDate ? new Date(websiteData.weddingDate) : new Date())
       setWelcomeMessage(
         websiteData.welcomeMessage ||
           'We can\'t wait to celebrate our special day with you! Join us as we say "I do".'
@@ -91,16 +90,15 @@ export default function WebsiteBuilderPage() {
     }
     setIsSaving(true)
     try {
-      // Convert Date to Firestore Timestamp before saving
       const dataToSave = {
         coupleNames,
-        weddingDate: weddingDate ? Timestamp.fromDate(weddingDate) : null,
+        weddingDate: weddingDate ? weddingDate.toISOString() : null,
         welcomeMessage,
         vanityUrl,
         templateId: selectedTemplate,
       };
 
-      await setDoc(websiteRef, dataToSave, { merge: true }) 
+      await set(websiteRef, dataToSave) 
       toast({
         title: 'Website Published!',
         description: 'Your changes are live and the link is ready to share.',
@@ -333,5 +331,3 @@ export default function WebsiteBuilderPage() {
     </>
   )
 }
-
-    

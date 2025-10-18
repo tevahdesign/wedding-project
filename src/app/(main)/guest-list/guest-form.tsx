@@ -1,10 +1,11 @@
+
 "use client"
 
 import { useEffect, useState } from "react"
 import { useForm, SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { collection, addDoc, doc, setDoc } from "firebase/firestore"
+import { ref, push, set } from "firebase/database"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,11 +17,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { useAuth, useFirestore } from "@/firebase"
+import { useAuth, useDatabase } from "@/firebase"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
-import { errorEmitter } from "@/firebase/error-emitter"
-import { FirestorePermissionError } from "@/firebase/errors"
 
 const guestSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -39,7 +38,7 @@ type GuestFormProps = {
 
 export function GuestForm({ setDialogOpen, guestToEdit }: GuestFormProps) {
   const { user } = useAuth()
-  const firestore = useFirestore()
+  const database = useDatabase()
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -71,7 +70,7 @@ export function GuestForm({ setDialogOpen, guestToEdit }: GuestFormProps) {
   }, [isEditMode, guestToEdit, form])
 
   const onSubmit: SubmitHandler<GuestFormValues> = async (data) => {
-    if (!user || !firestore) {
+    if (!user || !database) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -82,65 +81,40 @@ export function GuestForm({ setDialogOpen, guestToEdit }: GuestFormProps) {
 
     setIsSubmitting(true)
 
-    if (isEditMode && guestToEdit?.id) {
-        // Update existing guest
-        const guestRef = doc(firestore, `users/${user.uid}/guests`, guestToEdit.id);
-        const guestData = { ...guestToEdit, ...data };
-
-        setDoc(guestRef, guestData, { merge: true })
-          .then(() => {
-            toast({
-              title: "Guest Updated!",
-              description: `${data.name}'s details have been updated.`,
-            })
-            setDialogOpen(false)
+    try {
+      if (isEditMode && guestToEdit?.id) {
+          // Update existing guest
+          const guestRef = ref(database, `users/${user.uid}/guests/${guestToEdit.id}`);
+          await set(guestRef, { ...guestToEdit, ...data });
+          toast({
+            title: "Guest Updated!",
+            description: `${data.name}'s details have been updated.`,
           })
-          .catch((serverError) => {
-            const permissionError = new FirestorePermissionError({
-              path: guestRef.path,
-              operation: 'update',
-              requestResourceData: guestData,
-            });
-            errorEmitter.emit('permission-error', permissionError);
-            toast({
-              variant: "destructive",
-              title: "Update Failed",
-              description: "Could not update guest. Please try again.",
-            })
-          })
-          .finally(() => setIsSubmitting(false));
       } else {
-        // Add new guest
-        const guestData = {
-          ...data,
-          status: "Pending",
-        }
-        const guestsRef = collection(firestore, `users/${user.uid}/guests`)
-
-        addDoc(guestsRef, guestData)
-          .then(() => {
-            toast({
-              title: "Guest Added!",
-              description: `${data.name} has been added to your guest list.`,
-            })
-            form.reset()
-            setDialogOpen(false)
-          })
-          .catch((serverError) => {
-            const permissionError = new FirestorePermissionError({
-              path: guestsRef.path,
-              operation: 'create',
-              requestResourceData: guestData,
-            });
-            errorEmitter.emit('permission-error', permissionError);
-            toast({
-              variant: "destructive",
-              title: "Uh oh! Something went wrong.",
-              description: "Could not add guest. Please try again.",
-            })
-          })
-          .finally(() => setIsSubmitting(false));
+          // Add new guest
+          const guestsRef = ref(database, `users/${user.uid}/guests`);
+          const newGuestRef = push(guestsRef);
+          await set(newGuestRef, {
+            ...data,
+            id: newGuestRef.key,
+            status: "Pending",
+          });
+          toast({
+            title: "Guest Added!",
+            description: `${data.name} has been added to your guest list.`,
+          });
+          form.reset();
       }
+      setDialogOpen(false);
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Uh oh! Something went wrong.",
+            description: error.message || "Could not save guest. Please try again.",
+        })
+    } finally {
+        setIsSubmitting(false)
+    }
   }
 
   return (

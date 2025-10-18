@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState } from "react"
@@ -44,12 +45,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { useAuth, useCollection, useFirestore } from "@/firebase"
-import { collection, doc, deleteDoc } from "firebase/firestore"
+import { useAuth, useDatabase } from "@/firebase"
+import { ref, remove } from "firebase/database"
+import { useList } from "@/firebase/database/use-list"
 import { GuestForm } from "./guest-form"
 import { useToast } from "@/hooks/use-toast"
-import { errorEmitter } from "@/firebase/error-emitter"
-import { FirestorePermissionError } from "@/firebase/errors"
 
 type Guest = {
   id: string
@@ -61,7 +61,7 @@ type Guest = {
 
 export default function GuestListPage() {
   const { user } = useAuth()
-  const firestore = useFirestore()
+  const database = useDatabase()
   const { toast } = useToast()
 
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -70,11 +70,11 @@ export default function GuestListPage() {
   const [isDeleting, setIsDeleting] = useState(false)
 
   const guestsRef = useMemo(() => {
-    if (!user || !firestore) return null
-    return collection(firestore, `users/${user.uid}/guests`)
-  }, [user, firestore])
+    if (!user || !database) return null
+    return ref(database, `users/${user.uid}/guests`)
+  }, [user, database])
 
-  const { data: guests, loading } = useCollection<Guest>(guestsRef)
+  const { data: guests, loading } = useList<Guest>(guestsRef)
 
   const handleAddClick = () => {
     setSelectedGuest(null)
@@ -92,35 +92,27 @@ export default function GuestListPage() {
   }
 
   const handleDeleteConfirm = async () => {
-    if (!user || !firestore || !selectedGuest) return;
+    if (!user || !database || !selectedGuest) return;
 
     setIsDeleting(true);
-    const guestRef = doc(firestore, `users/${user.uid}/guests`, selectedGuest.id);
-
-    deleteDoc(guestRef)
-      .then(() => {
-        toast({
-          title: "Guest Deleted",
-          description: `${selectedGuest.name} has been removed from your list.`,
-        });
-        setIsDeleteAlertOpen(false);
-        setSelectedGuest(null);
-      })
-      .catch((serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: guestRef.path,
-          operation: 'delete',
-        });
-        errorEmitter.emit('permission-error', permissionError);
+    try {
+      const guestRef = ref(database, `users/${user.uid}/guests/${selectedGuest.id}`);
+      await remove(guestRef);
+      toast({
+        title: "Guest Deleted",
+        description: `${selectedGuest.name} has been removed from your list.`,
+      });
+      setIsDeleteAlertOpen(false);
+      setSelectedGuest(null);
+    } catch (error: any) {
         toast({
           variant: "destructive",
           title: "Delete Failed",
-          description: "Could not delete guest. Please try again.",
+          description: error.message || "Could not delete guest. Please try again.",
         });
-      })
-      .finally(() => {
+    } finally {
         setIsDeleting(false);
-      });
+    }
   };
 
   return (

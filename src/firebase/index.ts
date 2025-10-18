@@ -1,3 +1,4 @@
+
 // src/firebase/index.ts
 import type { FirebaseApp } from 'firebase/app';
 import { initializeApp, getApps } from 'firebase/app';
@@ -13,8 +14,7 @@ import { getFirebaseConfig } from './config';
 import { useUser } from './auth/use-user';
 import { FirebaseProvider, useFirebaseApp, useAuth as useFirebaseAuth, useFirestore, useDatabase } from './provider';
 import { FirebaseClientProvider } from './client-provider';
-import { useCollection } from './firestore/use-collection';
-import { useDoc } from './firestore/use-doc';
+
 
 type FirebaseInstances = {
   firebaseApp: FirebaseApp;
@@ -65,8 +65,6 @@ export {
   useFirestore,
   useFirebaseAuth,
   useDatabase,
-  useCollection,
-  useDoc,
   FirebaseProvider,
   FirebaseClientProvider
 };

@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from "next/link"
@@ -11,9 +12,10 @@ import {
   Globe,
   Mail,
 } from "lucide-react"
-import { useAuth, useCollection, useDoc, useFirestore } from "@/firebase"
-import { collection, doc } from "firebase/firestore"
+import { useAuth, useDatabase } from "@/firebase"
+import { ref } from "firebase/database"
 import { useMemo } from "react"
+import { useList } from "@/firebase/database/use-list"
 
 import {
   Card,
@@ -66,27 +68,25 @@ const features = [
 
 export default function DashboardPage() {
   const { user } = useAuth()
-  const firestore = useFirestore()
+  const database = useDatabase()
 
   const guestsRef = useMemo(() => {
-    if (!user || !firestore) return null
-    return collection(firestore, `users/${user.uid}/guests`)
-  }, [user, firestore])
-  const { data: guests, loading: guestsLoading } = useCollection(guestsRef)
+    if (!user || !database) return null
+    return ref(database, `users/${user.uid}/guests`)
+  }, [user, database])
+  const { data: guests } = useList(guestsRef)
 
   const budgetItemsRef = useMemo(() => {
-    if (!user || !firestore) return null
-    return collection(firestore, `users/${user.uid}/budgetItems`)
-  }, [user, firestore])
-  const { data: budgetItems, loading: budgetLoading } =
-    useCollection(budgetItemsRef)
+    if (!user || !database) return null
+    return ref(database, `users/${user.uid}/budgetItems`)
+  }, [user, database])
+  const { data: budgetItems } = useList(budgetItemsRef)
 
   const registryItemsRef = useMemo(() => {
-    if (!user || !firestore) return null
-    return collection(firestore, `users/${user.uid}/registryItems`)
-  }, [user, firestore])
-  const { data: registryItems, loading: registryLoading } =
-    useCollection(registryItemsRef)
+    if (!user || !database) return null
+    return ref(database, `users/${user.uid}/registryItems`)
+  }, [user, database])
+  const { data: registryItems } = useList(registryItemsRef)
 
   const { totalBudget, totalSpent } = useMemo(() => {
     if (!budgetItems) return { totalBudget: 0, totalSpent: 0 }

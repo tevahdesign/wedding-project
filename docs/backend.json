@@ -29,6 +29,7 @@
       "description": "Represents a wedding guest.",
       "type": "object",
       "properties": {
+        "id": { "type": "string", "description": "The guest's unique ID." },
         "name": { "type": "string", "description": "The guest's full name." },
         "email": {
           "type": "string",
@@ -42,31 +43,33 @@
         },
         "group": { "type": "string", "description": "The group the guest belongs to (e.g., Bride's Family, Friends)." }
       },
-      "required": ["name", "status"]
+      "required": ["id", "name", "status"]
     },
     "BudgetItem": {
       "title": "Budget Item",
       "description": "Represents an item in the wedding budget.",
       "type": "object",
       "properties": {
+        "id": { "type": "string", "description": "The item's unique ID." },
         "name": { "type": "string", "description": "Name of the budget category." },
         "budget": { "type": "number", "description": "The allocated budget for this category." },
         "spent": { "type": "number", "description": "The amount spent in this category." }
       },
-      "required": ["name", "budget", "spent"]
+      "required": ["id", "name", "budget", "spent"]
     },
     "RegistryItem": {
       "title": "Registry Item",
       "description": "Represents an item in the wedding registry.",
       "type": "object",
       "properties": {
+        "id": { "type": "string", "description": "The item's unique ID." },
         "title": { "type": "string", "description": "The title of the registry item." },
         "store": { "type": "string", "description": "The store where the item can be purchased." },
         "price": { "type": "string", "description": "The price of the item." },
         "imageId": { "type": "string", "description": "The ID of the placeholder image for the item." },
         "purchased": { "type": "boolean", "description": "Whether the item has been purchased." }
       },
-      "required": ["title", "price", "purchased"]
+      "required": ["id", "title", "price", "purchased"]
     },
     "WeddingWebsite": {
       "title": "Wedding Website",
@@ -85,26 +88,7 @@
   "auth": {
     "providers": ["Google", "Email"]
   },
-  "firestore": {
-    "/users/{userId}": {
-      "schema": { "$ref": "#/entities/UserProfile" },
-      "description": "Stores user profile information."
-    },
-    "/users/{userId}/guests/{guestId}": {
-      "schema": { "$ref": "#/entities/Guest" },
-      "description": "Stores the guest list for a specific user."
-    },
-    "/users/{userId}/budgetItems/{itemId}": {
-      "schema": { "$ref": "#/entities/BudgetItem" },
-      "description": "Stores budget items for a specific user."
-    },
-    "/users/{userId}/registryItems/{itemId}": {
-      "schema": { "$ref": "#/entities/RegistryItem" },
-      "description": "Stores registry items for a specific user."
-    },
-    "/users/{userId}/website/details": {
-      "schema": { "$ref": "#/entities/WeddingWebsite" },
-      "description": "Stores the details for a user's single wedding website."
-    }
+  "database": {
+    "rules": "database.rules.json"
   }
 }
