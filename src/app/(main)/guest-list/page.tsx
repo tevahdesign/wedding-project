@@ -93,12 +93,6 @@ export default function GuestListPage() {
 
   const { data: guests, loading } = useList<Guest>(guestsRef)
 
-  const existingGroups = useMemo(() => {
-    if (!guests) return []
-    const groups = guests.map(g => g.group).filter(Boolean) as string[]
-    return [...new Set(groups)]
-  }, [guests])
-
   const handleAddClick = () => {
     setSelectedGuest(null)
     setIsFormOpen(true)
@@ -191,7 +185,6 @@ export default function GuestListPage() {
           <GuestForm 
             setDialogOpen={setIsFormOpen} 
             guestToEdit={selectedGuest} 
-            existingGroups={existingGroups}
           />
         </DialogContent>
       </Dialog>

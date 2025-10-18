@@ -19,21 +19,14 @@ import {
 } from "@/components/ui/form"
 import { useAuth, useDatabase } from "@/firebase"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2, ChevronsUpDown, Check } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import { cn } from "@/lib/utils"
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const guestSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -48,17 +41,13 @@ type Guest = GuestFormValues & { id?: string; status: string }
 type GuestFormProps = {
   setDialogOpen: (open: boolean) => void
   guestToEdit?: Guest | null;
-  existingGroups: string[];
 }
 
-export function GuestForm({ setDialogOpen, guestToEdit, existingGroups }: GuestFormProps) {
+export function GuestForm({ setDialogOpen, guestToEdit }: GuestFormProps) {
   const { user } = useAuth()
   const database = useDatabase()
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [popoverOpen, setPopoverOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-
 
   const isEditMode = !!guestToEdit;
 
@@ -171,73 +160,19 @@ export function GuestForm({ setDialogOpen, guestToEdit, existingGroups }: GuestF
             control={form.control}
             name="group"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Group (Optional)</FormLabel>
-                <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          "w-full justify-between",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value
-                          ? existingGroups.find(
-                              (group) => group === field.value
-                            ) || field.value
-                          : "Select or create a group"}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                    <Command>
-                      <CommandInput 
-                        placeholder="Search group or create new..."
-                        value={inputValue}
-                        onValueChange={setInputValue}
-                       />
-                       <CommandList>
-                        <CommandEmpty>
-                           <div
-                              className="cursor-pointer p-2"
-                              onSelect={() => {
-                                form.setValue("group", inputValue);
-                                setPopoverOpen(false);
-                              }}
-                            >
-                              Create new group: &quot;{inputValue}&quot;
-                            </div>
-                        </CommandEmpty>
-                        <CommandGroup>
-                          {existingGroups.map((group) => (
-                            <CommandItem
-                              value={group}
-                              key={group}
-                              onSelect={() => {
-                                form.setValue("group", group)
-                                setPopoverOpen(false)
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  group === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {group}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+              <FormItem>
+                <FormLabel>Group</FormLabel>
+                 <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Assign to a group" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Bride">Bride</SelectItem>
+                    <SelectItem value="Groom">Groom</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
