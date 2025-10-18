@@ -72,15 +72,15 @@ export default function LoginPage() {
 
   if (loading || user) {
     return (
-      <div className="flex h-screen items-center justify-center bg-secondary/30">
+      <div className="flex h-screen items-center justify-center bg-background">
         <Heart className="w-12 h-12 animate-spin text-primary" />
       </div>
     )
   }
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-secondary/30 p-4 relative overflow-hidden">
-      <div className="absolute -top-1/4 -left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob"></div>
+    <div className="flex h-screen w-full items-center justify-center bg-gray-100 dark:bg-gray-950 p-4 relative overflow-hidden">
+       <div className="absolute -top-1/4 -left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob"></div>
       <div className="absolute -bottom-1/4 -right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
       <div className="absolute -bottom-1/4 -left-1/4 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
 

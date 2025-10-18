@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -40,7 +41,7 @@ export function MainNav() {
           <Link href={item.path} passHref>
             <SidebarMenuButton
               asChild
-              isActive={pathname === item.path}
+              isActive={pathname.startsWith(item.path)}
               tooltip={item.label}
               className="justify-start text-base"
               size="lg"

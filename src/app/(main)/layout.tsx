@@ -34,7 +34,7 @@ export default function MainLayout({
 
   if (loading || !user) {
     return (
-      <div className="flex h-screen items-center justify-center bg-secondary/30">
+      <div className="flex h-screen items-center justify-center bg-background">
         <Heart className="w-12 h-12 animate-spin text-primary" />
       </div>
     )
@@ -42,10 +42,12 @@ export default function MainLayout({
 
   return (
     <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader className="p-4 border-b border-sidebar-border">
+      <Sidebar side="left" collapsible="icon" variant="sidebar">
+        <SidebarHeader className="p-4">
           <div className="flex items-center gap-2">
-            <Heart className="w-7 h-7 text-primary" />
+            <Button variant="ghost" size="icon" className="h-10 w-10 text-primary">
+              <Heart className="w-7 h-7" />
+            </Button>
             <span className="text-2xl font-headline font-bold group-data-[collapsible=icon]:hidden group-data-[collapsible=offcanvas]:hidden">
               WedEase
             </span>
@@ -58,7 +60,7 @@ export default function MainLayout({
           <UserNav />
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset className="flex flex-col bg-secondary/30">
+      <SidebarInset className="flex flex-col bg-gray-100/50 dark:bg-gray-950/50">
         <header className="flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
           <div className="md:hidden">
             <SidebarTrigger />
@@ -67,7 +69,7 @@ export default function MainLayout({
             {/* Can add breadcrumbs or search here */}
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 animate-fade-in">
           {children}
         </main>
       </SidebarInset>

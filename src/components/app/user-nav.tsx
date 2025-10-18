@@ -1,3 +1,4 @@
+
 "use client"
 
 import {
@@ -31,7 +32,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="relative h-10 w-full justify-start gap-2"
+          className="relative h-12 w-full justify-start gap-3 px-3 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:px-0"
         >
           <Avatar className="h-8 w-8">
             <AvatarImage
