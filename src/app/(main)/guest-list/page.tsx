@@ -2,6 +2,16 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { ref, remove, update } from "firebase/database"
+import {
+  PlusCircle,
+  MoreHorizontal,
+  Loader2,
+  CheckCircle,
+  Circle,
+  XCircle,
+} from "lucide-react"
+
 import { PageHeader } from "@/components/app/page-header"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,7 +30,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { PlusCircle, MoreHorizontal, Loader2 } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +37,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu"
 import {
   Dialog,
@@ -46,18 +59,26 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useAuth, useDatabase } from "@/firebase"
-import { ref, remove } from "firebase/database"
 import { useList } from "@/firebase/database/use-list"
 import { GuestForm } from "./guest-form"
 import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
+
+type GuestStatus = "Attending" | "Pending" | "Declined"
 
 type Guest = {
   id: string
   name: string
   email?: string
   group?: string
-  status: "Attending" | "Pending" | "Declined"
+  status: GuestStatus
 }
+
+const statusOptions: { value: GuestStatus; label: string; icon: React.FC<any> }[] = [
+  { value: "Attending", label: "Attending", icon: CheckCircle },
+  { value: "Pending", label: "Pending", icon: Circle },
+  { value: "Declined", label: "Declined", icon: XCircle },
+]
 
 export default function GuestListPage() {
   const { user } = useAuth()
@@ -91,29 +112,60 @@ export default function GuestListPage() {
     setIsDeleteAlertOpen(true)
   }
 
-  const handleDeleteConfirm = async () => {
-    if (!user || !database || !selectedGuest) return;
+  const handleStatusChange = async (guest: Guest, newStatus: GuestStatus) => {
+    if (!user || !database) return
 
-    setIsDeleting(true);
+    const guestRef = ref(database, `users/${user.uid}/guests/${guest.id}`)
     try {
-      const guestRef = ref(database, `users/${user.uid}/guests/${selectedGuest.id}`);
-      await remove(guestRef);
+      await update(guestRef, { status: newStatus })
+      toast({
+        title: "Status Updated",
+        description: `${guest.name}'s status has been changed to ${newStatus}.`,
+      })
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: "Could not update status. Please try again.",
+      })
+    }
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!user || !database || !selectedGuest) return
+
+    setIsDeleting(true)
+    try {
+      const guestRef = ref(
+        database,
+        `users/${user.uid}/guests/${selectedGuest.id}`
+      )
+      await remove(guestRef)
       toast({
         title: "Guest Deleted",
         description: `${selectedGuest.name} has been removed from your list.`,
-      });
-      setIsDeleteAlertOpen(false);
-      setSelectedGuest(null);
+      })
+      setIsDeleteAlertOpen(false)
+      setSelectedGuest(null)
     } catch (error: any) {
-        toast({
-          variant: "destructive",
-          title: "Delete Failed",
-          description: error.message || "Could not delete guest. Please try again.",
-        });
+      toast({
+        variant: "destructive",
+        title: "Delete Failed",
+        description:
+          error.message || "Could not delete guest. Please try again.",
+      })
     } finally {
-        setIsDeleting(false);
+      setIsDeleting(false)
     }
-  };
+  }
+
+  const getStatusBadgeClasses = (status: GuestStatus) => {
+    return cn({
+        "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300": status === "Attending",
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300": status === "Pending",
+        "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300": status === "Declined",
+    });
+  }
 
   return (
     <>
@@ -126,15 +178,22 @@ export default function GuestListPage() {
           Add Guest
         </Button>
       </PageHeader>
+
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>{selectedGuest ? "Edit Guest" : "Add New Guest"}</DialogTitle>
+            <DialogTitle>
+              {selectedGuest ? "Edit Guest" : "Add New Guest"}
+            </DialogTitle>
           </DialogHeader>
           <GuestForm setDialogOpen={setIsFormOpen} guestToEdit={selectedGuest} />
         </DialogContent>
       </Dialog>
-       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+
+      <AlertDialog
+        open={isDeleteAlertOpen}
+        onOpenChange={setIsDeleteAlertOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -162,6 +221,7 @@ export default function GuestListPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
       <Card>
         <CardHeader>
           <CardTitle>All Guests</CardTitle>
@@ -184,8 +244,11 @@ export default function GuestListPage() {
             <TableBody>
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center">
-                    Loading guests...
+                  <TableCell colSpan={4} className="text-center py-10">
+                    <div className="flex justify-center items-center gap-2 text-muted-foreground">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span>Loading guests...</span>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}
@@ -201,22 +264,29 @@ export default function GuestListPage() {
                     {guest.group}
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant={
-                        guest.status === "Attending"
-                          ? "default"
-                          : guest.status === "Pending"
-                          ? "secondary"
-                          : "destructive"
-                      }
-                      className={
-                        guest.status === "Attending"
-                          ? "bg-green-500/20 text-green-700 hover:bg-green-500/30 dark:bg-green-500/30 dark:text-green-400"
-                          : ""
-                      }
-                    >
-                      {guest.status}
-                    </Badge>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Badge
+                          variant="outline"
+                          className={cn("cursor-pointer transition-colors hover:bg-muted", getStatusBadgeClasses(guest.status))}
+                        >
+                          {guest.status}
+                        </Badge>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {statusOptions.map(option => (
+                           <DropdownMenuItem
+                            key={option.value}
+                            onClick={() => handleStatusChange(guest, option.value)}
+                          >
+                            <option.icon className="mr-2 h-4 w-4" />
+                            <span>{option.label}</span>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
@@ -232,8 +302,10 @@ export default function GuestListPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => handleEditClick(guest)}>
-                          Edit
+                        <DropdownMenuItem
+                          onClick={() => handleEditClick(guest)}
+                        >
+                          Edit Guest Details
                         </DropdownMenuItem>
                         <DropdownMenuItem disabled>Send Reminder</DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -241,7 +313,7 @@ export default function GuestListPage() {
                           className="text-destructive"
                           onClick={() => handleDeleteClick(guest)}
                         >
-                          Delete
+                          Delete Guest
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
