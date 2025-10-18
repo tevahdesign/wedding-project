@@ -201,13 +201,16 @@ export function GuestForm({ setDialogOpen, guestToEdit, existingGroups }: GuestF
                         onValueChange={setInputValue}
                        />
                        <CommandList>
-                        <CommandEmpty
-                          onSelect={() => {
-                            form.setValue("group", inputValue);
-                            setPopoverOpen(false);
-                          }}
-                        >
-                           <div className="cursor-pointer p-2">Create new group: &quot;{inputValue}&quot;</div>
+                        <CommandEmpty>
+                           <div
+                              className="cursor-pointer p-2"
+                              onSelect={() => {
+                                form.setValue("group", inputValue);
+                                setPopoverOpen(false);
+                              }}
+                            >
+                              Create new group: &quot;{inputValue}&quot;
+                            </div>
                         </CommandEmpty>
                         <CommandGroup>
                           {existingGroups.map((group) => (
