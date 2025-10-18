@@ -10,6 +10,7 @@ import {
   CheckCircle,
   Circle,
   XCircle,
+  Download,
 } from "lucide-react"
 
 import { PageHeader } from "@/components/app/page-header"
@@ -163,16 +164,77 @@ export default function GuestListPage() {
     });
   }
 
+  const downloadAsCSV = (data: Guest[], filename: string) => {
+    if (!data || data.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No Data",
+        description: "There is no guest data to download.",
+      });
+      return;
+    }
+
+    const headers = ["ID", "Name", "Email", "Group", "Status"];
+    const csvContent = [
+      headers.join(","),
+      ...data.map(item => [
+        item.id,
+        `"${item.name}"`,
+        `"${item.email || ''}"`,
+        `"${item.group || ''}"`,
+        item.status
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.href) {
+      URL.revokeObjectURL(link.href);
+    }
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDownload = (filter?: 'Bride' | 'Groom') => {
+    if (!guests) return;
+    if (filter) {
+        const filteredGuests = guests.filter(g => g.group === filter);
+        downloadAsCSV(filteredGuests, `guest-list-${filter.toLowerCase()}.csv`);
+    } else {
+        downloadAsCSV(guests, 'full-guest-list.csv');
+    }
+  };
+
   return (
     <>
       <PageHeader
         title="Guest List Manager"
         description="Organize your guests and track RSVPs."
       >
-        <Button onClick={handleAddClick}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Guest
-        </Button>
+        <div className="flex gap-2">
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline">
+                        <Download className="mr-2 h-4 w-4" />
+                        Download
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuLabel>Download Options</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => handleDownload()}>Download Full List (CSV)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDownload('Bride')}>Download Bride's List (CSV)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDownload('Groom')}>Download Groom's List (CSV)</DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+            <Button onClick={handleAddClick}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Guest
+            </Button>
+        </div>
       </PageHeader>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
