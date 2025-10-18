@@ -91,17 +91,14 @@ export const testimonials = [
   {
     quote: "WedEase made planning our wedding so much less stressful. The AI style quiz was spookily accurate and the guest list manager was a lifesaver!",
     name: "Jessica & Tom",
-    avatar: "https://i.pravatar.cc/60?img=1",
   },
   {
     quote: "Our wedding website was beautiful and so easy to set up. Our guests loved it! I highly recommend WedEase to anyone planning a wedding.",
     name: "Sarah & David",
-    avatar: "https://i.pravatar.cc/60?img=2",
   },
   {
     quote: "An indispensable tool for modern wedding planning. It's intuitive, beautiful, and genuinely helpful. A total game-changer for us.",
     name: "Emily & James",
-    avatar: "https://i.pravatar.cc/60?img=3",
   },
 ];
 

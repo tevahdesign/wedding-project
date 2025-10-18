@@ -2,31 +2,26 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { ArrowRight, Heart, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
 } from "@/components/ui/card"
-import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { testimonials, features } from "@/lib/placeholders"
 
 
 export default function RootPage() {
 
-  const heroImage = PlaceHolderImages.find(
-    (img) => img.id === "landing-hero"
-  )
-  const featureImage = PlaceHolderImages.find(
-    (img) => img.id === "landing-feature"
-  )
-
   return (
     <div className="w-full min-h-screen bg-background text-foreground">
-      <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]">
-        <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_500px_at_50%_200px,#FDD835,transparent)]"></div>
+      <div className="absolute inset-0 -z-10 h-full w-full bg-white dark:bg-black">
+        <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_500px_at_50%_200px,#ff949422,transparent)]"></div>
       </div>
+
 
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
@@ -65,65 +60,43 @@ export default function RootPage() {
         {/* Hero Section */}
         <section className="pt-32 pb-20 md:pt-48 md:pb-24 relative overflow-hidden">
            <div className="container mx-auto px-4">
-             <div className="grid md:grid-cols-2 gap-12 items-center">
-                <div className="space-y-6 text-center md:text-left">
-                    <h1 className="text-5xl md:text-7xl font-headline font-bold !leading-tight tracking-tight">
-                        Your Dream Wedding, <span className="text-primary">Simplified</span>
-                    </h1>
-                    <p className="text-lg text-muted-foreground max-w-lg mx-auto md:mx-0">
-                       All-in-one platform to plan your perfect day. From guest lists to website building, we've got you covered.
-                    </p>
-                    <div className="flex items-center justify-center md:justify-start gap-4">
-                        <Button size="lg" asChild className="shadow-lg shadow-primary/20">
-                            <Link href="/login">Start Planning For Free</Link>
-                        </Button>
-                    </div>
+             <div className="max-w-3xl mx-auto text-center space-y-6">
+                <h1 className="text-5xl md:text-7xl font-headline font-bold !leading-tight tracking-tight">
+                    Your Dream Wedding, <span className="text-primary">Simplified</span>
+                </h1>
+                <p className="text-lg text-muted-foreground max-w-lg mx-auto">
+                   All-in-one platform to plan your perfect day. From guest lists to website building, we've got you covered.
+                </p>
+                <div className="flex items-center justify-center gap-4">
+                    <Button size="lg" asChild className="shadow-lg shadow-primary/20">
+                        <Link href="/login">Start Planning For Free</Link>
+                    </Button>
                 </div>
-                <div className="relative">
-                    {heroImage && (
-                        <Image
-                            src={heroImage.imageUrl}
-                            alt={heroImage.description}
-                            width={600}
-                            height={600}
-                            className="rounded-3xl shadow-2xl object-cover"
-                            data-ai-hint={heroImage.imageHint}
-                        />
-                    )}
-                 </div>
              </div>
            </div>
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-20 md:py-28 bg-secondary/30">
+        <section id="features" className="py-20 md:py-28">
             <div className="container mx-auto px-4">
-                <div className="grid md:grid-cols-2 gap-16 items-center">
-                    <div className="relative order-2 md:order-1">
-                         {featureImage && <Image src={featureImage.imageUrl} alt={featureImage.description} width={600} height={700} className="rounded-3xl object-cover" data-ai-hint={featureImage.imageHint}/>}
-                    </div>
-                    <div className="order-1 md:order-2">
-                        <h2 className="text-4xl md:text-5xl font-headline font-bold mb-4">Powerful Tools, Effortless Planning</h2>
-                        <p className="text-muted-foreground mb-8 text-lg">
-                           From AI-powered suggestions to seamless guest management, WedEase brings all your wedding planning needs into one beautiful platform.
-                        </p>
-                        <div className="space-y-6">
-                            {features.map(feature => (
-                                <div key={feature.title} className="flex items-start gap-4">
-                                    <div className="bg-primary/10 text-primary p-3 rounded-full">
-                                        <feature.icon className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-semibold">{feature.title}</h3>
-                                        <p className="text-muted-foreground">{feature.description}</p>
-                                    </div>
+                <div className="text-center max-w-3xl mx-auto mb-16">
+                    <h2 className="text-4xl md:text-5xl font-headline font-bold mb-4">Powerful Tools, Effortless Planning</h2>
+                    <p className="text-muted-foreground text-lg">
+                       From AI-powered suggestions to seamless guest management, WedEase brings all your wedding planning needs into one beautiful platform.
+                    </p>
+                </div>
+                <div className="grid md:grid-cols-3 gap-8">
+                    {features.map(feature => (
+                        <Card key={feature.title} className="bg-card/50 backdrop-blur-sm">
+                            <CardHeader>
+                                <div className="bg-primary/10 text-primary p-3 rounded-full w-fit mb-4">
+                                    <feature.icon className="w-6 h-6" />
                                 </div>
-                            ))}
-                        </div>
-                         <Button asChild variant="link" className="p-0 mt-6 text-lg">
-                            <Link href="/login">Explore all features <ArrowRight className="ml-2 h-5 w-5"/></Link>
-                        </Button>
-                    </div>
+                                <CardTitle>{feature.title}</CardTitle>
+                                <CardDescription>{feature.description}</CardDescription>
+                            </CardHeader>
+                        </Card>
+                    ))}
                 </div>
             </div>
         </section>
@@ -140,7 +113,7 @@ export default function RootPage() {
               {testimonials.map((testimonial) => (
                 <Card
                   key={testimonial.name}
-                  className="p-8 border-2"
+                  className="p-8 border-2 bg-card/50 backdrop-blur-sm"
                 >
                   <CardContent className="p-0 flex flex-col h-full">
                     <div className="flex text-yellow-400 mb-4">
@@ -152,13 +125,6 @@ export default function RootPage() {
                       "{testimonial.quote}"
                     </p>
                     <div className="flex items-center gap-4">
-                      <Image
-                        src={testimonial.avatar}
-                        alt={testimonial.name}
-                        width={40}
-                        height={40}
-                        className="rounded-full"
-                      />
                       <div>
                         <p className="font-semibold text-foreground">
                           {testimonial.name}
