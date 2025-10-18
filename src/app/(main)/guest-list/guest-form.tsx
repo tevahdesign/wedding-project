@@ -19,7 +19,21 @@ import {
 } from "@/components/ui/form"
 import { useAuth, useDatabase } from "@/firebase"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2 } from "lucide-react"
+import { Loader2, ChevronsUpDown, Check } from "lucide-react"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import { cn } from "@/lib/utils"
 
 const guestSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -34,13 +48,15 @@ type Guest = GuestFormValues & { id?: string; status: string }
 type GuestFormProps = {
   setDialogOpen: (open: boolean) => void
   guestToEdit?: Guest | null;
+  existingGroups: string[];
 }
 
-export function GuestForm({ setDialogOpen, guestToEdit }: GuestFormProps) {
+export function GuestForm({ setDialogOpen, guestToEdit, existingGroups }: GuestFormProps) {
   const { user } = useAuth()
   const database = useDatabase()
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [popoverOpen, setPopoverOpen] = useState(false);
 
   const isEditMode = !!guestToEdit;
 
@@ -83,7 +99,6 @@ export function GuestForm({ setDialogOpen, guestToEdit }: GuestFormProps) {
 
     try {
       if (isEditMode && guestToEdit?.id) {
-          // Update existing guest
           const guestRef = ref(database, `users/${user.uid}/guests/${guestToEdit.id}`);
           await set(guestRef, { ...guestToEdit, ...data });
           toast({
@@ -91,7 +106,6 @@ export function GuestForm({ setDialogOpen, guestToEdit }: GuestFormProps) {
             description: `${data.name}'s details have been updated.`,
           })
       } else {
-          // Add new guest
           const guestsRef = ref(database, `users/${user.uid}/guests`);
           const newGuestRef = push(guestsRef);
           await set(newGuestRef, {
@@ -155,11 +169,69 @@ export function GuestForm({ setDialogOpen, guestToEdit }: GuestFormProps) {
             control={form.control}
             name="group"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col">
                 <FormLabel>Group (Optional)</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., Bride's Family" {...field} />
-                </FormControl>
+                <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className={cn(
+                          "w-full justify-between",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value
+                          ? existingGroups.find(
+                              (group) => group === field.value
+                            ) || field.value
+                          : "Select or create a group"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search group or create new..." />
+                       <CommandList>
+                        <CommandEmpty onSelect={() => {
+                            const inputValue = (document.querySelector(
+                              'input[aria-label="Command input"]'
+                            ) as HTMLInputElement)?.value;
+                            form.setValue("group", inputValue);
+                            setPopoverOpen(false);
+                          }}>
+                           <div className="cursor-pointer p-2">Create new group: &quot;{(document.querySelector(
+                              'input[aria-label="Command input"]'
+                            ) as HTMLInputElement)?.value}&quot;</div>
+                        </CommandEmpty>
+                        <CommandGroup>
+                          {existingGroups.map((group) => (
+                            <CommandItem
+                              value={group}
+                              key={group}
+                              onSelect={() => {
+                                form.setValue("group", group)
+                                setPopoverOpen(false)
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  group === field.value
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {group}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 <FormMessage />
               </FormItem>
             )}

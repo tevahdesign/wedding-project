@@ -37,10 +37,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu"
 import {
   Dialog,
@@ -96,6 +92,12 @@ export default function GuestListPage() {
   }, [user, database])
 
   const { data: guests, loading } = useList<Guest>(guestsRef)
+
+  const existingGroups = useMemo(() => {
+    if (!guests) return []
+    const groups = guests.map(g => g.group).filter(Boolean) as string[]
+    return [...new Set(groups)]
+  }, [guests])
 
   const handleAddClick = () => {
     setSelectedGuest(null)
@@ -186,7 +188,11 @@ export default function GuestListPage() {
               {selectedGuest ? "Edit Guest" : "Add New Guest"}
             </DialogTitle>
           </DialogHeader>
-          <GuestForm setDialogOpen={setIsFormOpen} guestToEdit={selectedGuest} />
+          <GuestForm 
+            setDialogOpen={setIsFormOpen} 
+            guestToEdit={selectedGuest} 
+            existingGroups={existingGroups}
+          />
         </DialogContent>
       </Dialog>
 
@@ -249,6 +255,14 @@ export default function GuestListPage() {
                         <Loader2 className="h-5 w-5 animate-spin" />
                         <span>Loading guests...</span>
                     </div>
+                  </TableCell>
+                </TableRow>
+              )}
+              {!loading && guests?.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-10">
+                    <p className="text-muted-foreground">No guests added yet.</p>
+                    <Button variant="link" onClick={handleAddClick} className="mt-2">Add your first guest</Button>
                   </TableCell>
                 </TableRow>
               )}
