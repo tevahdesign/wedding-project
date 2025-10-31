@@ -47,6 +47,24 @@
       "description": "A beautiful wedding venue setup",
       "imageUrl": "https://images.unsplash.com/photo-1505944357431-27579db47558?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8d2VkZGluZyUyMHZlbnVlfGVufDB8fHx8MTc2MDc3ODk2MHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "wedding venue"
+    },
+    {
+      "id": "vendor-grand-ballroom",
+      "description": "Grand Ballroom interior with chandeliers",
+      "imageUrl": "https://images.unsplash.com/photo-1511795408833-4a1382698e3b?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageHint": "ballroom wedding"
+    },
+    {
+      "id": "vendor-everlast-photo",
+      "description": "Close up of a professional camera lens",
+      "imageUrl": "https://images.unsplash.com/photo-1519638831568-d9897f54ed69?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageHint": "camera lens"
+    },
+    {
+      "id": "vendor-gourmet-celebrations",
+      "description": "A wedding cake decorated with fresh berries",
+      "imageUrl": "https://images.unsplash.com/photo-1551024709-8f23befc6f81?q=80&w=2148&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageHint": "wedding cake"
     }
   ]
 }

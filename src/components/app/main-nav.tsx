@@ -18,6 +18,7 @@ import {
   PiggyBank,
   Mail,
   Gift,
+  Store,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -27,6 +28,7 @@ const menuItems = [
   { path: "/website-builder", icon: Globe, label: "Website Builder" },
   { path: "/guest-list", icon: Users, label: "Guest List" },
   { path: "/budget-tracker", icon: PiggyBank, label: "Budget Tracker" },
+  { path: "/vendors", icon: Store, label: "Vendors" },
   { path: "/invitations", icon: Mail, label: "Digital Invitations" },
   { path: "/registry", icon: Gift, label: "Registry" },
 ]

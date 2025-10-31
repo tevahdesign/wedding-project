@@ -1,5 +1,5 @@
 
-import { Gem, Users, Wand2 } from "lucide-react";
+import { Church, Camera, Utensils, Music, ClipboardList, Flower, Gem, Users, Wand2, Star, Heart } from "lucide-react";
 
 export const features = [
   {
@@ -128,3 +128,48 @@ export const blogPosts = [
         author: "Emily Clark"
     }
 ]
+
+export const vendorCategories = [
+    { id: 'venues', name: 'Venues', description: 'Find the perfect place', icon: Church },
+    { id: 'photography', name: 'Photography', description: 'Capture your moments', icon: Camera },
+    { id: 'catering', name: 'Catering', description: 'Delicious food options', icon: Utensils },
+    { id: 'music', name: 'Music & DJs', description: 'Set the mood', icon: Music },
+    { id: 'planners', name: 'Planners', description: 'Expert wedding help', icon: ClipboardList },
+    { id: 'florists', name: 'Florists', description: 'Beautiful arrangements', icon: Flower },
+];
+
+export const popularVendors = [
+    {
+        id: 'vendor-1',
+        name: 'The Grand Ballroom',
+        category: 'Venue',
+        priceRange: '$$$$',
+        rating: 4.9,
+        reviewCount: 128,
+        isFeatured: true,
+        isFavorited: true,
+        imageId: 'vendor-grand-ballroom'
+    },
+    {
+        id: 'vendor-2',
+        name: 'Everlast Photo Co.',
+        category: 'Photography',
+        priceRange: '$$$',
+        rating: 5.0,
+        reviewCount: 97,
+        isFeatured: false,
+        isFavorited: false,
+        imageId: 'vendor-everlast-photo'
+    },
+    {
+        id: 'vendor-3',
+        name: 'Gourmet Celebrations',
+        category: 'Catering',
+        priceRange: '$$',
+        rating: 4.8,
+        reviewCount: 204,
+        isFeatured: false,
+        isFavorited: false,
+        imageId: 'vendor-gourmet-celebrations'
+    }
+];

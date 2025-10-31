@@ -87,6 +87,48 @@
         "templateId": { "type": "string", "description": "The ID of the chosen website template." }
       },
       "required": ["coupleNames", "weddingDate", "templateId"]
+    },
+    "Vendor": {
+      "title": "Vendor",
+      "description": "Represents a wedding vendor.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The vendor's unique ID." },
+        "name": { "type": "string", "description": "The name of the vendor." },
+        "category": { "type": "string", "description": "The category of the vendor (e.g., Venues, Photography)." },
+        "location": { "type": "string", "description": "The location of the vendor." },
+        "priceRange": { "type": "string", "enum": ["$", "$$", "$$$", "$$$$"], "description": "The price range of the vendor." },
+        "rating": { "type": "number", "description": "The average rating of the vendor." },
+        "reviewCount": { "type": "number", "description": "The number of reviews for the vendor." },
+        "isFeatured": { "type": "boolean", "description": "Whether the vendor is a featured vendor." },
+        "imageId": { "type": "string", "description": "The ID of the placeholder image for the vendor." }
+      },
+      "required": ["id", "name", "category", "location", "priceRange", "rating", "reviewCount"]
+    },
+    "VendorCategory": {
+        "title": "Vendor Category",
+        "description": "A category for wedding vendors.",
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "icon": { "type": "string", "description": "Lucide icon name" }
+        },
+        "required": ["id", "name", "icon"]
+    },
+    "VendorReview": {
+        "title": "Vendor Review",
+        "description": "A review for a specific vendor.",
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "vendorId": { "type": "string" },
+          "userId": { "type": "string" },
+          "rating": { "type": "number", "minimum": 1, "maximum": 5 },
+          "comment": { "type": "string" }
+        },
+        "required": ["id", "vendorId", "userId", "rating"]
     }
   },
   "auth": {
