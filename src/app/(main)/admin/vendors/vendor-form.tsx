@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
@@ -97,17 +96,15 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
     },
   })
 
-  const { control, handleSubmit, reset, setValue, getValues } = form;
+  const { control, handleSubmit, reset, setValue, getValues, watch } = form;
 
   const { fields: serviceFields, append: appendService, remove: removeService } = useFieldArray({
     control,
     name: "services",
   });
+  
+  const galleryImageIds = watch("galleryImageIds");
 
-  const { fields: galleryFields, append: appendGallery, remove: removeGallery } = useFieldArray({
-    control,
-    name: "galleryImageIds",
-  });
 
    useEffect(() => {
     async function fetchCategories() {
@@ -265,7 +262,7 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
                     render={({ field }) => (
                     <FormItem>
                         <FormLabel>Category</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                             <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
                         </FormControl>
@@ -359,9 +356,9 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
                     </CardHeader>
                     <CardContent className="space-y-4">
                          <div className="flex w-full overflow-x-auto space-x-4 pb-2">
-                            {galleryFields.map((field, index) => (
-                                <div key={field.id} className="relative flex-shrink-0 w-32 h-32">
-                                    {field.value && <Image src={field.value} alt={`Gallery image ${index + 1}`} fill className="rounded-md object-cover" />}
+                            {galleryImageIds?.map((imageUrl, index) => (
+                                <div key={index} className="relative flex-shrink-0 w-32 h-32">
+                                    {imageUrl && <Image src={imageUrl} alt={`Gallery image ${index + 1}`} fill className="rounded-md object-cover" />}
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                             <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6">
@@ -377,7 +374,11 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => removeGallery(index)}>Delete</AlertDialogAction>
+                                                <AlertDialogAction onClick={() => {
+                                                    const currentValues = getValues("galleryImageIds") || [];
+                                                    const newValues = currentValues.filter((_, i) => i !== index);
+                                                    setValue("galleryImageIds", newValues);
+                                                }}>Delete</AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
                                     </AlertDialog>
