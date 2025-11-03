@@ -1,7 +1,6 @@
 
 "use client"
 
-import Link from "next/link"
 import {
   ArrowRight,
   Users,
@@ -10,9 +9,9 @@ import {
   Mail,
   Store,
   Shield,
-  LayoutGrid,
 } from "lucide-react"
 import { useAuth } from "@/firebase"
+import { useRouter } from "next/navigation"
 
 import {
   Card,
@@ -64,20 +63,29 @@ const features = [
 
 export default function DashboardPage() {
   const { user } = useAuth()
+  const router = useRouter()
   
+  const handleCardClick = (path: string) => {
+    router.push(path);
+  };
+
+  const handleMouseEnter = (path: string) => {
+    router.prefetch(path);
+  };
+
   return (
     <div className="flex flex-col flex-1 pb-20 bg-muted/20">
       <header className="p-4 flex items-center justify-between bg-background border-b">
           <div className="flex items-center gap-3">
-             <h1 className="text-2xl font-headline text-primary">WedWise</h1>
+             <h1 className="text-3xl font-headline text-primary">WedWise</h1>
           </div>
         <div className="flex items-center gap-2">
-           <Link href="/login">
+           <div className="cursor-pointer" onClick={() => handleCardClick('/login')} onMouseEnter={() => handleMouseEnter('/login')}>
             <Avatar className="h-9 w-9">
                 <AvatarImage src={user?.photoURL || "https://i.pravatar.cc/150"} />
                 <AvatarFallback>{user?.displayName?.charAt(0) || "U"}</AvatarFallback>
             </Avatar>
-           </Link>
+           </div>
         </div>
       </header>
 
@@ -90,9 +98,11 @@ export default function DashboardPage() {
         <h3 className="text-lg font-semibold mb-4 text-center font-headline">Your Planning Tools</h3>
         <div className="grid gap-4 sm:grid-cols-2">
             {features.map((feature) => (
-            <Link href={feature.href} key={feature.href}>
                 <Card
-                    className="flex items-center p-4 transition-all hover:bg-muted/60 hover:shadow-lg"
+                    key={feature.href}
+                    className="flex items-center p-4 transition-all hover:bg-muted/60 hover:shadow-lg cursor-pointer"
+                    onClick={() => handleCardClick(feature.href)}
+                    onMouseEnter={() => handleMouseEnter(feature.href)}
                 >
                     <div className="mr-4 text-primary bg-primary/10 p-3 rounded-lg"><feature.icon className="w-5 h-5"/></div>
                     <div className="flex-1">
@@ -101,7 +111,6 @@ export default function DashboardPage() {
                     </div>
                     <ArrowRight className="ml-2 h-5 w-5 text-muted-foreground" />
                 </Card>
-            </Link>
             ))}
         </div>
        </main>

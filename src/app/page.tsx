@@ -2,7 +2,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { ArrowRight, Bell, Menu, Search, Star } from "lucide-react"
 import { ref } from "firebase/database"
@@ -40,6 +40,7 @@ type VendorCategory = {
 
 export default function RootPage() {
   const database = useDatabase();
+  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   const categoriesRef = useMemo(() => database ? ref(database, 'vendorCategories') : null, [database]);
@@ -64,6 +65,14 @@ export default function RootPage() {
       .slice(0, 4);
   }, [vendors]);
 
+  const handleCardClick = (path: string) => {
+    router.push(path);
+  };
+
+  const handleMouseEnter = (path: string) => {
+    router.prefetch(path);
+  };
+
   return (
     <div className="w-full min-h-screen bg-background text-foreground flex flex-col pb-20">
       {/* Header */}
@@ -71,18 +80,18 @@ export default function RootPage() {
         <Button variant="ghost" size="icon">
           <Menu className="w-6 h-6" />
         </Button>
-        <h1 className="text-3xl font-headline text-primary">WedWise</h1>
+        <h1 className="text-3xl font-headline font-bold text-primary">WedWise</h1>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="w-6 h-6" />
             <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-primary" />
           </Button>
-          <Link href="/login">
+          <div className="cursor-pointer" onClick={() => handleCardClick('/login')} onMouseEnter={() => handleMouseEnter('/login')}>
             <Avatar className="h-8 w-8">
               <AvatarImage src="https://i.pravatar.cc/150" />
               <AvatarFallback>A</AvatarFallback>
             </Avatar>
-          </Link>
+          </div>
         </div>
       </header>
 
@@ -121,14 +130,25 @@ export default function RootPage() {
         <section className="mt-8">
           <div className="flex justify-between items-center px-4">
             <h2 className="text-lg font-semibold">New Arrivals</h2>
-            <Link href="/vendors" className="text-sm text-primary font-medium">See All</Link>
+            <div 
+              className="text-sm text-primary font-medium cursor-pointer"
+              onClick={() => handleCardClick('/vendors')}
+              onMouseEnter={() => handleMouseEnter('/vendors')}
+            >
+              See All
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4 mt-4 px-4">
             {vendorsLoading ? (
               Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none h-64 bg-muted animate-pulse rounded-lg"></Card>)
             ) : (
               newArrivals.map(item => (
-                <Link href={`/vendors/${item.id}`} key={item.id}>
+                <div 
+                  key={item.id}
+                  onClick={() => handleCardClick(`/vendors/${item.id}`)}
+                  onMouseEnter={() => handleMouseEnter(`/vendors/${item.id}`)}
+                  className="cursor-pointer"
+                >
                   <Card className="border-0 shadow-none overflow-hidden group">
                     <CardContent className="p-0 relative">
                       <Image src={item.imageId || "https://picsum.photos/seed/placeholder/400/600"} alt={item.name} width={400} height={600} className="rounded-lg object-cover w-full aspect-[2/3] transition-transform duration-300 group-hover:scale-105" />
@@ -142,7 +162,7 @@ export default function RootPage() {
                       </div>
                     </div>
                   </Card>
-                </Link>
+                </div>
               ))
             )}
           </div>
@@ -152,14 +172,25 @@ export default function RootPage() {
         <section className="mt-8">
           <div className="flex justify-between items-center px-4">
             <h2 className="text-lg font-semibold">Popular Vendors</h2>
-            <Link href="/vendors" className="text-sm text-primary font-medium">See All</Link>
+            <div 
+              className="text-sm text-primary font-medium cursor-pointer"
+              onClick={() => handleCardClick('/vendors')}
+              onMouseEnter={() => handleMouseEnter('/vendors')}
+            >
+              See All
+            </div>
           </div>
           <div className="space-y-4 mt-4 px-4">
             {vendorsLoading ? (
               Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-muted shadow-sm h-28 bg-muted animate-pulse"></Card>)
             ) : (
               popularVendors.map(item => (
-                  <Link href={`/vendors/${item.id}`} key={item.id} className="block group">
+                  <div
+                    key={item.id} 
+                    className="block group cursor-pointer"
+                    onClick={() => handleCardClick(`/vendors/${item.id}`)}
+                    onMouseEnter={() => handleMouseEnter(`/vendors/${item.id}`)}
+                  >
                     <Card className="border-muted shadow-sm transition-all group-hover:shadow-md">
                         <CardContent className="p-3 flex gap-4">
                             <Image src={item.imageId || "https://picsum.photos/seed/placeholder/100/100"} alt={item.name} width={100} height={100} className="rounded-md object-cover aspect-square h-24 w-24"/>
@@ -179,7 +210,7 @@ export default function RootPage() {
                             </div>
                         </CardContent>
                     </Card>
-                  </Link>
+                  </div>
               ))
             )}
           </div>
@@ -191,14 +222,19 @@ export default function RootPage() {
             <div className="pt-0">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     {features.map((feature) => (
-                      <Link href={feature.href} key={feature.title}>
+                      <div
+                        key={feature.title}
+                        onClick={() => handleCardClick(feature.href)}
+                        onMouseEnter={() => handleMouseEnter(feature.href)}
+                        className="cursor-pointer"
+                      >
                         <Card className="p-4 flex flex-col items-center justify-center text-center transition-all hover:shadow-lg hover:-translate-y-1 h-full">
                             <div className="p-3 bg-primary/10 rounded-full mb-2">
                                 <feature.icon className="h-6 w-6 text-primary" />
                             </div>
                             <p className="font-semibold text-sm">{feature.title}</p>
                         </Card>
-                      </Link>
+                      </div>
                     ))}
                 </div>
             </div>

@@ -15,7 +15,7 @@ import { ref } from 'firebase/database';
 import type { Icon } from 'lucide-react';
 import * as lucideIcons from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 // Define types for our data
 type Vendor = {
@@ -42,6 +42,7 @@ type VendorCategory = {
 export default function VendorsPage() {
     const { user } = useAuth();
     const database = useDatabase();
+    const router = useRouter();
     
     // Fetch categories and vendors from Firebase
     const categoriesRef = useMemo(() => database ? ref(database, 'vendorCategories') : null, [database]);
@@ -86,6 +87,13 @@ export default function VendorsPage() {
         return [{ id: 'All', name: 'All', description: 'All vendors', icon: 'LayoutGrid' as const }, ...(categories || [])];
     }, [categories]);
 
+    const handleCardClick = (path: string) => {
+        router.push(path);
+    };
+
+    const handleMouseEnter = (path: string) => {
+        router.prefetch(path);
+    };
 
     return (
         <div className="flex flex-col flex-1 pb-20">
@@ -140,7 +148,12 @@ export default function VendorsPage() {
                     <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
                         {filteredVendors.map(vendor => {
                              return (
-                                <Link href={`/vendors/${vendor.id}`} key={vendor.id} className="overflow-hidden group">
+                                <div 
+                                    key={vendor.id} 
+                                    className="overflow-hidden group cursor-pointer"
+                                    onClick={() => handleCardClick(`/vendors/${vendor.id}`)}
+                                    onMouseEnter={() => handleMouseEnter(`/vendors/${vendor.id}`)}
+                                >
                                     <Card className="overflow-hidden h-full">
                                         <div className="relative">
                                             <Image 
@@ -175,7 +188,7 @@ export default function VendorsPage() {
                                             </div>
                                         </CardContent>
                                     </Card>
-                                </Link>
+                                </div>
                             )
                         })}
                     </div>
