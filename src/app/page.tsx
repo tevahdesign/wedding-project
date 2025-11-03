@@ -4,7 +4,7 @@
 import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { ArrowRight, Bell, Menu, Search, Star } from "lucide-react"
+import { ArrowRight, Star } from "lucide-react"
 import { ref } from "firebase/database"
 
 import { Button } from "@/components/ui/button"
@@ -15,10 +15,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
 import { useDatabase } from "@/firebase"
 import { useList } from "@/firebase/database/use-list"
 import { features } from "@/lib/placeholders"
+import { Search } from "lucide-react"
 
 type Vendor = {
   id: string;
@@ -76,22 +76,16 @@ export default function RootPage() {
   return (
     <div className="w-full min-h-screen bg-background text-foreground flex flex-col pb-20">
       {/* Header */}
-      <header className="p-4 flex items-center justify-between">
-        <Button variant="ghost" size="icon">
-          <Menu className="w-6 h-6" />
-        </Button>
-        <h1 className="text-3xl font-headline font-bold text-primary">WedWise</h1>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="w-6 h-6" />
-            <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-primary" />
-          </Button>
-          <div className="cursor-pointer" onClick={() => handleCardClick('/login')} onMouseEnter={() => handleMouseEnter('/login')}>
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="https://i.pravatar.cc/150" />
-              <AvatarFallback>A</AvatarFallback>
-            </Avatar>
-          </div>
+      <header className="p-4 flex items-center justify-between sticky top-0 bg-background/80 backdrop-blur-sm z-20">
+        <div className="w-10"></div>
+        <h1 className="text-3xl font-headline font-bold text-primary text-center">WedWise</h1>
+        <div className="w-10 flex justify-end">
+            <div className="cursor-pointer" onClick={() => handleCardClick('/login')} onMouseEnter={() => handleMouseEnter('/login')}>
+                <Avatar className="h-9 w-9">
+                    <AvatarImage src="https://i.pravatar.cc/150" />
+                    <AvatarFallback>A</AvatarFallback>
+                </Avatar>
+            </div>
         </div>
       </header>
 
