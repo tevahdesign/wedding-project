@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { FirebaseClientProvider } from "@/firebase/client-provider"
 import { ProgressBar } from "@/components/app/progress-bar"
 import { Suspense } from "react"
+import { BottomNav } from "@/components/app/bottom-nav"
 
 export const metadata: Metadata = {
   title: "WedEase",
@@ -25,7 +26,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
         />
       </head>
@@ -34,9 +35,13 @@ export default function RootLayout({
           <ProgressBar />
         </Suspense>
         <FirebaseClientProvider>
-          {children}
+          <main className="app-container bg-white">
+            {children}
+            <BottomNav />
+          </main>
           <Toaster />
         </FirebaseClientProvider>
       </body>
     </html>
   )
+}

@@ -2,185 +2,177 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Heart, Star } from "lucide-react"
+import Image from "next/image"
+import { ArrowRight, Bell, Heart, Menu, Plus, Search, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card"
-import { testimonials, features } from "@/lib/placeholders"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
+
+const newArrivals = [
+  {
+    id: 1,
+    name: "Lace Wedding Dress",
+    designer: "Designer Vera Wang",
+    price: 650,
+    imageUrl: "https://picsum.photos/seed/arrival1/400/600",
+    imageHint: "wedding dress"
+  },
+  {
+    id: 2,
+    name: "Lace Wedding Dress",
+    designer: "Designer Galia Lahav",
+    price: 500,
+    originalPrice: 450,
+    discount: "20%",
+    imageUrl: "https://picsum.photos/seed/arrival2/400/600",
+    imageHint: "wedding gown"
+  }
+];
+
+const donations = [
+    {
+        id: 1,
+        name: "Wedding Dress",
+        details: "White, Size S",
+        seller: "Sarah B.",
+        rating: 4.9,
+        reviews: 20,
+        location: "Los Angeles, California USA",
+        price: "Free",
+        imageUrl: "https://picsum.photos/seed/donation1/200/200",
+        imageHint: "lace dress"
+    },
+    {
+        id: 2,
+        name: "Wedding Earrings",
+        details: "White Gold",
+        imageUrl: "https://picsum.photos/seed/donation2/200/200",
+        imageHint: "pearl earrings"
+    }
+];
+
+const categories = ["NEW!", "Dresses", "Accessories", "Shoes", "Bags", "Free"];
 
 
 export default function RootPage() {
 
   return (
-    <div className="w-full min-h-screen bg-background text-foreground">
-      <div className="absolute inset-0 -z-10 h-full w-full bg-white dark:bg-black">
-        <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_500px_at_50%_200px,#ff949422,transparent)]"></div>
-      </div>
-
-
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Heart className="w-8 h-8 text-primary" />
-            <span className="text-2xl font-headline font-bold">WedEase</span>
-          </Link>
-          <nav className="hidden md:flex items-center gap-8">
-            <Link
-              href="#features"
-              className="text-muted-foreground hover:text-primary transition-colors font-medium"
-            >
-              Features
-            </Link>
-            <Link
-              href="/vendors"
-              className="text-muted-foreground hover:text-primary transition-colors font-medium"
-            >
-              Vendors
-            </Link>
-            <Link
-              href="#testimonials"
-              className="text-muted-foreground hover:text-primary transition-colors font-medium"
-            >
-              Testimonials
-            </Link>
-             <Link
-              href="/admin"
-              className="text-muted-foreground hover:text-primary transition-colors font-medium"
-            >
-              Admin
-            </Link>
-          </nav>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" asChild>
-              <Link href="/login">Sign In</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/login">
-                Get Started
-              </Link>
-            </Button>
-          </div>
+    <div className="w-full min-h-screen bg-white text-foreground flex flex-col pb-20">
+      {/* Header */}
+      <header className="p-4 flex items-center justify-between">
+        <Button variant="ghost" size="icon">
+          <Menu className="w-6 h-6" />
+        </Button>
+        <h1 className="text-2xl font-headline text-yellow-600">Majestic Moments</h1>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="w-6 h-6" />
+            <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500" />
+          </Button>
+          <Avatar className="h-8 w-8">
+            <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" />
+            <AvatarFallback>A</AvatarFallback>
+          </Avatar>
         </div>
       </header>
 
-      <main>
-        {/* Hero Section */}
-        <section className="pt-32 pb-20 md:pt-48 md:pb-24 relative overflow-hidden">
-           <div className="container mx-auto px-4">
-             <div className="max-w-3xl mx-auto text-center space-y-6">
-                <h1 className="text-5xl md:text-7xl font-headline font-bold !leading-tight tracking-tight">
-                    Your Dream Wedding, <span className="text-primary">Simplified</span>
-                </h1>
-                <p className="text-lg text-muted-foreground max-w-lg mx-auto">
-                   All-in-one platform to plan your perfect day. From guest lists to website building, we've got you covered.
-                </p>
-                <div className="flex items-center justify-center gap-4">
-                    <Button size="lg" asChild className="shadow-lg shadow-primary/20">
-                        <Link href="/login">Start Planning For Free</Link>
-                    </Button>
-                </div>
-             </div>
-           </div>
-        </section>
+      {/* Search Bar */}
+      <div className="px-4 mt-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input placeholder="Search wedding items..." className="pl-10 h-12 rounded-lg bg-gray-100 border-transparent focus:bg-white focus:border-primary" />
+        </div>
+      </div>
 
-        {/* Features Section */}
-        <section id="features" className="py-20 md:py-28">
-            <div className="container mx-auto px-4">
-                <div className="text-center max-w-3xl mx-auto mb-16">
-                    <h2 className="text-4xl md:text-5xl font-headline font-bold mb-4">Powerful Tools, Effortless Planning</h2>
-                    <p className="text-muted-foreground text-lg">
-                       From AI-powered suggestions to seamless guest management, WedEase brings all your wedding planning needs into one beautiful platform.
-                    </p>
-                </div>
-                <div className="grid md:grid-cols-3 gap-8">
-                    {features.map(feature => (
-                        <Card key={feature.title} className="bg-card/50 backdrop-blur-sm">
-                            <CardHeader>
-                                <div className="bg-primary/10 text-primary p-3 rounded-full w-fit mb-4">
-                                    <feature.icon className="w-6 h-6" />
-                                </div>
-                                <CardTitle>{feature.title}</CardTitle>
-                                <CardDescription>{feature.description}</CardDescription>
-                            </CardHeader>
-                        </Card>
-                    ))}
-                </div>
-            </div>
-        </section>
-
-        {/* Testimonials Section */}
-        <section id="testimonials" className="py-20 md:py-32">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <h2 className="text-4xl md:text-5xl font-headline font-bold">
-                Loved by Couples Everywhere
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {testimonials.map((testimonial) => (
-                <Card
-                  key={testimonial.name}
-                  className="p-8 border-2 bg-card/50 backdrop-blur-sm"
-                >
-                  <CardContent className="p-0 flex flex-col h-full">
-                    <div className="flex text-yellow-400 mb-4">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 fill-current" />
-                      ))}
-                    </div>
-                    <p className="text-muted-foreground mb-6 flex-grow">
-                      "{testimonial.quote}"
-                    </p>
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <p className="font-semibold text-foreground">
-                          {testimonial.name}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto">
+        
+        {/* Categories */}
+        <section className="mt-6">
+          <h2 className="text-lg font-semibold px-4 mb-2">Categories</h2>
+          <div className="flex space-x-3 overflow-x-auto whitespace-nowrap px-4 pb-2">
+            {categories.map((cat, index) => (
+              <Button 
+                key={index}
+                variant={cat === 'NEW!' ? 'default' : 'secondary'}
+                className={cn("rounded-full", {
+                    "bg-red-500 hover:bg-red-600 text-white": cat === 'NEW!',
+                    "bg-gray-100 text-gray-800 hover:bg-gray-200": cat !== 'NEW!'
+                })}
+              >
+                {cat}
+              </Button>
+            ))}
           </div>
         </section>
 
-         {/* CTA Section */}
-        <section className="py-20">
-            <div className="container mx-auto px-4 text-center">
-                <div className="bg-primary/90 text-primary-foreground rounded-3xl p-12">
-                    <h2 className="text-4xl md:text-5xl font-headline font-bold mb-4">Ready to Start Planning?</h2>
-                    <p className="max-w-2xl mx-auto mb-8">
-                        Create your free account today and see how WedEase can bring your dream wedding to life. No credit card required.
-                    </p>
-                    <Button size="lg" variant="secondary" asChild className="shadow-lg">
-                        <Link href="/login">Get Started for Free <ArrowRight className="ml-2 h-5 w-5"/></Link>
-                    </Button>
+        {/* New Arrivals */}
+        <section className="mt-8">
+          <div className="flex justify-between items-center px-4">
+            <h2 className="text-lg font-semibold">New Arrivals</h2>
+            <Link href="#" className="text-sm text-red-500 font-medium">See All</Link>
+          </div>
+          <div className="grid grid-cols-2 gap-4 mt-4 px-4">
+            {newArrivals.map(item => (
+              <Card key={item.id} className="border-0 shadow-none">
+                <CardContent className="p-0 relative">
+                  <Image src={item.imageUrl} alt={item.name} width={400} height={600} className="rounded-lg object-cover w-full aspect-[2/3]" data-ai-hint={item.imageHint} />
+                  {item.discount && <Badge className="absolute top-2 left-2 bg-yellow-400 text-yellow-900">{item.discount}</Badge>}
+                   <Button size="icon" className="absolute bottom-2 right-2 h-8 w-8 rounded-full bg-red-500 hover:bg-red-600">
+                    <Plus className="h-5 w-5" />
+                  </Button>
+                </CardContent>
+                <div className="pt-2">
+                  <h3 className="font-semibold text-sm">{item.name}</h3>
+                  <p className="text-xs text-muted-foreground">{item.designer}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                     <p className="text-sm font-bold text-red-500">${item.originalPrice || item.price}</p>
+                    {item.originalPrice && <p className="text-sm text-muted-foreground line-through">${item.price}</p>}
+                  </div>
                 </div>
-            </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Donations */}
+        <section className="mt-8">
+          <div className="flex justify-between items-center px-4">
+            <h2 className="text-lg font-semibold">Donations</h2>
+            <Link href="#" className="text-sm text-red-500 font-medium">See All</Link>
+          </div>
+          <div className="space-y-4 mt-4 px-4">
+            {donations.map(item => (
+                <Card key={item.id} className="border-gray-200 shadow-sm">
+                    <CardContent className="p-3 flex gap-4">
+                        <Image src={item.imageUrl} alt={item.name} width={100} height={100} className="rounded-md object-cover aspect-square h-24 w-24" data-ai-hint={item.imageHint}/>
+                        <div className="flex-1">
+                            <h3 className="font-semibold">{item.name}</h3>
+                            <p className="text-sm text-muted-foreground">{item.details}</p>
+                            {item.seller && (
+                                <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
+                                     <span>{item.seller}</span>
+                                     <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                                     <span>{item.rating} ({item.reviews} reviews)</span>
+                                </div>
+                            )}
+                            <p className="text-xs text-muted-foreground mt-1">{item.location}</p>
+                        </div>
+                        <div className="text-right">
+                           <p className="font-bold text-green-600">{item.price}</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
+          </div>
         </section>
       </main>
-
-      <footer className="bg-secondary/30">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-              <div className="flex items-center gap-2">
-                <Heart className="w-6 h-6 text-primary" />
-                <span className="text-xl font-headline font-bold">
-                  WedEase
-                </span>
-              </div>
-            <p className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} WedEase. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }
