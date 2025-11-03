@@ -3,7 +3,6 @@
 
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -27,9 +26,9 @@ type Vendor = {
     rating: number;
     reviewCount: number;
     isFeatured: boolean;
-    imageId: string;
+    imageId: string; // This will now be a base64 Data URI
     isFavorited: boolean;
-    logoImageId?: string;
+    logoImageId?: string; // This will now be a base64 Data URI
 };
 
 type VendorCategory = {
@@ -139,13 +138,12 @@ export default function VendorsPage() {
                 ) : filteredVendors.length > 0 ? (
                     <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                         {filteredVendors.map(vendor => {
-                             const vendorImage = PlaceHolderImages.find(img => img.id === vendor.imageId);
                              return (
                                 <Card key={vendor.id} className="overflow-hidden group">
                                     <div className="relative">
                                         <Image 
-                                            src={vendorImage?.imageUrl || "https://picsum.photos/seed/placeholder/400/300"} 
-                                            alt={vendorImage?.description || vendor.name}
+                                            src={vendor.imageId || "https://picsum.photos/seed/placeholder/400/300"} 
+                                            alt={vendor.name}
                                             width={400}
                                             height={300}
                                             className="object-cover w-full h-48 transition-transform duration-300 group-hover:scale-105"
@@ -189,5 +187,3 @@ export default function VendorsPage() {
         </>
     );
 }
-
-    

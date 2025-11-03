@@ -66,12 +66,12 @@
       "description": "Represents an item in the wedding registry.",
       "type": "object",
       "properties": {
-        "id": { "type": "string", "description": "The item's unique ID." },
-        "title": { "type": "string", "description": "The title of the registry item." },
-        "store": { "type": "string", "description": "The store where the item can be purchased." },
-        "price": { "type": "string", "description": "The price of the item." },
-        "imageId": { "type": "string", "description": "The ID of the placeholder image for the item." },
-        "purchased": { "type": "boolean", "description": "Whether the item has been purchased." }
+        "id": { "type_": "string", "description": "The item's unique ID." },
+        "title": { "type_": "string", "description": "The title of the registry item." },
+        "store": { "type_": "string", "description": "The store where the item can be purchased." },
+        "price": { "type_": "string", "description": "The price of the item." },
+        "imageId": { "type_": "string", "description": "The ID of the placeholder image for the item." },
+        "purchased": { "type_": "boolean", "description": "Whether the item has been purchased." }
       },
       "required": ["id", "title", "price", "purchased"]
     },
@@ -101,9 +101,9 @@
         "rating": { "type": "number", "description": "The average rating of the vendor." },
         "reviewCount": { "type": "number", "description": "The number of reviews for the vendor." },
         "isFeatured": { "type": "boolean", "description": "Whether the vendor is a featured vendor." },
-        "imageId": { "type": "string", "description": "The ID of the placeholder image for the vendor." },
-        "logoImageId": { "type": "string", "description": "The ID of the placeholder image for the vendor's logo." },
-        "galleryImageIds": { "type": "array", "items": { "type": "string" }, "description": "A list of placeholder image IDs for the vendor's gallery." },
+        "imageId": { "type": "string", "description": "A base64 data URI of the main vendor image." },
+        "logoImageId": { "type": "string", "description": "A base64 data URI of the vendor's logo." },
+        "galleryImageIds": { "type": "array", "items": { "type": "string" }, "description": "A list of base64 data URIs for the vendor's gallery." },
         "services": { "type": "array", "items": { "$ref": "#/entities/VendorService" } }
       },
       "required": ["id", "name", "category", "location", "priceRange", "rating", "reviewCount"]
@@ -151,5 +151,3 @@
     "rules": "rules.json"
   }
 }
-
-    

@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -35,6 +36,7 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    unoptimized: true, // Required for data: URLs
   },
   // Allow cross-origin requests in development from the cloud workstation
   // See: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins

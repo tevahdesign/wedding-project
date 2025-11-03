@@ -6,6 +6,7 @@ import { useForm, SubmitHandler, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { ref, push, set, get } from "firebase/database"
+import Image from "next/image"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,7 +20,7 @@ import {
 } from "@/components/ui/form"
 import { useDatabase } from "@/firebase"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2, PlusCircle, Trash2 } from "lucide-react"
+import { Loader2, PlusCircle, Trash2, X } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -29,8 +30,6 @@ import {
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { PlaceHolderImages } from "@/lib/placeholder-images"
-import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 
 const serviceSchema = z.object({
@@ -46,7 +45,7 @@ const vendorSchema = z.object({
   rating: z.coerce.number().min(0).max(5),
   reviewCount: z.coerce.number().min(0),
   isFeatured: z.boolean().default(false),
-  imageId: z.string().min(1, { message: "Please select a main image." }),
+  imageId: z.string().min(1, { message: "Please upload a main image." }),
   logoImageId: z.string().optional(),
   galleryImageIds: z.array(z.string()).optional(),
   services: z.array(serviceSchema).optional(),
@@ -59,6 +58,16 @@ type VendorFormProps = {
   setDialogOpen: (open: boolean) => void
   vendorToEdit?: Vendor | null;
 }
+
+const fileToDataUri = (file: File) => new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      resolve(event.target?.result as string);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+});
+
 
 export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
   const database = useDatabase()
@@ -88,6 +97,11 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "services",
+  });
+
+  const { fields: galleryFields, append: appendGallery, remove: removeGallery } = useFieldArray({
+    control: form.control,
+    name: "galleryImageIds",
   });
 
    useEffect(() => {
@@ -141,7 +155,8 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
     try {
       const dataToSave = {
         ...data,
-        services: data.services || []
+        services: data.services || [],
+        galleryImageIds: data.galleryImageIds || []
       }
 
       if (isEditMode && vendorToEdit?.id) {
@@ -255,40 +270,82 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
         <FormField
             control={form.control}
             name="imageId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Main Image</FormLabel>
-                 <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Select a main image" /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {PlaceHolderImages.map(img => <SelectItem key={img.id} value={img.id}>{img.description}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
+            render={({ field: { onChange, value, ...rest } }) => (
+                <FormItem>
+                    <FormLabel>Main Image</FormLabel>
+                    {value && <Image src={value} alt="Main image preview" width={100} height={100} className="rounded-md object-cover" />}
+                    <FormControl>
+                        <Input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                    const dataUri = await fileToDataUri(file);
+                                    onChange(dataUri);
+                                }
+                            }}
+                            {...rest} 
+                        />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
             )}
-          />
+        />
 
         <FormField
             control={form.control}
             name="logoImageId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Logo Image</FormLabel>
-                 <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Select a logo image" /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {PlaceHolderImages.map(img => <SelectItem key={img.id} value={img.id}>{img.description}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
+            render={({ field: { onChange, value, ...rest } }) => (
+                <FormItem>
+                    <FormLabel>Logo Image</FormLabel>
+                     {value && <Image src={value} alt="Logo preview" width={100} height={100} className="rounded-md object-cover" />}
+                    <FormControl>
+                        <Input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                    const dataUri = await fileToDataUri(file);
+                                    onChange(dataUri);
+                                }
+                            }}
+                             {...rest}
+                        />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
             )}
-          />
+        />
+        
+        <div>
+           <Label>Gallery Images</Label>
+            <div className="grid grid-cols-3 gap-2 mt-2">
+                {galleryFields.map((field, index) => (
+                    <div key={field.id} className="relative">
+                        <Image src={field.value} alt={`Gallery image ${index + 1}`} width={100} height={100} className="rounded-md object-cover w-full h-24" />
+                        <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6" onClick={() => removeGallery(index)}>
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </div>
+                ))}
+            </div>
+            <Input 
+                type="file"
+                accept="image/*"
+                multiple
+                className="mt-2"
+                onChange={async (e) => {
+                    const files = Array.from(e.target.files || []);
+                    for (const file of files) {
+                        const dataUri = await fileToDataUri(file);
+                        appendGallery(dataUri);
+                    }
+                }}
+            />
+        </div>
+
 
         <FormField
             control={form.control}
@@ -368,5 +425,3 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
     </Form>
   )
 }
-
-    
