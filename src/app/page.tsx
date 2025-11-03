@@ -1,9 +1,12 @@
 
 "use client"
 
+import { useMemo, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight, Bell, Heart, Menu, Plus, Search, Star } from "lucide-react"
+import { Bell, Menu, Search, Star } from "lucide-react"
+import { ref } from "firebase/database"
+
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -13,54 +16,52 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { useDatabase } from "@/firebase"
+import { useList } from "@/firebase/database/use-list"
 
-const newArrivals = [
-  {
-    id: 1,
-    name: "Lace Wedding Dress",
-    designer: "Designer Vera Wang",
-    price: 650,
-    imageUrl: "https://picsum.photos/seed/arrival1/400/600",
-    imageHint: "wedding dress"
-  },
-  {
-    id: 2,
-    name: "Lace Wedding Dress",
-    designer: "Designer Galia Lahav",
-    price: 500,
-    originalPrice: 450,
-    discount: "20%",
-    imageUrl: "https://picsum.photos/seed/arrival2/400/600",
-    imageHint: "wedding gown"
-  }
-];
+type Vendor = {
+  id: string;
+  name: string;
+  category: string;
+  location: string;
+  priceRange: string;
+  rating: number;
+  reviewCount: number;
+  isFeatured: boolean;
+  imageId: string;
+  isFavorited: boolean;
+};
 
-const donations = [
-    {
-        id: 1,
-        name: "Wedding Dress",
-        details: "White, Size S",
-        seller: "Sarah B.",
-        rating: 4.9,
-        reviews: 20,
-        location: "Los Angeles, California USA",
-        price: "Free",
-        imageUrl: "https://picsum.photos/seed/donation1/200/200",
-        imageHint: "lace dress"
-    },
-    {
-        id: 2,
-        name: "Wedding Earrings",
-        details: "White Gold",
-        imageUrl: "https://picsum.photos/seed/donation2/200/200",
-        imageHint: "pearl earrings"
-    }
-];
-
-const categories = ["NEW!", "Dresses", "Accessories", "Shoes", "Bags", "Free"];
-
+type VendorCategory = {
+  id: string;
+  name: string;
+};
 
 export default function RootPage() {
+  const database = useDatabase();
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  const categoriesRef = useMemo(() => database ? ref(database, 'vendorCategories') : null, [database]);
+  const { data: categories, loading: categoriesLoading } = useList<VendorCategory>(categoriesRef);
+
+  const vendorsRef = useMemo(() => database ? ref(database, 'vendors') : null, [database]);
+  const { data: vendors, loading: vendorsLoading } = useList<Vendor>(vendorsRef);
+
+  const allCategories = useMemo(() => {
+    return [{ id: 'All', name: 'All' }, ...(categories || [])];
+  }, [categories]);
+
+  const newArrivals = useMemo(() => {
+    if (!vendors) return [];
+    return vendors.filter(vendor => vendor.isFeatured).slice(0, 2);
+  }, [vendors]);
+
+  const popularVendors = useMemo(() => {
+    if (!vendors) return [];
+    return [...vendors]
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 2);
+  }, [vendors]);
 
   return (
     <div className="w-full min-h-screen bg-white text-foreground flex flex-col pb-20">
@@ -97,18 +98,22 @@ export default function RootPage() {
         <section className="mt-6">
           <h2 className="text-lg font-semibold px-4 mb-2">Categories</h2>
           <div className="flex space-x-3 overflow-x-auto whitespace-nowrap px-4 pb-2">
-            {categories.map((cat, index) => (
+            {categoriesLoading ? (
+              Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-9 w-24 bg-gray-200 rounded-full animate-pulse"></div>)
+            ) : (
+              allCategories.map((cat, index) => (
               <Button 
-                key={index}
-                variant={cat === 'NEW!' ? 'default' : 'secondary'}
+                key={cat.id}
+                variant={selectedCategory === cat.name ? 'default' : 'secondary'}
+                onClick={() => setSelectedCategory(cat.name)}
                 className={cn("rounded-full", {
-                    "bg-red-500 hover:bg-red-600 text-white": cat === 'NEW!',
-                    "bg-gray-100 text-gray-800 hover:bg-gray-200": cat !== 'NEW!'
+                    "bg-red-500 hover:bg-red-600 text-white": selectedCategory === cat.name,
+                    "bg-gray-100 text-gray-800 hover:bg-gray-200": selectedCategory !== cat.name
                 })}
               >
-                {cat}
+                {cat.name}
               </Button>
-            ))}
+            )))}
           </div>
         </section>
 
@@ -116,63 +121,68 @@ export default function RootPage() {
         <section className="mt-8">
           <div className="flex justify-between items-center px-4">
             <h2 className="text-lg font-semibold">New Arrivals</h2>
-            <Link href="#" className="text-sm text-red-500 font-medium">See All</Link>
+            <Link href="/vendors" className="text-sm text-red-500 font-medium">See All</Link>
           </div>
           <div className="grid grid-cols-2 gap-4 mt-4 px-4">
-            {newArrivals.map(item => (
-              <Card key={item.id} className="border-0 shadow-none">
-                <CardContent className="p-0 relative">
-                  <Image src={item.imageUrl} alt={item.name} width={400} height={600} className="rounded-lg object-cover w-full aspect-[2/3]" data-ai-hint={item.imageHint} />
-                  {item.discount && <Badge className="absolute top-2 left-2 bg-yellow-400 text-yellow-900">{item.discount}</Badge>}
-                   <Button size="icon" className="absolute bottom-2 right-2 h-8 w-8 rounded-full bg-red-500 hover:bg-red-600">
-                    <Plus className="h-5 w-5" />
-                  </Button>
-                </CardContent>
-                <div className="pt-2">
-                  <h3 className="font-semibold text-sm">{item.name}</h3>
-                  <p className="text-xs text-muted-foreground">{item.designer}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                     <p className="text-sm font-bold text-red-500">${item.originalPrice || item.price}</p>
-                    {item.originalPrice && <p className="text-sm text-muted-foreground line-through">${item.price}</p>}
+            {vendorsLoading ? (
+              Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none h-64 bg-gray-200 animate-pulse rounded-lg"></Card>)
+            ) : (
+              newArrivals.map(item => (
+                <Card key={item.id} className="border-0 shadow-none">
+                  <CardContent className="p-0 relative">
+                    <Image src={item.imageId || "https://picsum.photos/seed/placeholder/400/600"} alt={item.name} width={400} height={600} className="rounded-lg object-cover w-full aspect-[2/3]" />
+                    {item.isFeatured && <Badge className="absolute top-2 left-2 bg-yellow-400 text-yellow-900">Featured</Badge>}
+                  </CardContent>
+                  <div className="pt-2">
+                    <h3 className="font-semibold text-sm">{item.name}</h3>
+                    <p className="text-xs text-muted-foreground">{item.category}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-sm font-bold text-red-500">{item.priceRange}</p>
+                    </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))
+            )}
           </div>
         </section>
 
-        {/* Donations */}
+        {/* Popular Vendors */}
         <section className="mt-8">
           <div className="flex justify-between items-center px-4">
-            <h2 className="text-lg font-semibold">Donations</h2>
-            <Link href="#" className="text-sm text-red-500 font-medium">See All</Link>
+            <h2 className="text-lg font-semibold">Popular Vendors</h2>
+            <Link href="/vendors" className="text-sm text-red-500 font-medium">See All</Link>
           </div>
           <div className="space-y-4 mt-4 px-4">
-            {donations.map(item => (
-                <Card key={item.id} className="border-gray-200 shadow-sm">
-                    <CardContent className="p-3 flex gap-4">
-                        <Image src={item.imageUrl} alt={item.name} width={100} height={100} className="rounded-md object-cover aspect-square h-24 w-24" data-ai-hint={item.imageHint}/>
-                        <div className="flex-1">
-                            <h3 className="font-semibold">{item.name}</h3>
-                            <p className="text-sm text-muted-foreground">{item.details}</p>
-                            {item.seller && (
-                                <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
-                                     <span>{item.seller}</span>
-                                     <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                                     <span>{item.rating} ({item.reviews} reviews)</span>
-                                </div>
-                            )}
-                            <p className="text-xs text-muted-foreground mt-1">{item.location}</p>
-                        </div>
-                        <div className="text-right">
-                           <p className="font-bold text-green-600">{item.price}</p>
-                        </div>
-                    </CardContent>
-                </Card>
-            ))}
+            {vendorsLoading ? (
+              Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-gray-200 shadow-sm h-28 bg-gray-200 animate-pulse"></Card>)
+            ) : (
+              popularVendors.map(item => (
+                  <Card key={item.id} className="border-gray-200 shadow-sm">
+                      <CardContent className="p-3 flex gap-4">
+                          <Image src={item.imageId || "https://picsum.photos/seed/placeholder/100/100"} alt={item.name} width={100} height={100} className="rounded-md object-cover aspect-square h-24 w-24"/>
+                          <div className="flex-1">
+                              <h3 className="font-semibold">{item.name}</h3>
+                              <p className="text-sm text-muted-foreground">{item.category}</p>
+                              {item.rating && (
+                                  <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
+                                       <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                                       <span>{item.rating.toFixed(1)} ({item.reviewCount} reviews)</span>
+                                  </div>
+                              )}
+                              <p className="text-xs text-muted-foreground mt-1">{item.location}</p>
+                          </div>
+                          <div className="text-right">
+                             <p className="font-bold text-green-600">{item.priceRange}</p>
+                          </div>
+                      </CardContent>
+                  </Card>
+              ))
+            )}
           </div>
         </section>
       </main>
     </div>
   )
 }
+
+    

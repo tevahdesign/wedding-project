@@ -72,9 +72,10 @@ export default function VendorsPage() {
     const filteredVendors = useMemo(() => {
         if (!vendors) return [];
         return vendors.filter(vendor => {
+            const hasImage = !!vendor.imageId;
             const matchesCategory = selectedCategory === 'All' || vendor.category === selectedCategory;
             const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase());
-            return matchesCategory && matchesSearch;
+            return hasImage && matchesCategory && matchesSearch;
         });
     }, [vendors, selectedCategory, searchTerm]);
 
@@ -187,3 +188,5 @@ export default function VendorsPage() {
         </>
     );
 }
+
+    
