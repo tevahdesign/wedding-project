@@ -77,15 +77,12 @@ export default function RootPage() {
     <div className="w-full min-h-screen bg-background text-foreground flex flex-col pb-20">
       {/* Header */}
       <header className="p-4 flex items-center justify-between sticky top-0 bg-background/80 backdrop-blur-sm z-20">
-        <div className="w-10"></div>
-        <h1 className="text-3xl font-headline font-bold text-primary text-center">WedWise</h1>
-        <div className="w-10 flex justify-end">
-            <div className="cursor-pointer" onClick={() => handleCardClick('/login')} onMouseEnter={() => handleMouseEnter('/login')}>
-                <Avatar className="h-9 w-9">
-                    <AvatarImage src="https://i.pravatar.cc/150" />
-                    <AvatarFallback>A</AvatarFallback>
-                </Avatar>
-            </div>
+        <h1 className="text-3xl font-headline font-bold text-primary">WedWise</h1>
+        <div className="cursor-pointer" onClick={() => handleCardClick('/login')} onMouseEnter={() => handleMouseEnter('/login')}>
+            <Avatar className="h-9 w-9">
+                <AvatarImage src="https://i.pravatar.cc/150" />
+                <AvatarFallback>A</AvatarFallback>
+            </Avatar>
         </div>
       </header>
 
@@ -161,7 +158,7 @@ export default function RootPage() {
             )}
           </div>
         </section>
-
+        
         {/* Popular Vendors */}
         <section className="mt-8">
           <div className="flex justify-between items-center px-4">
@@ -209,7 +206,7 @@ export default function RootPage() {
             )}
           </div>
         </section>
-        
+
         {/* Tools Section */}
         <section className="mt-8 p-4">
             <h2 className="text-lg font-semibold text-center mb-4">Your Complete Planning Toolkit</h2>
