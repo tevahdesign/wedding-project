@@ -128,19 +128,21 @@ export default function RootPage() {
               Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none h-64 bg-gray-200 animate-pulse rounded-lg"></Card>)
             ) : (
               newArrivals.map(item => (
-                <Card key={item.id} className="border-0 shadow-none">
-                  <CardContent className="p-0 relative">
-                    <Image src={item.imageId || "https://picsum.photos/seed/placeholder/400/600"} alt={item.name} width={400} height={600} className="rounded-lg object-cover w-full aspect-[2/3]" />
-                    {item.isFeatured && <Badge className="absolute top-2 left-2 bg-yellow-400 text-yellow-900">Featured</Badge>}
-                  </CardContent>
-                  <div className="pt-2">
-                    <h3 className="font-semibold text-sm">{item.name}</h3>
-                    <p className="text-xs text-muted-foreground">{item.category}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <p className="text-sm font-bold text-red-500">{item.priceRange}</p>
+                <Link href={`/vendors/${item.id}`} key={item.id}>
+                  <Card className="border-0 shadow-none">
+                    <CardContent className="p-0 relative">
+                      <Image src={item.imageId || "https://picsum.photos/seed/placeholder/400/600"} alt={item.name} width={400} height={600} className="rounded-lg object-cover w-full aspect-[2/3]" />
+                      {item.isFeatured && <Badge className="absolute top-2 left-2 bg-yellow-400 text-yellow-900">Featured</Badge>}
+                    </CardContent>
+                    <div className="pt-2">
+                      <h3 className="font-semibold text-sm">{item.name}</h3>
+                      <p className="text-xs text-muted-foreground">{item.category}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-sm font-bold text-red-500">{item.priceRange}</p>
+                      </div>
                     </div>
-                  </div>
-                </Card>
+                  </Card>
+                </Link>
               ))
             )}
           </div>
@@ -157,25 +159,27 @@ export default function RootPage() {
               Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-gray-200 shadow-sm h-28 bg-gray-200 animate-pulse"></Card>)
             ) : (
               popularVendors.map(item => (
-                  <Card key={item.id} className="border-gray-200 shadow-sm">
-                      <CardContent className="p-3 flex gap-4">
-                          <Image src={item.imageId || "https://picsum.photos/seed/placeholder/100/100"} alt={item.name} width={100} height={100} className="rounded-md object-cover aspect-square h-24 w-24"/>
-                          <div className="flex-1">
-                              <h3 className="font-semibold">{item.name}</h3>
-                              <p className="text-sm text-muted-foreground">{item.category}</p>
-                              {item.rating && (
-                                  <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
-                                       <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                                       <span>{item.rating.toFixed(1)} ({item.reviewCount} reviews)</span>
-                                  </div>
-                              )}
-                              <p className="text-xs text-muted-foreground mt-1">{item.location}</p>
-                          </div>
-                          <div className="text-right">
-                             <p className="font-bold text-green-600">{item.priceRange}</p>
-                          </div>
-                      </CardContent>
-                  </Card>
+                  <Link href={`/vendors/${item.id}`} key={item.id}>
+                    <Card className="border-gray-200 shadow-sm">
+                        <CardContent className="p-3 flex gap-4">
+                            <Image src={item.imageId || "https://picsum.photos/seed/placeholder/100/100"} alt={item.name} width={100} height={100} className="rounded-md object-cover aspect-square h-24 w-24"/>
+                            <div className="flex-1">
+                                <h3 className="font-semibold">{item.name}</h3>
+                                <p className="text-sm text-muted-foreground">{item.category}</p>
+                                {item.rating && (
+                                    <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
+                                        <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                                        <span>{item.rating.toFixed(1)} ({item.reviewCount} reviews)</span>
+                                    </div>
+                                )}
+                                <p className="text-xs text-muted-foreground mt-1">{item.location}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-green-600">{item.priceRange}</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                  </Link>
               ))
             )}
           </div>
@@ -184,5 +188,3 @@ export default function RootPage() {
     </div>
   )
 }
-
-    

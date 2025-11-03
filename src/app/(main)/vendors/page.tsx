@@ -15,6 +15,7 @@ import { ref } from 'firebase/database';
 import type { Icon } from 'lucide-react';
 import * as lucideIcons from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 // Define types for our data
 type Vendor = {
@@ -64,7 +65,9 @@ export default function VendorsPage() {
         }
     });
 
-    const toggleFavorite = (id: string) => {
+    const toggleFavorite = (e: React.MouseEvent, id: string) => {
+        e.preventDefault();
+        e.stopPropagation();
         setFavorited(prev => ({ ...prev, [id]: !prev[id] }));
         // Here you would also update the database
     };
@@ -137,40 +140,42 @@ export default function VendorsPage() {
                     <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
                         {filteredVendors.map(vendor => {
                              return (
-                                <Card key={vendor.id} className="overflow-hidden group">
-                                    <div className="relative">
-                                        <Image 
-                                            src={vendor.imageId || "https://picsum.photos/seed/placeholder/400/300"} 
-                                            alt={vendor.name}
-                                            width={400}
-                                            height={300}
-                                            className="object-cover w-full h-36 transition-transform duration-300 group-hover:scale-105"
-                                        />
-                                        <Button 
-                                            size="icon" 
-                                            variant="ghost" 
-                                            className="absolute top-2 right-2 rounded-full bg-background/70 hover:bg-background h-8 w-8"
-                                            onClick={() => toggleFavorite(vendor.id)}
-                                        >
-                                            <Heart className={cn("w-4 h-4", favorited[vendor.id] ? "text-red-500 fill-current" : "text-gray-500")} />
-                                        </Button>
-                                         {vendor.isFeatured && <Badge className="absolute top-2 left-2">Featured</Badge>}
-                                    </div>
-                                    <CardContent className="p-4">
-                                        
-                                        <h3 className="font-bold text-lg">{vendor.name}</h3>
-                                        <p className="text-sm text-muted-foreground">{vendor.category}</p>
-                                        
-                                        <div className="flex items-center justify-between mt-2">
-                                            <p className="text-sm font-bold">{vendor.priceRange}</p>
-                                            <div className="flex items-center gap-1 text-sm">
-                                                <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                                <span className="font-semibold">{vendor.rating.toFixed(1)}</span>
-                                                <span className="text-muted-foreground">({vendor.reviewCount})</span>
-                                            </div>
+                                <Link href={`/vendors/${vendor.id}`} key={vendor.id} className="overflow-hidden group">
+                                    <Card className="overflow-hidden h-full">
+                                        <div className="relative">
+                                            <Image 
+                                                src={vendor.imageId || "https://picsum.photos/seed/placeholder/400/300"} 
+                                                alt={vendor.name}
+                                                width={400}
+                                                height={300}
+                                                className="object-cover w-full h-36 transition-transform duration-300 group-hover:scale-105"
+                                            />
+                                            <Button 
+                                                size="icon" 
+                                                variant="ghost" 
+                                                className="absolute top-2 right-2 rounded-full bg-background/70 hover:bg-background h-8 w-8"
+                                                onClick={(e) => toggleFavorite(e, vendor.id)}
+                                            >
+                                                <Heart className={cn("w-4 h-4", favorited[vendor.id] ? "text-red-500 fill-current" : "text-gray-500")} />
+                                            </Button>
+                                            {vendor.isFeatured && <Badge className="absolute top-2 left-2">Featured</Badge>}
                                         </div>
-                                    </CardContent>
-                                </Card>
+                                        <CardContent className="p-4">
+                                            
+                                            <h3 className="font-bold text-lg">{vendor.name}</h3>
+                                            <p className="text-sm text-muted-foreground">{vendor.category}</p>
+                                            
+                                            <div className="flex items-center justify-between mt-2">
+                                                <p className="text-sm font-bold">{vendor.priceRange}</p>
+                                                <div className="flex items-center gap-1 text-sm">
+                                                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                                                    <span className="font-semibold">{vendor.rating.toFixed(1)}</span>
+                                                    <span className="text-muted-foreground">({vendor.reviewCount})</span>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </Link>
                             )
                         })}
                     </div>
