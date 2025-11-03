@@ -76,6 +76,7 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [categories, setCategories] = useState<{id: string, name: string}[]>([])
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
 
   const isEditMode = !!vendorToEdit;
 
@@ -118,14 +119,15 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
             })
             setCategories(cats);
         }
+        setCategoriesLoaded(true);
     }
     fetchCategories();
   }, [database]);
 
   useEffect(() => {
-    if (isEditMode && vendorToEdit) {
+    if (isEditMode && vendorToEdit && categoriesLoaded) {
       reset(vendorToEdit)
-    } else {
+    } else if (!isEditMode) {
         reset({
             name: "",
             category: "",
@@ -140,7 +142,7 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
             services: [],
         })
     }
-  }, [isEditMode, vendorToEdit, reset])
+  }, [isEditMode, vendorToEdit, reset, categoriesLoaded])
 
   const onSubmit: SubmitHandler<VendorFormValues> = async (data) => {
     if (!database) {
