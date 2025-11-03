@@ -84,9 +84,10 @@
         "weddingDate": { "type": "string", "format": "date-time", "description": "The date and time of the wedding." },
         "welcomeMessage": { "type": "string", "description": "A welcome message for the guests." },
         "vanityUrl": { "type": "string", "description": "The custom vanity URL for the website." },
-        "templateId": { "type": "string", "description": "The ID of the chosen website template." }
+        "templateId": { "type": "string", "description": "The ID of the chosen website template." },
+        "ownerId": { "type": "string", "description": "The UID of the user who owns the website."}
       },
-      "required": ["coupleNames", "weddingDate", "templateId"]
+      "required": ["coupleNames", "weddingDate", "templateId", "ownerId"]
     },
     "Vendor": {
       "title": "Vendor",
@@ -146,6 +147,40 @@
   },
   "auth": {
     "providers": ["Google", "Email"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Stores private user profile information."
+    },
+    "/users/{userId}/guests/{guestId}": {
+      "schema": { "$ref": "#/entities/Guest" },
+      "description": "Subcollection for a user's guests."
+    },
+    "/users/{userId}/budgetItems/{itemId}": {
+      "schema": { "$ref": "#/entities/BudgetItem" },
+      "description": "Subcollection for a user's budget items."
+    },
+    "/users/{userId}/registryItems/{itemId}": {
+      "schema": { "$ref": "#/entities/RegistryItem" },
+      "description": "Subcollection for a user's registry items."
+    },
+    "/users/{userId}/website/details": {
+        "schema": { "$ref": "#/entities/WeddingWebsite" },
+        "description": "Document storing a user's private website configuration."
+    },
+    "/websites/{vanityUrl}": {
+        "schema": { "$ref": "#/entities/WeddingWebsite" },
+        "description": "Publicly accessible collection of wedding websites, identified by their vanity URL."
+    },
+    "/vendors/{vendorId}": {
+        "schema": { "$ref": "#/entities/Vendor" },
+        "description": "Collection of all vendors in the marketplace."
+    },
+    "/vendorCategories/{categoryId}": {
+        "schema": { "$ref": "#/entities/VendorCategory" },
+        "description": "Collection of all vendor categories."
+    }
   },
   "database": {
     "rules": "rules.json"

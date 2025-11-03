@@ -1,26 +1,19 @@
+
 /**
  * @fileoverview Firestore Security Rules for the Wedding Planner application.
  *
  * Core Philosophy:
  * This ruleset enforces a strict user-ownership model. Each user can only access their own profile data,
- * guest lists, budget items, registry items, and wedding website details. No cross-user data access is allowed.
+ * guest lists, budget items, registry items, and wedding website details. Public website data is readable by anyone.
  *
  * Data Structure:
- * All data is nested under /users/{userId}, ensuring clear ownership. Each user's data is further organized
- * into subcollections for guests, budget items, and registry items. The website details are stored in a
- * dedicated /website/details document.
+ * - User-private data is nested under /users/{userId}.
+ * - Public website data is stored in a top-level /websites collection, with document IDs matching the vanityUrl.
  *
  * Key Security Decisions:
- * - User listing is disallowed to prevent potential information harvesting.
- * - All write operations are protected by authorization checks to ensure that only the owner can modify their data.
- *
- * Denormalization for Authorization:
- * - The current data model inherently supports ownership checks via the /users/{userId} path. No additional
- *   denormalization is required.
- *
- * Structural Segregation:
- * - The application uses a hierarchical structure with private user subcollections. This inherently provides
- *   structural segregation between user data.
+ * - User listing is disallowed.
+ * - All user-private write operations are protected by ownership checks.
+ * - The /websites collection is publicly readable but writable only by the owning user of the data.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -28,10 +21,6 @@ service cloud.firestore {
 
     /**
      * @description Secure user profiles. Only the authenticated user can read and write their own profile.
-     * @path /users/{userId}
-     * @allow (get, create, update, delete) - User with matching UID.
-     * @deny (get, create, update, delete) - Any other user.
-     * @principle Enforces document ownership for all operations.
      */
     match /users/{userId} {
       function isSignedIn() {
@@ -51,114 +40,35 @@ service cloud.firestore {
       allow create: if isOwner(userId) && request.resource.data.uid == request.auth.uid;
       allow update: if isExistingOwner(userId) && request.resource.data.uid == resource.data.uid;
       allow delete: if isExistingOwner(userId);
-    }
 
-    /**
-     * @description Secure guest lists. Only the authenticated user can manage their own guest list.
-     * @path /users/{userId}/guests/{guestId}
-     * @allow (get, list, create, update, delete) - User with matching UID.
-     * @deny (get, list, create, update, delete) - Any other user.
-     * @principle Enforces document ownership for all operations.
-     */
-    match /users/{userId}/guests/{guestId} {
-      function isSignedIn() {
-        return request.auth != null;
+      /**
+       * @description Secure user-specific subcollections.
+       */
+      match /{subcollection}/{docId} {
+        allow read, write: if isOwner(userId);
       }
-
-      function isOwner(userId) {
-        return request.auth.uid == userId;
-      }
-
-     function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isExistingOwner(userId);
-      allow delete: if isExistingOwner(userId);
-    }
-
-    /**
-     * @description Secure budget items. Only the authenticated user can manage their own budget items.
-     * @path /users/{userId}/budgetItems/{itemId}
-     * @allow (get, list, create, update, delete) - User with matching UID.
-     * @deny (get, list, create, update, delete) - Any other user.
-     * @principle Enforces document ownership for all operations.
-     */
-    match /users/{userId}/budgetItems/{itemId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(userId) {
-        return request.auth.uid == userId;
-      }
-
-     function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isExistingOwner(userId);
-      allow delete: if isExistingOwner(userId);
-    }
-
-    /**
-     * @description Secure registry items. Only the authenticated user can manage their own registry items.
-     * @path /users/{userId}/registryItems/{itemId}
-     * @allow (get, list, create, update, delete) - User with matching UID.
-     * @deny (get, list, create, update, delete) - Any other user.
-     * @principle Enforces document ownership for all operations.
-     */
-    match /users/{userId}/registryItems/{itemId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(userId) {
-        return request.auth.uid == userId;
-      }
-
-     function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isExistingOwner(userId);
-      allow delete: if isExistingOwner(userId);
     }
 
     /**
      * @description Secure wedding website details. Only the authenticated user can manage their own website details.
-     * @path /users/{userId}/website/details
-     * @allow (get, create, update, delete) - User with matching UID.
-     * @deny (get, create, update, delete) - Any other user.
-     * @principle Enforces document ownership for all operations.
      */
     match /users/{userId}/website/details {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
       function isOwner(userId) {
         return request.auth.uid == userId;
       }
+      
+      allow read, write: if isOwner(userId);
+    }
 
-     function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-
-      allow get: if isOwner(userId);
-      allow list: if false;
-      allow create: if isOwner(userId);
-      allow update: if isExistingOwner(userId);
-      allow delete: if isExistingOwner(userId);
+    /**
+     * @description Publicly readable collection for wedding websites.
+     * Writable only by the user who owns the website data.
+     */
+    match /websites/{vanityUrl} {
+      allow get: if true;
+      allow list: if true;
+      allow create, update: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
     }
   }
 }

@@ -3,18 +3,11 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import {
-  query,
-  orderByChild,
-  equalTo,
-  get,
-  ref,
-  DataSnapshot,
-} from 'firebase/database'
+import { doc, getDoc } from 'firebase/firestore'
 import { format } from 'date-fns'
 
 import { Button } from '@/components/ui/button'
-import { useDatabase } from '@/firebase'
+import { useFirestore } from '@/firebase'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { Gem } from 'lucide-react'
 
@@ -24,60 +17,38 @@ type PublicWebsitePageProps = {
 
 export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
   const { vanityUrl } = params
-  const database = useDatabase()
+  const firestore = useFirestore()
   const [websiteData, setWebsiteData] = useState<any | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchWebsiteData = async () => {
-      if (!database || !vanityUrl) {
+      if (!firestore || !vanityUrl) {
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true)
-        const usersRef = ref(database, 'users')
-        const websiteQuery = query(
-          usersRef,
-          orderByChild('website/details/vanityUrl'),
-          equalTo(vanityUrl)
-        )
+        const websiteRef = doc(firestore, 'websites', vanityUrl);
+        const docSnap = await getDoc(websiteRef);
         
-        const snapshot = await get(websiteQuery);
-
-        if (snapshot.exists()) {
-          let foundData = null;
-          snapshot.forEach((childSnapshot) => {
-            const userData = childSnapshot.val();
-            if (userData.website && userData.website.details) {
-              foundData = userData.website.details;
-            }
-          });
-
-          if (foundData) {
-            setWebsiteData(foundData);
-          } else {
-            setError('This wedding website does not exist or is incomplete.')
-          }
+        if (docSnap.exists()) {
+          setWebsiteData(docSnap.data());
         } else {
           setError('This wedding website does not exist.')
         }
       } catch (err: any) {
         console.error('Error fetching website data:', err)
-        if (err.message.includes('permission_denied') || err.message.includes('Index not defined')) {
-             setError('This wedding website could not be loaded due to a configuration issue. Please contact the couple.');
-        } else {
-            setError('Could not load the wedding website. Please try again later.')
-        }
+        setError('Could not load the wedding website. Please try again later.')
       } finally {
         setLoading(false)
       }
     }
 
     fetchWebsiteData()
-  }, [database, vanityUrl])
+  }, [firestore, vanityUrl])
 
   if (loading) {
     return (

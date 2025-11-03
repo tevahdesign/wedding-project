@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
-import { set, ref, remove } from 'firebase/database'
+import { doc, setDoc, deleteDoc, getDoc } from 'firebase/firestore'
 import { format } from 'date-fns'
 
 import { PageHeader } from '@/components/app/page-header'
@@ -21,8 +21,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { useAuth, useDatabase } from '@/firebase'
-import { useObjectValue } from '@/firebase/database/use-object-value'
+import { useAuth, useFirestore } from '@/firebase'
 import { useToast } from '@/hooks/use-toast'
 import { Copy, Link as LinkIcon, Loader2, Check, Trash2 } from 'lucide-react'
 import Link from 'next/link'
@@ -30,7 +29,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 export default function WebsiteBuilderPage() {
   const { user } = useAuth()
-  const database = useDatabase()
+  const firestore = useFirestore()
   const { toast } = useToast()
 
   const [coupleNames, setCoupleNames] = useState('')
@@ -41,6 +40,8 @@ export default function WebsiteBuilderPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
+  const [loading, setLoading] = useState(true);
+  const [initialVanityUrl, setInitialVanityUrl] = useState<string | null>(null);
   
   const websiteOrigin = typeof window !== 'undefined' ? window.location.origin : '';
   const shareableUrl = `${websiteOrigin}/${vanityUrl}`;
@@ -55,43 +56,50 @@ export default function WebsiteBuilderPage() {
   const previewImage =
     selectedTemplate === 'template-1' ? template1 : template2
 
-  const websiteDetailsRef = useMemo(() => {
-    if (!user || !database) return null
-    return ref(database, `users/${user.uid}/website/details`)
-  }, [user, database])
+  const userWebsiteRef = useMemo(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, `users/${user.uid}/website`, 'details');
+  }, [user, firestore]);
 
-  const { data: websiteData, loading } = useObjectValue(websiteDetailsRef)
 
   const resetFormToDefaults = () => {
     setCoupleNames('Alex & Jordan');
     setWeddingDate(new Date());
     setWelcomeMessage('We can\'t wait to celebrate our special day with you! Join us as we say "I do".');
-    setVanityUrl('alex-and-jordan');
+    setVanityUrl(user ? `wedding-${user.uid.slice(0,6)}` : 'our-wedding');
     setSelectedTemplate('template-1');
+    setInitialVanityUrl(null);
   }
 
   useEffect(() => {
-    if (websiteData) {
-      setCoupleNames(websiteData.coupleNames || 'Alex & Jordan')
-      // RTDB stores dates as ISO strings
-      setWeddingDate(websiteData.weddingDate ? new Date(websiteData.weddingDate) : new Date())
-      setWelcomeMessage(
-        websiteData.welcomeMessage ||
-          'We can\'t wait to celebrate our special day with you! Join us as we say "I do".'
-      )
-      setVanityUrl(websiteData.vanityUrl || 'alex-and-jordan')
-      setSelectedTemplate(websiteData.templateId || 'template-1')
-    } else if (!loading) {
-        resetFormToDefaults();
+    async function fetchWebsiteData() {
+        if (userWebsiteRef) {
+            setLoading(true);
+            const docSnap = await getDoc(userWebsiteRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                setCoupleNames(data.coupleNames || 'Alex & Jordan');
+                setWeddingDate(data.weddingDate ? new Date(data.weddingDate) : new Date());
+                setWelcomeMessage(data.welcomeMessage || 'We can\'t wait to celebrate our special day with you! Join us as we say "I do".');
+                setVanityUrl(data.vanityUrl || '');
+                setInitialVanityUrl(data.vanityUrl || null);
+                setSelectedTemplate(data.templateId || 'template-1');
+            } else {
+                resetFormToDefaults();
+            }
+            setLoading(false);
+        }
     }
-  }, [websiteData, loading])
+    fetchWebsiteData();
+  }, [userWebsiteRef]);
+
 
   const handleSave = async () => {
-    if (!websiteDetailsRef) {
+    if (!userWebsiteRef || !firestore || !user || !vanityUrl) {
        toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Cannot save. User not authenticated.',
+        description: 'Cannot save. Please fill all fields and be logged in.',
       })
       return;
     }
@@ -103,9 +111,24 @@ export default function WebsiteBuilderPage() {
         welcomeMessage,
         vanityUrl,
         templateId: selectedTemplate,
+        ownerId: user.uid,
       };
 
-      await set(websiteDetailsRef, dataToSave) 
+      // Save to public collection
+      const publicWebsiteRef = doc(firestore, 'websites', vanityUrl);
+      await setDoc(publicWebsiteRef, dataToSave);
+
+      // if vanityUrl changed, delete old public doc
+      if (initialVanityUrl && initialVanityUrl !== vanityUrl) {
+        const oldPublicWebsiteRef = doc(firestore, 'websites', initialVanityUrl);
+        await deleteDoc(oldPublicWebsiteRef);
+      }
+      
+      // Save to user's private collection
+      await setDoc(userWebsiteRef, dataToSave);
+
+      setInitialVanityUrl(vanityUrl);
+      
       toast({
         title: 'Website Published!',
         description: 'Your changes are live and the link is ready to share.',
@@ -123,11 +146,17 @@ export default function WebsiteBuilderPage() {
   }
 
   const handleDelete = async () => {
-      if (!user || !database) return;
-      const wholeWebsiteRef = ref(database, `users/${user.uid}/website`);
+      if (!user || !firestore || !initialVanityUrl) return;
+
       setIsDeleting(true);
       try {
-        await remove(wholeWebsiteRef);
+        // Delete user's private doc
+        if(userWebsiteRef) await deleteDoc(userWebsiteRef);
+        
+        // Delete public doc
+        const publicWebsiteRef = doc(firestore, 'websites', initialVanityUrl);
+        await deleteDoc(publicWebsiteRef);
+
         toast({
             title: "Website Deleted",
             description: "Your wedding website has been successfully deleted.",
@@ -279,7 +308,7 @@ export default function WebsiteBuilderPage() {
               )}
             </CardContent>
           </Card>
-           {websiteData && !loading && (
+           {initialVanityUrl && !loading && (
              <Card>
                 <CardHeader>
                     <CardTitle>Your Link is Ready!</CardTitle>
