@@ -80,7 +80,7 @@ export default function DashboardPage() {
       <header className="p-4 flex items-center justify-between bg-background border-b">
           <div className="flex items-center gap-3">
              
-             <h1 className="text-xl font-bold text-foreground">WedWise</h1>
+             <h1 className="text-2xl font-headline text-primary">WedWise</h1>
           </div>
         <div className="flex items-center gap-2">
            <Link href="/login">
