@@ -222,17 +222,7 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Price Range</FormLabel>
-                 <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Select a price range" /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="₹">₹</SelectItem>
-                    <SelectItem value="₹₹">₹₹</SelectItem>
-                    <SelectItem value="₹₹₹">₹₹₹</SelectItem>
-                    <SelectItem value="₹₹₹₹">₹₹₹₹</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormControl><Input placeholder="e.g., ₹50,000 - ₹1,00,000" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
