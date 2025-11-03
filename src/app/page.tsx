@@ -131,7 +131,7 @@ export default function RootPage() {
           </div>
           <div className="grid grid-cols-2 gap-4 mt-4 px-4">
             {vendorsLoading ? (
-              Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none h-64 bg-muted animate-pulse rounded-lg"></Card>)
+              Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none h-64 bg-muted animate-pulse rounded-2xl"></Card>)
             ) : (
               newArrivals.map(item => (
                 <div 
@@ -142,7 +142,7 @@ export default function RootPage() {
                 >
                   <Card className="border-0 shadow-none overflow-hidden group">
                     <CardContent className="p-0 relative">
-                      <Image src={item.imageId || "https://picsum.photos/seed/placeholder/400/600"} alt={item.name} width={400} height={600} className="rounded-lg object-cover w-full aspect-[2/3] transition-transform duration-300 group-hover:scale-105" />
+                      <Image src={item.imageId || "https://picsum.photos/seed/placeholder/400/600"} alt={item.name} width={400} height={600} className="rounded-2xl object-cover w-full aspect-[2/3] transition-transform duration-300 group-hover:scale-105" />
                       {item.isFeatured && <Badge className="absolute top-2 left-2">Featured</Badge>}
                     </CardContent>
                     <div className="pt-2">
@@ -234,3 +234,5 @@ export default function RootPage() {
     </div>
   )
 }
+
+    
