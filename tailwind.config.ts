@@ -14,6 +14,7 @@ export default {
         sans: ['Poppins', 'sans-serif'],
         body: ['Poppins', 'sans-serif'],
         headline: ['Poppins', 'sans-serif'],
+        logo: ['Great Vibes', 'cursive'],
         code: ['monospace'],
       },
       colors: {

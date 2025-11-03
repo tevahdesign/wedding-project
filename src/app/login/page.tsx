@@ -86,8 +86,7 @@ export default function LoginPage() {
 
       <div className="z-10 w-full max-w-sm">
         <Link href="/" className="flex justify-center items-center gap-2 mb-8 text-foreground">
-          <Heart className="w-8 h-8 text-primary" />
-          <span className="text-4xl font-headline font-bold text-primary">WedWise</span>
+          <span className="text-6xl font-logo text-primary">WedWise</span>
         </Link>
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-background/60 backdrop-blur-sm">

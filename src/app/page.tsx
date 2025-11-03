@@ -77,7 +77,7 @@ export default function RootPage() {
     <div className="w-full min-h-screen bg-background text-foreground flex flex-col pb-20">
       {/* Header */}
       <header className="p-4 flex items-center justify-between sticky top-0 bg-background/80 backdrop-blur-sm z-20">
-        <h1 className="text-3xl font-headline font-bold text-primary">WedWise</h1>
+        <h1 className="text-4xl font-logo text-primary">WedWise</h1>
         <div className="cursor-pointer" onClick={() => handleCardClick('/login')} onMouseEnter={() => handleMouseEnter('/login')}>
             <Avatar className="h-9 w-9">
                 <AvatarImage src="https://i.pravatar.cc/150" />

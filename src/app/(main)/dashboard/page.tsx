@@ -77,7 +77,7 @@ export default function DashboardPage() {
     <div className="flex flex-col flex-1 pb-20 bg-muted/20">
       <header className="p-4 flex items-center justify-between bg-background border-b">
           <div className="flex items-center gap-3">
-             <h1 className="text-3xl font-headline text-primary">WedWise</h1>
+             <h1 className="text-4xl font-logo text-primary">WedWise</h1>
           </div>
         <div className="flex items-center gap-2">
            <div className="cursor-pointer" onClick={() => handleCardClick('/login')} onMouseEnter={() => handleMouseEnter('/login')}>
