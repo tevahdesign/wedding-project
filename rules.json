@@ -1,7 +1,7 @@
 {
   "rules": {
     "users": {
-      ".indexOn": ["website/details/vanityUrl"],
+      ".indexOn": "website/details/vanityUrl",
       "$uid": {
         ".read": "$uid === auth.uid",
         ".write": "$uid === auth.uid"
