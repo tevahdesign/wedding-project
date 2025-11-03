@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/form"
 import { useDatabase } from "@/firebase"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2, PlusCircle, Trash2, X } from "lucide-react"
+import { Loader2, PlusCircle, Trash2, X, Upload } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -31,6 +31,9 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 
 const serviceSchema = z.object({
   name: z.string().min(1, "Service name is required."),
@@ -45,7 +48,7 @@ const vendorSchema = z.object({
   rating: z.coerce.number().min(0).max(5),
   reviewCount: z.coerce.number().min(0),
   isFeatured: z.boolean().default(false),
-  imageId: z.string().min(1, { message: "Please upload a main image." }),
+  imageId: z.string().optional(),
   logoImageId: z.string().optional(),
   galleryImageIds: z.array(z.string()).optional(),
   services: z.array(serviceSchema).optional(),
@@ -94,13 +97,15 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
     },
   })
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
+  const { control, handleSubmit, reset, setValue } = form;
+
+  const { fields: serviceFields, append: appendService, remove: removeService } = useFieldArray({
+    control,
     name: "services",
   });
 
   const { fields: galleryFields, append: appendGallery, remove: removeGallery } = useFieldArray({
-    control: form.control,
+    control,
     name: "galleryImageIds",
   });
 
@@ -122,9 +127,9 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
 
   useEffect(() => {
     if (isEditMode && vendorToEdit) {
-      form.reset(vendorToEdit)
+      reset(vendorToEdit)
     } else {
-        form.reset({
+        reset({
             name: "",
             category: "",
             location: "New York, NY",
@@ -138,7 +143,7 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
             services: [],
         })
     }
-  }, [isEditMode, vendorToEdit, form])
+  }, [isEditMode, vendorToEdit, reset])
 
   const onSubmit: SubmitHandler<VendorFormValues> = async (data) => {
     if (!database) {
@@ -175,7 +180,7 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
             description: `${data.name} has been added to the marketplace.`,
           });
       }
-      form.reset();
+      reset();
       setDialogOpen(false);
     } catch (error: any) {
         toast({
@@ -188,250 +193,281 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
     }
   }
 
+  const ImageUploadField = ({ name, label }: { name: "imageId" | "logoImageId", label: string }) => (
+    <FormField
+        control={control}
+        name={name}
+        render={({ field }) => (
+            <FormItem>
+                <FormLabel>{label}</FormLabel>
+                {field.value ? (
+                    <div className="relative w-full h-40">
+                         <Image src={field.value} alt={`${label} preview`} layout="fill" className="rounded-md object-cover" />
+                         <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => setValue(name, "")}>
+                             <Trash2 className="h-4 w-4" />
+                         </Button>
+                    </div>
+                ) : (
+                    <FormControl>
+                       <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted">
+                           <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                               <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                               <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
+                               <p className="text-xs text-muted-foreground">PNG, JPG, or GIF</p>
+                           </div>
+                           <Input 
+                                type="file" 
+                                className="hidden"
+                                accept="image/*"
+                                onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        const dataUri = await fileToDataUri(file);
+                                        field.onChange(dataUri);
+                                    }
+                                }}
+                            />
+                       </label>
+                    </FormControl>
+                )}
+                <FormMessage />
+            </FormItem>
+        )}
+    />
+  );
+
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[80vh] overflow-y-auto pr-6 pl-1">
-        
-        {/* Main Details Section */}
-        <div className="space-y-4">
-            <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl><Input placeholder="Vendor's business name" {...field} /></FormControl>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
-            <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                    <FormControl>
-                        <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                        {categories.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}
-                    </SelectContent>
-                    </Select>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
-            <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl><Input placeholder="e.g., New York, NY" {...field} /></FormControl>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
-            <FormField
-                control={form.control}
-                name="priceRange"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Price Range</FormLabel>
-                    <FormControl><Input placeholder="e.g., ₹50,000 - ₹1,00,000" {...field} /></FormControl>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
-            <div className="grid grid-cols-2 gap-4">
-            <FormField
-                control={form.control}
-                name="rating"
-                render={({ field }) => (
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-h-[80vh] overflow-y-auto pr-2">
+        <Tabs defaultValue="details" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="details">Details</TabsTrigger>
+                <TabsTrigger value="gallery">Gallery</TabsTrigger>
+                <TabsTrigger value="services">Services</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="details" className="space-y-6 pt-4">
+                <FormField
+                    control={control}
+                    name="name"
+                    render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Rating (0-5)</FormLabel>
-                    <FormControl><Input type="number" step="0.1" {...field} /></FormControl>
-                    <FormMessage />
+                        <FormLabel>Name</FormLabel>
+                        <FormControl><Input placeholder="Vendor's business name" {...field} /></FormControl>
+                        <FormMessage />
                     </FormItem>
-                )}
+                    )}
                 />
-            <FormField
-                control={form.control}
-                name="reviewCount"
-                render={({ field }) => (
+                <FormField
+                    control={control}
+                    name="category"
+                    render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Review Count</FormLabel>
-                    <FormControl><Input type="number" {...field} /></FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-            </div>
-
-            <FormField
-                control={form.control}
-                name="isFeatured"
-                render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormLabel>Category</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                         <FormControl>
-                            <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                            />
+                            <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
                         </FormControl>
-                        <div className="space-y-1 leading-none">
-                            <Label>Featured Vendor</Label>
-                            <p className="text-sm text-muted-foreground">
-                            Featured vendors appear more prominently in search results.
-                            </p>
-                            <FormMessage />
-                        </div>
+                        <SelectContent>
+                            {categories.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}
+                        </SelectContent>
+                        </Select>
+                        <FormMessage />
                     </FormItem>
-                )}
-            />
-        </div>
-
-        <Separator className="my-6" />
-
-        {/* Image Uploads Section */}
-        <div className="space-y-6">
-            <h3 className="text-lg font-medium">Vendor Images</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                    control={form.control}
-                    name="imageId"
-                    render={({ field: { onChange, value, ...rest } }) => (
-                        <FormItem>
-                            <FormLabel>Main Image</FormLabel>
-                            {value && <Image src={value} alt="Main image preview" width={100} height={100} className="rounded-md object-cover w-full h-32" />}
-                            <FormControl>
-                                <Input 
-                                    type="file" 
-                                    accept="image/*"
-                                    onChange={async (e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                            const dataUri = await fileToDataUri(file);
-                                            onChange(dataUri);
-                                        }
-                                    }}
-                                    {...rest} 
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
                     )}
                 />
                 <FormField
-                    control={form.control}
-                    name="logoImageId"
-                    render={({ field: { onChange, value, ...rest } }) => (
+                    control={control}
+                    name="location"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <FormControl><Input placeholder="e.g., New York, NY" {...field} /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={control}
+                    name="priceRange"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Price Range</FormLabel>
+                         <FormControl><Input placeholder="e.g., ₹50,000 - ₹1,00,000" {...field} /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                <FormField
+                    control={control}
+                    name="rating"
+                    render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Logo Image</FormLabel>
-                            {value && <Image src={value} alt="Logo preview" width={100} height={100} className="rounded-md object-cover w-full h-32" />}
+                        <FormLabel>Rating (0-5)</FormLabel>
+                        <FormControl><Input type="number" step="0.1" {...field} /></FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                <FormField
+                    control={control}
+                    name="reviewCount"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Review Count</FormLabel>
+                        <FormControl><Input type="number" {...field} /></FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
+
+                <FormField
+                    control={control}
+                    name="isFeatured"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                             <FormControl>
-                                <Input 
-                                    type="file" 
-                                    accept="image/*"
-                                    onChange={async (e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                            const dataUri = await fileToDataUri(file);
-                                            onChange(dataUri);
-                                        }
-                                    }}
-                                    {...rest}
+                                <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
                                 />
                             </FormControl>
-                            <FormMessage />
+                            <div className="space-y-1 leading-none">
+                                <Label>Featured Vendor</Label>
+                                <p className="text-sm text-muted-foreground">
+                                Featured vendors appear more prominently in search results.
+                                </p>
+                                <FormMessage />
+                            </div>
                         </FormItem>
                     )}
                 />
-            </div>
-            <div>
-                <Label>Gallery Images</Label>
-                <div className="mt-2 flex w-full overflow-x-auto space-x-4 pb-2">
-                    {galleryFields.map((field, index) => (
-                        <div key={field.id} className="relative flex-shrink-0">
-                            {field.value && <Image src={field.value} alt={`Gallery image ${index + 1}`} width={100} height={100} className="rounded-md object-cover w-32 h-32" />}
-                            <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6" onClick={() => removeGallery(index)}>
-                                <X className="h-4 w-4" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <ImageUploadField name="imageId" label="Main Image" />
+                    <ImageUploadField name="logoImageId" label="Logo Image" />
+                </div>
+            </TabsContent>
+
+            <TabsContent value="gallery">
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Gallery Images</CardTitle>
+                        <CardDescription>Upload multiple images to showcase the vendor's work.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                         <div className="flex w-full overflow-x-auto space-x-4 pb-2">
+                            {galleryFields.map((field, index) => (
+                                <div key={field.id} className="relative flex-shrink-0 w-32 h-32">
+                                    {field.value && <Image src={field.value} alt={`Gallery image ${index + 1}`} layout="fill" className="rounded-md object-cover" />}
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6">
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Delete Image?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Are you sure you want to delete this gallery image? This cannot be undone.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => removeGallery(index)}>Delete</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </div>
+                            ))}
+                        </div>
+                        <FormControl>
+                            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                                    <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                </div>
+                                <Input 
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={async (e) => {
+                                        const files = Array.from(e.target.files || []);
+                                        for (const file of files) {
+                                            const dataUri = await fileToDataUri(file);
+                                            appendGallery({ value: dataUri });
+                                        }
+                                    }}
+                                />
+                            </label>
+                        </FormControl>
+                    </CardContent>
+                 </Card>
+            </TabsContent>
+
+            <TabsContent value="services">
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Services</CardTitle>
+                        <CardDescription>Add or remove services offered by this vendor.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {serviceFields.map((field, index) => (
+                        <div key={field.id} className="flex gap-2 items-end p-4 border rounded-lg">
+                            <FormField
+                            control={control}
+                            name={`services.${index}.name`}
+                            render={({ field }) => (
+                                <FormItem className="flex-grow">
+                                <FormLabel>Service Name</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="e.g., Full Day Coverage" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                            <FormField
+                            control={control}
+                            name={`services.${index}.price`}
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Price (₹)</FormLabel>
+                                <FormControl>
+                                    <Input type="number" placeholder="e.g., 50000" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                            <Button type="button" variant="destructive" size="icon" onClick={() => removeService(index)}>
+                            <Trash2 className="h-4 w-4" />
                             </Button>
                         </div>
-                    ))}
-                </div>
-                <Input 
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="mt-2"
-                    onChange={async (e) => {
-                        const files = Array.from(e.target.files || []);
-                        for (const file of files) {
-                            const dataUri = await fileToDataUri(file);
-                            appendGallery({ value: dataUri });
-                        }
-                    }}
-                />
-            </div>
+                        ))}
+                        <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => appendService({ name: "", price: 0 })}
+                        >
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add Service
+                        </Button>
+                    </CardContent>
+                 </Card>
+            </TabsContent>
+        </Tabs>
+
+        <div className="pt-6">
+             <Button type="submit" disabled={isSubmitting} className="w-full">
+                {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : (isEditMode ? "Save Changes" : "Add Vendor")}
+             </Button>
         </div>
-
-        <Separator className="my-6" />
-
-        {/* Services Section */}
-        <div>
-          <h3 className="text-lg font-medium mb-4">Services</h3>
-          <div className="space-y-4">
-            {fields.map((field, index) => (
-              <div key={field.id} className="flex gap-2 items-end p-4 border rounded-lg">
-                <FormField
-                  control={form.control}
-                  name={`services.${index}.name`}
-                  render={({ field }) => (
-                    <FormItem className="flex-grow">
-                      <FormLabel>Service Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Full Day Coverage" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`services.${index}.price`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Price (₹)</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="e.g., 50000" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => append({ name: "", price: 0 })}
-            >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Service
-            </Button>
-          </div>
-        </div>
-
-        <Button type="submit" disabled={isSubmitting} className="w-full !mt-8">
-          {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : (isEditMode ? "Save Changes" : "Add Vendor")}
-        </Button>
       </form>
     </Form>
   )
