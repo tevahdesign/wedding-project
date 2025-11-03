@@ -27,9 +27,9 @@ type Vendor = {
     rating: number;
     reviewCount: number;
     isFeatured: boolean;
-    imageId: string; // This will now be a base64 Data URI
+    imageId: string; 
     isFavorited: boolean;
-    logoImageId?: string; // This will now be a base64 Data URI
+    logoImageId?: string;
 };
 
 type VendorCategory = {
@@ -56,7 +56,6 @@ export default function VendorsPage() {
 
     const [favorited, setFavorited] = useState<Record<string, boolean>>({});
 
-    // This effect initializes the favorited state from the fetched vendor data
     useState(() => {
         if (vendors) {
             setFavorited(vendors.reduce((acc, vendor) => {
@@ -141,11 +140,11 @@ export default function VendorsPage() {
              <div className="p-4">
                 <h2 className="text-xl font-bold mb-4">{selectedCategory} Vendors</h2>
                 {vendorsLoading ? (
-                     <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
+                     <div className="grid grid-cols-2 gap-4">
                         {Array.from({ length: 4 }).map((_, i) => <Card key={i} className="h-64 animate-pulse bg-muted"></Card>)}
                     </div>
                 ) : filteredVendors.length > 0 ? (
-                    <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
+                    <div className="grid grid-cols-2 gap-4">
                         {filteredVendors.map(vendor => {
                              return (
                                 <div 
@@ -154,40 +153,34 @@ export default function VendorsPage() {
                                     onClick={() => handleCardClick(`/vendors/${vendor.id}`)}
                                     onMouseEnter={() => handleMouseEnter(`/vendors/${vendor.id}`)}
                                 >
-                                    <Card className="overflow-hidden h-full">
-                                        <div className="relative">
-                                            <Image 
-                                                src={vendor.imageId || "https://picsum.photos/seed/placeholder/400/300"} 
-                                                alt={vendor.name}
-                                                width={400}
-                                                height={300}
-                                                className="object-cover w-full h-36 transition-transform duration-300 group-hover:scale-105"
-                                            />
-                                            <Button 
-                                                size="icon" 
-                                                variant="ghost" 
-                                                className="absolute top-2 right-2 rounded-full bg-background/70 hover:bg-background h-8 w-8"
-                                                onClick={(e) => toggleFavorite(e, vendor.id)}
-                                            >
-                                                <Heart className={cn("w-4 h-4", favorited[vendor.id] ? "text-red-500 fill-current" : "text-gray-500")} />
-                                            </Button>
-                                            {vendor.isFeatured && <Badge className="absolute top-2 left-2">Featured</Badge>}
+                                    <div className="relative">
+                                        <Image 
+                                            src={vendor.imageId || "https://picsum.photos/seed/placeholder/400/300"} 
+                                            alt={vendor.name}
+                                            width={400}
+                                            height={500}
+                                            className="object-cover w-full aspect-[4/5] rounded-lg transition-transform duration-300 group-hover:scale-105"
+                                        />
+                                        <Button 
+                                            size="icon" 
+                                            variant="ghost" 
+                                            className="absolute top-2 right-2 rounded-full bg-background/70 hover:bg-background h-8 w-8"
+                                            onClick={(e) => toggleFavorite(e, vendor.id)}
+                                        >
+                                            <Heart className={cn("w-4 h-4", favorited[vendor.id] ? "text-red-500 fill-current" : "text-gray-500")} />
+                                        </Button>
+                                        <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                            <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                                            <span className="font-semibold">{vendor.rating.toFixed(1)}</span>
+                                            <span className="text-gray-300">|</span>
+                                            <span>{vendor.reviewCount}</span>
                                         </div>
-                                        <CardContent className="p-4">
-                                            
-                                            <h3 className="font-bold text-lg">{vendor.name}</h3>
-                                            <p className="text-sm text-muted-foreground">{vendor.category}</p>
-                                            
-                                            <div className="flex items-center justify-between mt-2">
-                                                <p className="text-sm font-bold">{vendor.priceRange}</p>
-                                                <div className="flex items-center gap-1 text-sm">
-                                                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                                    <span className="font-semibold">{vendor.rating.toFixed(1)}</span>
-                                                    <span className="text-muted-foreground">({vendor.reviewCount})</span>
-                                                </div>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
+                                    </div>
+                                    <div className="p-2">
+                                        <h3 className="font-bold text-base truncate">{vendor.name}</h3>
+                                        <p className="text-sm text-muted-foreground truncate">{vendor.category}</p>
+                                        <p className="text-sm font-bold mt-1">{vendor.priceRange}</p>
+                                    </div>
                                 </div>
                             )
                         })}
@@ -201,3 +194,4 @@ export default function VendorsPage() {
         </div>
     );
 }
+
