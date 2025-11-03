@@ -21,6 +21,16 @@ export function BottomNav() {
     return null;
   }
 
+  // Do not render bottom nav on sub-pages of main sections for a cleaner look
+  const mainRoutes = navItems.map(item => item.href);
+  if (!mainRoutes.includes(pathname)) {
+      const isSubPage = mainRoutes.some(route => route !== '/' && pathname.startsWith(route));
+      if (isSubPage) {
+          return null;
+      }
+  }
+
+
   return (
     <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-card border-t border-border">
       <div className="flex justify-around items-center h-16">

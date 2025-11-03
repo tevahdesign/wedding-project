@@ -71,7 +71,7 @@ export default function RootPage() {
         <Button variant="ghost" size="icon">
           <Menu className="w-6 h-6" />
         </Button>
-        <h1 className="text-2xl font-headline text-primary">WedWise</h1>
+        <h1 className="text-3xl font-headline text-primary">WedWise</h1>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="w-6 h-6" />
@@ -184,11 +184,11 @@ export default function RootPage() {
             )}
           </div>
         </section>
-
+        
         {/* Tools Section */}
-        <section className="mt-8">
-            <h2 className="text-lg font-semibold px-4 mb-4">Planning Tools</h2>
-            <div className="p-4 pt-0">
+        <section className="mt-8 p-4">
+            <h2 className="text-lg font-semibold text-center mb-4">Your Complete Planning Toolkit</h2>
+            <div className="pt-0">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     {features.map((feature) => (
                         <Card key={feature.title} className="p-4 flex flex-col items-center justify-center text-center transition-all hover:shadow-lg hover:-translate-y-1">
