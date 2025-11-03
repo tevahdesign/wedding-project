@@ -1,7 +1,7 @@
 
 import { PageHeader } from "@/components/app/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowRight, Store } from "lucide-react"
+import { ArrowRight, Store, LayoutGrid } from "lucide-react"
 import Link from "next/link"
 
 export default function AdminPage() {
@@ -24,6 +24,22 @@ export default function AdminPage() {
             <CardContent>
                 <div className="text-sm font-medium text-primary flex items-center">
                     Go to Vendor Management <ArrowRight className="ml-2 h-4 w-4" />
+                </div>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/admin/categories">
+          <Card className="flex flex-col justify-between transition-all hover:shadow-lg hover:-translate-y-1 h-full">
+            <CardHeader>
+                <div className="mb-4 text-primary">
+                    <LayoutGrid className="w-8 h-8" />
+                </div>
+                <CardTitle>Category Management</CardTitle>
+                <CardDescription>Add, edit, or delete vendor categories.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="text-sm font-medium text-primary flex items-center">
+                    Go to Category Management <ArrowRight className="ml-2 h-4 w-4" />
                 </div>
             </CardContent>
           </Card>
