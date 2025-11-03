@@ -191,12 +191,14 @@ export default function RootPage() {
             <div className="pt-0">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     {features.map((feature) => (
-                        <Card key={feature.title} className="p-4 flex flex-col items-center justify-center text-center transition-all hover:shadow-lg hover:-translate-y-1">
+                      <Link href={feature.href} key={feature.title}>
+                        <Card className="p-4 flex flex-col items-center justify-center text-center transition-all hover:shadow-lg hover:-translate-y-1 h-full">
                             <div className="p-3 bg-primary/10 rounded-full mb-2">
                                 <feature.icon className="h-6 w-6 text-primary" />
                             </div>
                             <p className="font-semibold text-sm">{feature.title}</p>
                         </Card>
+                      </Link>
                     ))}
                 </div>
             </div>

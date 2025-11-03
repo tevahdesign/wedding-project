@@ -6,31 +6,37 @@ export const features = [
     title: "Guest List",
     description: "Manage your guests and track RSVPs.",
     icon: Users,
+    href: "/guest-list",
   },
   {
     title: "Budget Tracker",
     description: "Keep your wedding expenses in control.",
     icon: PiggyBank,
+    href: "/budget-tracker",
   },
    {
     title: "Vendors",
     description: "Browse and book top wedding vendors.",
     icon: Store,
+    href: "/vendors",
   },
   {
     title: "Digital Invitations",
     description: "Design and send elegant invitations.",
     icon: Mail,
+    href: "/invitations",
   },
   {
     title: "Wedding Registry",
     description: "Combine gifts from any store.",
     icon: Gift,
+    href: "/registry",
   },
   {
     title: "Admin Panel",
     description: "Manage vendors and categories.",
     icon: Shield,
+    href: "/admin",
   },
 ];
 
