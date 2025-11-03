@@ -147,41 +147,61 @@ export default function VendorsPage() {
                     <div className="grid grid-cols-2 gap-4">
                         {filteredVendors.map(vendor => {
                              return (
-                                <div 
-                                    key={vendor.id} 
-                                    className="overflow-hidden group cursor-pointer"
-                                    onClick={() => handleCardClick(`/vendors/${vendor.id}`)}
-                                    onMouseEnter={() => handleMouseEnter(`/vendors/${vendor.id}`)}
+                                <Card
+                                  key={vendor.id}
+                                  className="overflow-hidden group cursor-pointer border-none shadow-sm transition-shadow hover:shadow-xl"
+                                  onClick={() => handleCardClick(`/vendors/${vendor.id}`)}
+                                  onMouseEnter={() => handleMouseEnter(`/vendors/${vendor.id}`)}
                                 >
+                                  <CardContent className="p-0">
                                     <div className="relative">
-                                        <Image 
-                                            src={vendor.imageId || "https://picsum.photos/seed/placeholder/400/300"} 
-                                            alt={vendor.name}
-                                            width={400}
-                                            height={500}
-                                            className="object-cover w-full aspect-[4/5] rounded-lg transition-transform duration-300 group-hover:scale-105"
+                                      <Image
+                                        src={
+                                          vendor.imageId ||
+                                          "https://picsum.photos/seed/placeholder/400/300"
+                                        }
+                                        alt={vendor.name}
+                                        width={400}
+                                        height={500}
+                                        className="object-cover w-full aspect-[4/5] rounded-t-xl transition-transform duration-300 group-hover:scale-105"
+                                      />
+                                      <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="absolute top-2 right-2 rounded-full bg-background/70 hover:bg-background h-8 w-8"
+                                        onClick={(e) => toggleFavorite(e, vendor.id)}
+                                      >
+                                        <Heart
+                                          className={cn(
+                                            "w-4 h-4",
+                                            favorited[vendor.id]
+                                              ? "text-red-500 fill-current"
+                                              : "text-gray-500"
+                                          )}
                                         />
-                                        <Button 
-                                            size="icon" 
-                                            variant="ghost" 
-                                            className="absolute top-2 right-2 rounded-full bg-background/70 hover:bg-background h-8 w-8"
-                                            onClick={(e) => toggleFavorite(e, vendor.id)}
-                                        >
-                                            <Heart className={cn("w-4 h-4", favorited[vendor.id] ? "text-red-500 fill-current" : "text-gray-500")} />
-                                        </Button>
-                                        <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                                            <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                                            <span className="font-semibold">{vendor.rating.toFixed(1)}</span>
-                                            <span className="text-gray-300">|</span>
-                                            <span>{vendor.reviewCount}</span>
-                                        </div>
+                                      </Button>
+                                      <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                        <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                                        <span className="font-semibold">
+                                          {vendor.rating.toFixed(1)}
+                                        </span>
+                                        <span className="text-gray-300">|</span>
+                                        <span>{vendor.reviewCount}</span>
+                                      </div>
                                     </div>
-                                    <div className="p-2">
-                                        <h3 className="font-bold text-base truncate">{vendor.name}</h3>
-                                        <p className="text-sm text-muted-foreground truncate">{vendor.category}</p>
-                                        <p className="text-sm font-bold mt-1">{vendor.priceRange}</p>
+                                    <div className="p-3">
+                                      <h3 className="font-bold text-base truncate">
+                                        {vendor.name}
+                                      </h3>
+                                      <p className="text-sm text-muted-foreground truncate">
+                                        {vendor.category}
+                                      </p>
+                                      <p className="text-sm font-bold mt-1">
+                                        {vendor.priceRange}
+                                      </p>
                                     </div>
-                                </div>
+                                  </CardContent>
+                                </Card>
                             )
                         })}
                     </div>
@@ -194,4 +214,5 @@ export default function VendorsPage() {
         </div>
     );
 }
+
 
