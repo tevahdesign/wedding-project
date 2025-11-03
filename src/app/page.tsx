@@ -97,20 +97,6 @@ export default function RootPage() {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
         
-         {/* Tools Section */}
-        <section className="mt-6 p-4">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {features.map((feature) => (
-                    <Card key={feature.title} className="p-4 flex flex-col items-center justify-center text-center transition-all hover:shadow-lg hover:-translate-y-1">
-                        <div className="p-3 bg-primary/10 rounded-full mb-2">
-                            <feature.icon className="h-6 w-6 text-primary" />
-                        </div>
-                        <p className="font-semibold text-sm">{feature.title}</p>
-                    </Card>
-                ))}
-            </div>
-        </section>
-
         {/* Categories */}
         <section className="mt-6">
           <h2 className="text-lg font-semibold px-4 mb-2">Categories</h2>
@@ -197,6 +183,23 @@ export default function RootPage() {
               ))
             )}
           </div>
+        </section>
+
+        {/* Tools Section */}
+        <section className="mt-8">
+            <h2 className="text-lg font-semibold px-4 mb-4">Planning Tools</h2>
+            <div className="p-4 pt-0">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {features.map((feature) => (
+                        <Card key={feature.title} className="p-4 flex flex-col items-center justify-center text-center transition-all hover:shadow-lg hover:-translate-y-1">
+                            <div className="p-3 bg-primary/10 rounded-full mb-2">
+                                <feature.icon className="h-6 w-6 text-primary" />
+                            </div>
+                            <p className="font-semibold text-sm">{feature.title}</p>
+                        </Card>
+                    ))}
+                </div>
+            </div>
         </section>
       </main>
     </div>
