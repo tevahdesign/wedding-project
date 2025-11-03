@@ -324,7 +324,7 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
             <div className="grid grid-cols-3 gap-2 mt-2">
                 {galleryFields.map((field, index) => (
                     <div key={field.id} className="relative">
-                        <Image src={field.value} alt={`Gallery image ${index + 1}`} width={100} height={100} className="rounded-md object-cover w-full h-24" />
+                        {field.value && <Image src={field.value} alt={`Gallery image ${index + 1}`} width={100} height={100} className="rounded-md object-cover w-full h-24" />}
                         <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6" onClick={() => removeGallery(index)}>
                             <X className="h-4 w-4" />
                         </Button>
@@ -340,7 +340,7 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
                     const files = Array.from(e.target.files || []);
                     for (const file of files) {
                         const dataUri = await fileToDataUri(file);
-                        appendGallery(dataUri);
+                        appendGallery({ value: dataUri });
                     }
                 }}
             />
