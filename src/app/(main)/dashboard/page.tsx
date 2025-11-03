@@ -23,18 +23,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const features = [
   {
-    title: "AI Style Quiz",
-    description: "Personalized wedding style suggestions.",
-    icon: Wand2,
-    href: "/style-quiz",
-  },
-  {
-    title: "Website Builder",
-    description: "Create your beautiful wedding website.",
-    icon: Globe,
-    href: "/website-builder",
-  },
-  {
     title: "Guest List",
     description: "Manage your guests and track RSVPs.",
     icon: Users,
