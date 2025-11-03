@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
 import { FirebaseClientProvider } from "@/firebase/client-provider"
+import { ProgressBar } from "@/components/app/progress-bar"
+import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "WedEase",
@@ -28,6 +30,9 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans antialiased">
+        <Suspense fallback={null}>
+          <ProgressBar />
+        </Suspense>
         <FirebaseClientProvider>
           {children}
           <Toaster />
@@ -35,4 +40,3 @@ export default function RootLayout({
       </body>
     </html>
   )
-}
