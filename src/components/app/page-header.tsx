@@ -16,10 +16,10 @@ type PageHeaderProps = {
 export function PageHeader({ title, description, children, showBackButton = false }: PageHeaderProps) {
     const router = useRouter();
   return (
-    <div className="flex items-center justify-between gap-4 p-4 bg-white border-b sticky top-0 z-10">
-      <div className="flex items-center gap-2">
+    <div className="flex items-start justify-between gap-4 p-4 bg-white border-b sticky top-0 z-10">
+      <div className="flex items-start gap-2">
         {showBackButton && (
-            <Button variant="ghost" size="icon" onClick={() => router.back()}>
+            <Button variant="ghost" size="icon" onClick={() => router.back()} className="!mt-0">
                 <ChevronLeft className="h-6 w-6" />
             </Button>
         )}
