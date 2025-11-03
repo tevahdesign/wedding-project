@@ -1,5 +1,5 @@
 
-import { Church, Camera, Utensils, Music, ClipboardList, Flower, Gem, Users, Wand2, Star, Heart } from "lucide-react";
+import { Church, Camera, Utensils, Music, ClipboardList, Flower, Gem, Users, Wand2, Star, Heart, LayoutGrid } from "lucide-react";
 
 export const features = [
   {
@@ -130,19 +130,19 @@ export const blogPosts = [
 ]
 
 export const vendorCategories = [
-    { id: 'venues', name: 'Venues', description: 'Find the perfect place', icon: Church },
-    { id: 'photography', name: 'Photography', description: 'Capture your moments', icon: Camera },
-    { id: 'catering', name: 'Catering', description: 'Delicious food options', icon: Utensils },
-    { id: 'music', name: 'Music & DJs', description: 'Set the mood', icon: Music },
-    { id: 'planners', name: 'Planners', description: 'Expert wedding help', icon: ClipboardList },
-    { id: 'florists', name: 'Florists', description: 'Beautiful arrangements', icon: Flower },
+    { id: 'venues', name: 'Venues', description: 'Find the perfect place', icon: 'Church' },
+    { id: 'photography', name: 'Photography', description: 'Capture your moments', icon: 'Camera' },
+    { id: 'catering', name: 'Catering', description: 'Delicious food options', icon: 'Utensils' },
+    { id: 'music', name: 'Music', description: 'Set the mood', icon: 'Music' },
+    { id: 'planners', name: 'Planners', description: 'Expert wedding help', icon: 'ClipboardList' },
+    { id: 'florists', name: 'Florists', description: 'Beautiful arrangements', icon: 'Flower' },
 ];
 
 export const popularVendors = [
     {
         id: 'vendor-1',
         name: 'The Grand Ballroom',
-        category: 'Venue',
+        category: 'Venues',
         location: 'New York, NY',
         priceRange: '$$$$',
         rating: 4.9,
@@ -174,5 +174,29 @@ export const popularVendors = [
         isFeatured: false,
         isFavorited: false,
         imageId: 'vendor-gourmet-celebrations'
+    },
+    {
+        id: 'vendor-4',
+        name: 'Blissful Bouquets',
+        category: 'Florists',
+        location: 'New York, NY',
+        priceRange: '$$',
+        rating: 4.9,
+        reviewCount: 78,
+        isFeatured: true,
+        isFavorited: true,
+        imageId: 'website-template-1'
+    },
+    {
+        id: 'vendor-5',
+        name: 'DJ Spark',
+        category: 'Music',
+        location: 'New York, NY',
+        priceRange: '$$',
+        rating: 4.7,
+        reviewCount: 112,
+        isFeatured: false,
+        isFavorited: false,
+        imageId: 'website-template-2'
     }
 ];
