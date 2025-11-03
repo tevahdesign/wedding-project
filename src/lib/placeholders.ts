@@ -1,22 +1,37 @@
 
-import { Church, Camera, Utensils, Music, ClipboardList, Flower, Gem, Users, Wand2, Star, Heart, LayoutGrid } from "lucide-react";
+import { Church, Camera, Utensils, Music, ClipboardList, Flower, Gem, Users, Wand2, Star, Heart, LayoutGrid, PiggyBank, Mail, Gift, Shield, Store } from "lucide-react";
 
 export const features = [
   {
-    title: "AI Style Discovery",
-    description: "Use our AI-powered quiz to find your perfect wedding theme and color palette.",
-    icon: Wand2
+    title: "Guest List",
+    description: "Manage your guests and track RSVPs.",
+    icon: Users,
   },
   {
-    title: "Smart Guest List",
-    description: "Manage your guests, RSVPs, and groups all in one place, effortlessly.",
-    icon: Users
+    title: "Budget Tracker",
+    description: "Keep your wedding expenses in control.",
+    icon: PiggyBank,
+  },
+   {
+    title: "Vendors",
+    description: "Browse and book top wedding vendors.",
+    icon: Store,
   },
   {
-    title: "Website Builder",
-    description: "Create a beautiful, personalized wedding website in minutes. No coding required.",
-    icon: Gem
-  }
+    title: "Digital Invitations",
+    description: "Design and send elegant invitations.",
+    icon: Mail,
+  },
+  {
+    title: "Wedding Registry",
+    description: "Combine gifts from any store.",
+    icon: Gift,
+  },
+  {
+    title: "Admin Panel",
+    description: "Manage vendors and categories.",
+    icon: Shield,
+  },
 ];
 
 export const allYourNeeds = [
@@ -89,11 +104,11 @@ export const packages = [
 
 export const testimonials = [
   {
-    quote: "WedEase made planning our wedding so much less stressful. The AI style quiz was spookily accurate and the guest list manager was a lifesaver!",
+    quote: "WedWise made planning our wedding so much less stressful. The AI style quiz was spookily accurate and the guest list manager was a lifesaver!",
     name: "Jessica & Tom",
   },
   {
-    quote: "Our wedding website was beautiful and so easy to set up. Our guests loved it! I highly recommend WedEase to anyone planning a wedding.",
+    quote: "Our wedding website was beautiful and so easy to set up. Our guests loved it! I highly recommend WedWise to anyone planning a wedding.",
     name: "Sarah & David",
   },
   {
