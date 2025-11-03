@@ -3,8 +3,6 @@
 
 import { useMemo, useState } from "react"
 import { ref, remove, update } from "firebase/database"
-import jsPDF from "jspdf"
-import autoTable from "jspdf-autotable"
 import {
   PlusCircle,
   MoreHorizontal,
@@ -14,8 +12,9 @@ import {
   XCircle,
   Download,
   Mail,
-  Copy,
-  Check,
+  Users,
+  Edit,
+  Trash2
 } from "lucide-react"
 
 import { PageHeader } from "@/components/app/page-header"
@@ -27,14 +26,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
@@ -47,8 +38,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -67,7 +56,6 @@ import { useList } from "@/firebase/database/use-list"
 import { GuestForm } from "./guest-form"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
-import { Textarea } from "@/components/ui/textarea"
 
 type GuestStatus = "Attending" | "Pending" | "Declined"
 
@@ -93,10 +81,8 @@ export default function GuestListPage() {
 
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
-  const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false)
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [isCopied, setIsCopied] = useState(false)
 
   const guestsRef = useMemo(() => {
     if (!user || !database) return null
@@ -105,16 +91,6 @@ export default function GuestListPage() {
 
   const { data: guests, loading } = useList<Guest>(guestsRef)
   
-  const attendeesWithEmail = useMemo(() => {
-      if (!guests) return [];
-      return guests.filter(g => g.status === 'Attending' && g.email);
-  }, [guests]);
-
-  const attendeeEmails = useMemo(() => {
-      return attendeesWithEmail.map(g => g.email).join(', ');
-  }, [attendeesWithEmail]);
-
-
   const handleAddClick = () => {
     setSelectedGuest(null)
     setIsFormOpen(true)
@@ -176,29 +152,6 @@ export default function GuestListPage() {
       setIsDeleting(false)
     }
   }
-  
-  const handleOpenEmailDialog = () => {
-    if (attendeesWithEmail.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "No Attendees to Email",
-        description: "There are no attending guests with email addresses.",
-      });
-      return;
-    }
-    setIsEmailDialogOpen(true);
-  };
-  
-  const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText(attendeeEmails).then(() => {
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
-       toast({
-        title: "Emails Copied!",
-        description: "Attendee email addresses are in your clipboard.",
-      });
-    });
-  };
 
   const getStatusBadgeClasses = (status: GuestStatus) => {
     return cn({
@@ -208,249 +161,96 @@ export default function GuestListPage() {
     });
   }
 
-  const downloadAsCSV = (data: Guest[], filename: string) => {
-    if (!data || data.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "No Data",
-        description: "There is no guest data to download.",
-      });
-      return;
-    }
-
-    const headers = ["ID", "Name", "Email", "Phone Number", "Group", "Status"];
-    const csvContent = [
-      headers.join(","),
-      ...data.map(item => [
-        item.id,
-        `"${item.name}"`,
-        `"${item.email || ''}"`,
-        `"${item.phoneNumber || ''}"`,
-        `"${item.group || ''}"`,
-        item.status
-      ].join(","))
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    if (link.href) {
-      URL.revokeObjectURL(link.href);
-    }
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const downloadAsPDF = (data: Guest[], filename: string, title: string) => {
-    if (!data || data.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "No Data",
-        description: "There is no guest data to download.",
-      });
-      return;
-    }
-
-    const doc = new jsPDF();
-    doc.text(title, 14, 16);
-
-    autoTable(doc, {
-      startY: 22,
-      head: [['Name', 'Email', 'Phone', 'Group', 'Status']],
-      body: data.map(guest => [
-        guest.name,
-        guest.email || 'N/A',
-        guest.phoneNumber || 'N/A',
-        guest.group || 'N/A',
-        guest.status,
-      ]),
-      headStyles: { fillColor: [100, 84, 144] }, // Primary color
-    });
-
-    doc.save(filename);
-  };
-
-  const handleDownload = (format: 'csv' | 'pdf', filter?: 'Bride' | 'Groom') => {
-    if (!guests) return;
-    
-    let data = guests;
-    let title = "Full Guest List";
-    let baseFilename = "full-guest-list";
-
-    if (filter) {
-        data = guests.filter(g => g.group === filter);
-        title = `${filter}'s Guest List`;
-        baseFilename = `guest-list-${filter.toLowerCase()}`;
-    }
-
-    if (format === 'csv') {
-        downloadAsCSV(data, `${baseFilename}.csv`);
-    } else {
-        downloadAsPDF(data, `${baseFilename}.pdf`, title);
-    }
-  };
-
   return (
-    <>
+    <div className="flex flex-col flex-1 bg-gray-50 pb-20">
       <PageHeader
-        title="Guest List Manager"
-        description="Organize your guests and track RSVPs."
+        title="Guest List"
+        description="Manage your guests and track RSVPs"
       >
-        <div className="flex gap-2">
-            <Button variant="outline" onClick={handleOpenEmailDialog}>
-                <Mail className="mr-2 h-4 w-4" />
-                Email Attendees
-            </Button>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline">
-                        <Download className="mr-2 h-4 w-4" />
-                        Download
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <DropdownMenuLabel>CSV Downloads</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => handleDownload('csv')}>Download Full List (CSV)</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDownload('csv', 'Bride')}>Download Bride's List (CSV)</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDownload('csv', 'Groom')}>Download Groom's List (CSV)</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuLabel>PDF Downloads</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => handleDownload('pdf')}>Download Full List (PDF)</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDownload('pdf', 'Bride')}>Download Bride's List (PDF)</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDownload('pdf', 'Groom')}>Download Groom's List (PDF)</DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-            <Button onClick={handleAddClick}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Guest
-            </Button>
-        </div>
+        <Button onClick={handleAddClick}>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Add Guest
+        </Button>
       </PageHeader>
-      
-      <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Email Attending Guests</DialogTitle>
-            <DialogDescription>
-              Copy the email addresses below and paste them into the BCC field of your email client.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <Textarea
-              readOnly
-              value={attendeeEmails}
-              rows={5}
-              className="bg-muted"
-            />
-          </div>
-          <DialogFooter>
-            <Button onClick={handleCopyToClipboard} className="w-full">
-              {isCopied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
-              {isCopied ? 'Copied!' : 'Copy Emails'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>
-              {selectedGuest ? "Edit Guest" : "Add New Guest"}
-            </DialogTitle>
-          </DialogHeader>
-          <GuestForm 
-            setDialogOpen={setIsFormOpen} 
-            guestToEdit={selectedGuest} 
-          />
-        </DialogContent>
-      </Dialog>
+      <div className="p-4 pt-0">
+          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>
+                  {selectedGuest ? "Edit Guest" : "Add New Guest"}
+                </DialogTitle>
+              </DialogHeader>
+              <GuestForm 
+                setDialogOpen={setIsFormOpen} 
+                guestToEdit={selectedGuest} 
+              />
+            </DialogContent>
+          </Dialog>
 
-      <AlertDialog
-        open={isDeleteAlertOpen}
-        onOpenChange={setIsDeleteAlertOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete{" "}
-              <span className="font-semibold">{selectedGuest?.name}</span> from
-              your guest list. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              disabled={isDeleting}
-              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...
-                </>
-              ) : (
-                "Delete"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          <AlertDialog
+            open={isDeleteAlertOpen}
+            onOpenChange={setIsDeleteAlertOpen}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete{" "}
+                  <span className="font-semibold">{selectedGuest?.name}</span> from
+                  your guest list. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
+                  className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Guests</CardTitle>
-          <CardDescription>
-            A total of {guests?.length || 0} guests have been invited.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead className="hidden md:table-cell">Group</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>
-                  <span className="sr-only">Actions</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <Card>
+            <CardHeader>
+              <CardTitle>All Guests</CardTitle>
+              <CardDescription>
+                A total of {guests?.length || 0} guests have been invited.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               {loading && (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center py-10">
-                    <div className="flex justify-center items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        <span>Loading guests...</span>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                  <div className="flex justify-center items-center gap-2 text-muted-foreground py-10">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span>Loading guests...</span>
+                  </div>
               )}
               {!loading && guests?.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center py-10">
-                    <p className="text-muted-foreground">No guests added yet.</p>
-                    <Button variant="link" onClick={handleAddClick} className="mt-2">Add your first guest</Button>
-                  </TableCell>
-                </TableRow>
-              )}
-              {guests?.map((guest) => (
-                <TableRow key={guest.id}>
-                  <TableCell>
-                    <div className="font-medium">{guest.name}</div>
-                    <div className="text-sm text-muted-foreground md:hidden">
-                      {guest.group}
+                  <div className="text-center py-10">
+                    <div className="flex flex-col items-center gap-4">
+                        <Users className="h-12 w-12 text-muted-foreground/50" />
+                        <p className="text-muted-foreground">No guests found.</p>
+                        <Button variant="secondary" onClick={handleAddClick} className="mt-2">Add your first guest</Button>
                     </div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    {guest.group}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
+                  </div>
+              )}
+              <div className="space-y-4">
+              {guests?.map((guest) => (
+                <Card key={guest.id} className="flex items-center p-4">
+                    <div className="flex-1 space-y-1">
+                        <p className="font-medium">{guest.name}</p>
+                        <p className="text-sm text-muted-foreground">{guest.group}</p>
+                    </div>
+                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Badge
                           variant="outline"
@@ -473,14 +273,13 @@ export default function GuestListPage() {
                         ))}
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </TableCell>
-                  <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           aria-haspopup="true"
                           size="icon"
                           variant="ghost"
+                          className="ml-2"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                           <span className="sr-only">Toggle menu</span>
@@ -491,25 +290,23 @@ export default function GuestListPage() {
                         <DropdownMenuItem
                           onClick={() => handleEditClick(guest)}
                         >
-                          Edit Guest Details
+                          <Edit className="mr-2 h-4 w-4" /> Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem disabled>Send Reminder</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="text-destructive"
                           onClick={() => handleDeleteClick(guest)}
                         >
-                          Delete Guest
+                          <Trash2 className="mr-2 h-4 w-4" /> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </TableCell>
-                </TableRow>
+                </Card>
               ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </>
+              </div>
+            </CardContent>
+          </Card>
+      </div>
+    </div>
   )
 }

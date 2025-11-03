@@ -6,45 +6,37 @@ import Link from "next/link"
 
 export default function AdminPage() {
   return (
-    <>
+    <div className="flex flex-col flex-1 bg-gray-50 pb-20">
       <PageHeader
         title="Admin Panel"
         description="Manage your application content and settings."
       />
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="p-4 pt-0 grid gap-4">
         <Link href="/admin/vendors">
-          <Card className="flex flex-col justify-between transition-all hover:shadow-lg hover:-translate-y-1 h-full">
-            <CardHeader>
-                <div className="mb-4 text-primary">
-                    <Store className="w-8 h-8" />
-                </div>
-                <CardTitle>Vendor Management</CardTitle>
-                <CardDescription>Add, edit, or delete vendors from your marketplace.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="text-sm font-medium text-primary flex items-center">
-                    Go to Vendor Management <ArrowRight className="ml-2 h-4 w-4" />
-                </div>
-            </CardContent>
+          <Card className="flex items-center p-4 transition-all hover:bg-muted">
+             <div className="mr-4 text-primary bg-primary/10 p-3 rounded-lg">
+                <Store className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+                <p className="font-semibold">Vendor Management</p>
+                <p className="text-sm text-muted-foreground">Add, edit, or delete vendors</p>
+            </div>
+            <ArrowRight className="ml-2 h-5 w-5 text-muted-foreground" />
           </Card>
         </Link>
         <Link href="/admin/categories">
-          <Card className="flex flex-col justify-between transition-all hover:shadow-lg hover:-translate-y-1 h-full">
-            <CardHeader>
-                <div className="mb-4 text-primary">
-                    <LayoutGrid className="w-8 h-8" />
-                </div>
-                <CardTitle>Category Management</CardTitle>
-                <CardDescription>Add, edit, or delete vendor categories.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="text-sm font-medium text-primary flex items-center">
-                    Go to Category Management <ArrowRight className="ml-2 h-4 w-4" />
-                </div>
-            </CardContent>
+          <Card className="flex items-center p-4 transition-all hover:bg-muted">
+            <div className="mr-4 text-primary bg-primary/10 p-3 rounded-lg">
+                <LayoutGrid className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+                <p className="font-semibold">Category Management</p>
+                <p className="text-sm text-muted-foreground">Add, edit, or delete categories</p>
+            </div>
+            <ArrowRight className="ml-2 h-5 w-5 text-muted-foreground" />
           </Card>
         </Link>
       </div>
-    </>
+    </div>
   )
 }

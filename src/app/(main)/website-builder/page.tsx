@@ -23,7 +23,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { useAuth, useFirestore } from '@/firebase'
 import { useToast } from '@/hooks/use-toast'
-import { Copy, Link as LinkIcon, Loader2, Check, Trash2 } from 'lucide-react'
+import { Copy, Link as LinkIcon, Loader2, Check, Trash2, Globe } from 'lucide-react'
 import Link from 'next/link'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 
@@ -91,6 +91,7 @@ export default function WebsiteBuilderPage() {
         }
     }
     fetchWebsiteData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userWebsiteRef]);
 
 
@@ -188,19 +189,15 @@ export default function WebsiteBuilderPage() {
   const formattedDate = weddingDate ? format(weddingDate, 'MMMM do, yyyy') : 'Select a date'
 
   return (
-    <>
+    <div className="flex flex-col flex-1 bg-gray-50 pb-20">
       <PageHeader
-        title="Wedding Website Builder"
+        title="Website Builder"
         description="Craft a beautiful home for your wedding story."
       />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div className="lg:col-span-1 space-y-6 sticky top-8">
+      <div className="p-4 pt-0 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Your Website Details</CardTitle>
-              <CardDescription>
-                Fill in the details for your personal wedding website.
-              </CardDescription>
+              <CardTitle>Website Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -234,8 +231,8 @@ export default function WebsiteBuilderPage() {
               <div className="space-y-2">
                 <Label htmlFor="vanity-url">Your Custom URL</Label>
                 <div className="flex items-center">
-                  <span className="text-sm text-muted-foreground bg-muted px-3 py-2.5 rounded-l-md border border-r-0 h-10 flex items-center">
-                    {websiteOrigin}/
+                  <span className="text-sm text-muted-foreground bg-muted px-3 py-2.5 rounded-l-md border border-r-0 h-10 flex items-center truncate">
+                    {websiteOrigin.replace('https://', '')}/
                   </span>
                   <Input
                     id="vanity-url"
@@ -308,11 +305,50 @@ export default function WebsiteBuilderPage() {
               )}
             </CardContent>
           </Card>
+
+           <Card>
+            <CardHeader>
+              <CardTitle>Live Preview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="w-full aspect-[9/16] bg-muted rounded-lg border overflow-hidden">
+                {previewImage && (
+                  <div className="relative w-full h-full text-white bg-slate-800">
+                    <Image
+                      src={previewImage.imageUrl}
+                      alt={previewImage.description}
+                      fill
+                      className="object-cover opacity-30"
+                      data-ai-hint={previewImage.imageHint}
+                    />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                      <h1 className="font-headline text-4xl font-bold">
+                        {coupleNames}
+                      </h1>
+                      <p className="mt-2 text-md uppercase tracking-widest">
+                        Are getting married!
+                      </p>
+                      <div className="w-16 h-px bg-white my-6" />
+                      <p className="text-lg font-semibold">
+                        {formattedDate}
+                      </p>
+                      <p className="mt-6 max-w-md text-sm">
+                        {welcomeMessage}
+                      </p>
+                      <Button variant="outline" className="mt-8 text-black">
+                        RSVP
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
            {initialVanityUrl && !loading && (
              <Card>
                 <CardHeader>
                     <CardTitle>Your Link is Ready!</CardTitle>
-                    <CardDescription>Share your beautiful website with your guests.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex items-center space-x-2">
@@ -326,34 +362,9 @@ export default function WebsiteBuilderPage() {
                         {isCopied ? 'Copied!' : 'Copy Link'}
                     </Button>
                 </CardContent>
-                <CardFooter>
-                     <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="w-full" disabled={isDeleting}>
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete Website
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete your
-                                    wedding website and all of its data.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
-                                    {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Continue
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                </CardFooter>
              </Card>
            )}
+
           <Button
             className="w-full"
             size="lg"
@@ -365,54 +376,39 @@ export default function WebsiteBuilderPage() {
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
               </>
             ) : (
-              'Save & Publish Website'
+             <>
+                <Globe className="mr-2 h-4 w-4" /> Save & Publish
+             </>
             )}
           </Button>
-        </div>
-        <div className="lg:col-span-2">
-          <Card className="sticky top-8">
-            <CardHeader>
-              <CardTitle>Live Preview</CardTitle>
-              <CardDescription>
-                This is how your website will appear to your guests.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="w-full aspect-[4/3] bg-muted rounded-lg border overflow-hidden">
-                {previewImage && (
-                  <div className="relative w-full h-full text-white bg-slate-800">
-                    <Image
-                      src={previewImage.imageUrl}
-                      alt={previewImage.description}
-                      fill
-                      className="object-cover opacity-30"
-                      data-ai-hint={previewImage.imageHint}
-                    />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
-                      <h1 className="font-headline text-5xl md:text-7xl font-bold">
-                        {coupleNames}
-                      </h1>
-                      <p className="mt-4 text-lg md:text-xl uppercase tracking-widest">
-                        Are getting married!
-                      </p>
-                      <div className="w-24 h-px bg-white my-8" />
-                      <p className="text-xl md:text-2xl font-semibold">
-                        {formattedDate}
-                      </p>
-                      <p className="mt-8 max-w-md text-base md:text-lg">
-                        {welcomeMessage}
-                      </p>
-                      <Button variant="outline" className="mt-12 text-black">
-                        RSVP
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+
+          {initialVanityUrl && !loading && (
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="w-full" disabled={isDeleting}>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete Website
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete your
+                            wedding website and all of its data.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                            {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Continue
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+          )}
       </div>
-    </>
+    </div>
   )
 }

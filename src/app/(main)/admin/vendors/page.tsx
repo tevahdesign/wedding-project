@@ -21,14 +21,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
@@ -58,6 +50,7 @@ import { useDatabase } from "@/firebase"
 import { useList } from "@/firebase/database/use-list"
 import { useToast } from "@/hooks/use-toast"
 import { VendorForm } from "./vendor-form"
+import Image from "next/image"
 
 type Vendor = {
   id: string
@@ -131,7 +124,7 @@ export default function VendorAdminPage() {
   }
 
   return (
-    <>
+    <div className="flex flex-col flex-1 bg-gray-50 pb-20">
       <PageHeader
         title="Vendor Management"
         description="Add, edit, or remove vendors from your marketplace."
@@ -142,102 +135,90 @@ export default function VendorAdminPage() {
         </Button>
       </PageHeader>
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[480px]">
-          <DialogHeader>
-            <DialogTitle>
-              {selectedVendor ? "Edit Vendor" : "Add New Vendor"}
-            </DialogTitle>
-          </DialogHeader>
-          <VendorForm 
-            setDialogOpen={setIsFormOpen} 
-            vendorToEdit={selectedVendor} 
-          />
-        </DialogContent>
-      </Dialog>
+       <div className="p-4 pt-0">
+          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+            <DialogContent className="sm:max-w-[480px]">
+              <DialogHeader>
+                <DialogTitle>
+                  {selectedVendor ? "Edit Vendor" : "Add New Vendor"}
+                </DialogTitle>
+              </DialogHeader>
+              <VendorForm 
+                setDialogOpen={setIsFormOpen} 
+                vendorToEdit={selectedVendor} 
+              />
+            </DialogContent>
+          </Dialog>
 
-      <AlertDialog
-        open={isDeleteAlertOpen}
-        onOpenChange={setIsDeleteAlertOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete{" "}
-              <span className="font-semibold">{selectedVendor?.name}</span>. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              disabled={isDeleting}
-              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...
-                </>
-              ) : (
-                "Delete"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          <AlertDialog
+            open={isDeleteAlertOpen}
+            onOpenChange={setIsDeleteAlertOpen}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete{" "}
+                  <span className="font-semibold">{selectedVendor?.name}</span>. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
+                  className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Vendors</CardTitle>
-          <CardDescription>
-            A total of {vendors?.length || 0} vendors in the marketplace.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Featured</TableHead>
-                <TableHead>
-                  <span className="sr-only">Actions</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <Card>
+            <CardHeader>
+              <CardTitle>All Vendors</CardTitle>
+              <CardDescription>
+                A total of {vendors?.length || 0} vendors in the marketplace.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               {loading && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-10">
-                    <div className="flex justify-center items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        <span>Loading vendors...</span>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                <div className="flex justify-center items-center gap-2 text-muted-foreground py-10">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>Loading vendors...</span>
+                </div>
               )}
               {!loading && vendors?.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-10">
-                     <div className="flex flex-col items-center gap-4">
+                 <div className="text-center py-10">
+                    <div className="flex flex-col items-center gap-4">
                         <Store className="h-12 w-12 text-muted-foreground/50" />
                         <p className="text-muted-foreground">No vendors found.</p>
                         <Button variant="secondary" onClick={handleAddClick} className="mt-2">Add your first vendor</Button>
                     </div>
-                  </TableCell>
-                </TableRow>
+                  </div>
               )}
+              <div className="space-y-4">
               {vendors?.map((vendor) => (
-                <TableRow key={vendor.id}>
-                  <TableCell className="font-medium">{vendor.name}</TableCell>
-                  <TableCell>{vendor.category}</TableCell>
-                   <TableCell>{vendor.location}</TableCell>
-                   <TableCell>
-                       {vendor.isFeatured && <Badge>Yes</Badge>}
-                   </TableCell>
-                  <TableCell>
+                <Card key={vendor.id} className="flex items-center p-2 pr-0">
+                    <Image
+                      src={vendor.imageId || "https://picsum.photos/seed/placeholder/100/100"}
+                      alt={vendor.name}
+                      width={80}
+                      height={80}
+                      className="rounded-md object-cover aspect-square"
+                    />
+                    <div className="flex-1 space-y-1 ml-4">
+                        <p className="font-medium">{vendor.name}</p>
+                        <p className="text-sm text-muted-foreground">{vendor.category}</p>
+                        {vendor.isFeatured && <Badge>Featured</Badge>}
+                    </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -265,13 +246,12 @@ export default function VendorAdminPage() {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </TableCell>
-                </TableRow>
+                </Card>
               ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </>
+              </div>
+            </CardContent>
+          </Card>
+       </div>
+    </div>
   )
 }

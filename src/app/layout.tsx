@@ -35,7 +35,7 @@ export default function RootLayout({
           <ProgressBar />
         </Suspense>
         <FirebaseClientProvider>
-          <main className="app-container bg-white">
+          <main className="app-container bg-background">
             {children}
             <BottomNav />
           </main>

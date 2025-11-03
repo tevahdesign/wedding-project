@@ -21,21 +21,10 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { PlusCircle } from "lucide-react"
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart"
 import { useMemo } from "react"
 import { useAuth, useDatabase } from "@/firebase"
 import { useList } from "@/firebase/database/use-list"
 import { ref } from "firebase/database"
-
-const chartConfig = {
-  spent: { label: "Spent", color: "hsl(var(--primary))" },
-  budget: { label: "Budget", color: "hsl(var(--secondary))" },
-}
 
 export default function BudgetTrackerPage() {
   const { user } = useAuth()
@@ -69,7 +58,7 @@ export default function BudgetTrackerPage() {
     })) || []
 
   return (
-    <>
+    <div className="flex flex-col flex-1 bg-gray-50 pb-20">
       <PageHeader
         title="Budget Tracker"
         description="Keep your wedding finances in order."
@@ -79,7 +68,7 @@ export default function BudgetTrackerPage() {
           Add Expense
         </Button>
       </PageHeader>
-      <div className="grid gap-6">
+      <div className="p-4 pt-0 space-y-4">
         <Card>
           <CardHeader>
             <CardTitle>Budget Overview</CardTitle>
@@ -102,53 +91,10 @@ export default function BudgetTrackerPage() {
           </CardFooter>
         </Card>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card>
+        <Card>
             <CardHeader>
               <CardTitle>Expense Breakdown</CardTitle>
-              <CardDescription>Spending by category</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer
-                config={chartConfig}
-                className="min-h-[200px] w-full"
-              >
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart
-                    data={chartData}
-                    margin={{ top: 20, right: 20, bottom: 5, left: 0 }}
-                  >
-                    <XAxis
-                      dataKey="name"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                    />
-                    <YAxis
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                      tickFormatter={(value) => `$${Number(value) / 1000}k`}
-                    />
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent indicator="dot" />}
-                    />
-                    <Bar dataKey="spent" fill="var(--color-spent)" radius={4} />
-                    <Bar
-                      dataKey="budget"
-                      fill="var(--color-budget)"
-                      radius={4}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
-              <CardDescription>Your latest wedding expenses.</CardDescription>
+              <CardDescription>Your latest wedding expenses by category.</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -180,8 +126,7 @@ export default function BudgetTrackerPage() {
               </Table>
             </CardContent>
           </Card>
-        </div>
       </div>
-    </>
+    </div>
   )
 }

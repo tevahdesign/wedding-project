@@ -13,12 +13,12 @@ export default function InvitationsPage() {
   const invitationTemplate = PlaceHolderImages.find(img => img.id === 'invitation-template-1');
 
   return (
-    <>
+    <div className="flex flex-col flex-1 bg-gray-50 pb-20">
       <PageHeader
         title="Digital Invitations"
         description="Design and send beautiful invitations in minutes."
       />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      <div className="p-4 pt-0 space-y-4">
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Customize Your Invitation</CardTitle>
@@ -57,9 +57,9 @@ export default function InvitationsPage() {
           </CardContent>
         </Card>
 
-        <div className="lg:col-span-2 flex items-center justify-center p-8 bg-muted rounded-lg h-full">
+        <div className="flex items-center justify-center p-4 bg-muted rounded-lg">
             {invitationTemplate && (
-              <Card className="w-full max-w-sm shadow-2xl">
+              <Card className="w-full max-w-sm shadow-lg">
                 <CardContent className="p-0">
                   <Image 
                     src={invitationTemplate.imageUrl} 
@@ -69,21 +69,21 @@ export default function InvitationsPage() {
                     className="w-full h-auto rounded-t-lg"
                     data-ai-hint={invitationTemplate.imageHint}
                   />
-                  <div className="p-8 text-center bg-card rounded-b-lg">
+                  <div className="p-6 text-center bg-card rounded-b-lg">
                     <h2 className="text-sm uppercase tracking-widest text-muted-foreground">The Wedding Of</h2>
-                    <h1 className="font-headline text-4xl my-4">Alex & Jordan</h1>
-                    <p className="text-muted-foreground whitespace-pre-line">
+                    <h1 className="font-headline text-3xl my-3">Alex & Jordan</h1>
+                    <p className="text-muted-foreground whitespace-pre-line text-sm">
                       Saturday, October 26, 2024
                       {'\n'}4:00 PM
                       {'\n'}The Grand Ballroom
                     </p>
-                    <Button variant="outline" className="mt-6">RSVP</Button>
+                    <Button variant="outline" className="mt-4">RSVP</Button>
                   </div>
                 </CardContent>
               </Card>
             )}
         </div>
       </div>
-    </>
+    </div>
   )
 }

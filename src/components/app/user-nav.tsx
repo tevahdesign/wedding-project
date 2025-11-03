@@ -1,73 +1,74 @@
-
 "use client"
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import * as React from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useAuth } from "@/firebase"
 import { getAuth, signOut } from "firebase/auth"
 
-export function UserNav() {
-  const { user } = useAuth()
+import {
+    LayoutDashboard,
+    Wand2,
+    Globe,
+    Users,
+    PiggyBank,
+    Mail,
+    Gift,
+    Store,
+    Shield,
+    LogOut,
+    Heart,
+} from "lucide-react"
+import { Button } from "../ui/button"
 
-  const handleLogout = async () => {
-    const auth = getAuth()
-    await signOut(auth)
-  }
+const menuItems = [
+    { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { path: "/style-quiz", icon: Wand2, label: "AI Style Quiz" },
+    { path: "/website-builder", icon: Globe, label: "Website Builder" },
+    { path: "/guest-list", icon: Users, label: "Guest List" },
+    { path: "/budget-tracker", icon: PiggyBank, label: "Budget Tracker" },
+    { path: "/vendors", icon: Store, label: "Vendors" },
+    { path: "/invitations", icon: Mail, label: "Digital Invitations" },
+    { path: "/registry", icon: Gift, label: "Registry" },
+    { path: "/admin", icon: Shield, label: "Admin" },
+]
 
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="relative h-12 w-full justify-start gap-3 px-3 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:px-0"
-        >
-          <Avatar className="h-8 w-8">
-            <AvatarImage
-              src={user?.photoURL || ""}
-              alt={user?.displayName || ""}
-            />
-            <AvatarFallback>
-              {user?.displayName?.charAt(0) || user?.email?.charAt(0) || "U"}
-            </AvatarFallback>
-          </Avatar>
-          <div className="text-left group-data-[collapsible=icon]:hidden">
-            <p className="text-sm font-medium">{user?.displayName}</p>
-            <p className="text-xs text-muted-foreground">{user?.email}</p>
-          </div>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">
-              {user?.displayName}
-            </p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {user?.email}
-            </p>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>Profile</DropdownMenuItem>
-          <DropdownMenuItem>Settings</DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
+export function MainNav() {
+    const pathname = usePathname()
+    const { user } = useAuth()
+
+    const handleLogout = async () => {
+        const auth = getAuth()
+        await signOut(auth)
+    }
+
+    return (
+        <div className="flex-1 overflow-y-auto">
+            <div className="p-4 flex items-center gap-4">
+                 <Heart className="w-8 h-8 text-primary" />
+                 <div>
+                    <p className="font-semibold">{user?.displayName || "Welcome!"}</p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                 </div>
+            </div>
+            <nav className="grid items-start px-4 text-sm font-medium">
+                {menuItems.map((item) => (
+                    <Link
+                        key={item.path}
+                        href={item.path}
+                        className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${
+                            pathname === item.path ? "bg-muted text-primary" : ""
+                        }`}
+                        >
+                        <item.icon className="h-4 w-4" />
+                        {item.label}
+                    </Link>
+                ))}
+                <Button onClick={handleLogout} variant="ghost" className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary justify-start">
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                </Button>
+            </nav>
+        </div>
+    )
 }

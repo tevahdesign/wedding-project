@@ -36,93 +36,85 @@ export default function RegistryPage() {
   const progress = totalItems > 0 ? (purchasedCount / totalItems) * 100 : 0
 
   return (
-    <>
+    <div className="flex flex-col flex-1 bg-gray-50 pb-20">
       <PageHeader
         title="Wedding Registry"
         description="All your wishes in one place."
       >
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Add Item or Link
+          Add Item
         </Button>
       </PageHeader>
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-        <div className="lg:col-span-3">
-          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {loading &&
-              Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i}>
-                  <div className="aspect-square bg-muted animate-pulse" />
-                  <CardHeader>
-                    <div className="h-6 bg-muted rounded w-3/4 animate-pulse" />
-                    <div className="h-4 bg-muted rounded w-1/2 animate-pulse mt-2" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-6 bg-muted rounded w-1/4 animate-pulse" />
-                  </CardContent>
-                  <CardFooter>
-                    <Button className="w-full" disabled>
-                      Loading...
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            {registryItems?.map((item) => {
-               const itemImage = PlaceHolderImages.find(
-                (img) => img.id === item.imageId
-              )
-              return (
-              <Card key={item.id} className="overflow-hidden">
-                {itemImage && (
-                  <div className="aspect-square bg-muted">
-                    <Image
-                      src={itemImage.imageUrl}
-                      alt={itemImage.description}
-                      width={300}
-                      height={300}
-                      className="w-full h-full object-cover"
-                      data-ai-hint={itemImage.imageHint}
-                    />
-                  </div>
-                )}
+      <div className="p-4 pt-0 space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Registry Progress</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Progress
+              value={progress}
+              aria-label={`${Math.round(progress)}% of gifts purchased`}
+            />
+            <p className="text-sm text-muted-foreground">
+              {purchasedCount} of {totalItems} gifts purchased.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" className="w-full">
+              Share Your Registry
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          {loading &&
+            Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i}>
+                <div className="aspect-square bg-muted animate-pulse" />
                 <CardHeader>
-                  <CardTitle>{item.title}</CardTitle>
-                  <CardDescription>From {item.store}</CardDescription>
+                  <div className="h-6 bg-muted rounded w-3/4 animate-pulse" />
+                  <div className="h-4 bg-muted rounded w-1/2 animate-pulse mt-2" />
                 </CardHeader>
                 <CardContent>
-                  <p className="text-lg font-semibold">{item.price}</p>
+                  <div className="h-6 bg-muted rounded w-1/4 animate-pulse" />
                 </CardContent>
-                <CardFooter>
-                  <Button className="w-full" disabled={item.purchased}>
-                    {item.purchased ? "Purchased" : "View & Purchase"}
-                  </Button>
-                </CardFooter>
               </Card>
-            )})}
-          </div>
-        </div>
-        <div className="lg:col-span-1 sticky top-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Registry Progress</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Progress
-                value={progress}
-                aria-label={`${Math.round(progress)}% of gifts purchased`}
-              />
-              <p className="text-sm text-muted-foreground">
-                {purchasedCount} of {totalItems} gifts purchased.
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full">
-                Share Your Registry
-              </Button>
-            </CardFooter>
-          </Card>
+            ))}
+          {registryItems?.map((item) => {
+              const itemImage = PlaceHolderImages.find(
+              (img) => img.id === item.imageId
+            )
+            return (
+            <Card key={item.id} className="overflow-hidden">
+              {itemImage && (
+                <div className="aspect-square bg-muted">
+                  <Image
+                    src={itemImage.imageUrl}
+                    alt={itemImage.description}
+                    width={300}
+                    height={300}
+                    className="w-full h-full object-cover"
+                    data-ai-hint={itemImage.imageHint}
+                  />
+                </div>
+              )}
+              <CardHeader className="p-4">
+                <CardTitle className="text-base">{item.title}</CardTitle>
+                <CardDescription>From {item.store}</CardDescription>
+              </CardHeader>
+              <CardContent className="p-4 pt-0">
+                <p className="text-md font-semibold">{item.price}</p>
+              </CardContent>
+              <CardFooter className="p-2">
+                <Button className="w-full" variant={item.purchased ? "secondary" : "default"} disabled={item.purchased}>
+                  {item.purchased ? "Purchased" : "View"}
+                </Button>
+              </CardFooter>
+            </Card>
+          )})}
         </div>
       </div>
-    </>
+    </div>
   )
 }

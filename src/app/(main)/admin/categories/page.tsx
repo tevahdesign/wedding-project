@@ -25,14 +25,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -130,11 +122,11 @@ export default function CategoryAdminPage() {
   const renderIcon = (iconName: keyof typeof lucideIcons) => {
     const IconComponent = lucideIcons[iconName] as Icon;
     if (!IconComponent) return null;
-    return <IconComponent className="h-5 w-5" />;
+    return <IconComponent className="h-6 w-6 text-primary" />;
   };
 
   return (
-    <>
+    <div className="flex flex-col flex-1 bg-gray-50 pb-20">
       <PageHeader
         title="Category Management"
         description="Add, edit, or remove vendor categories."
@@ -144,100 +136,87 @@ export default function CategoryAdminPage() {
           Add Category
         </Button>
       </PageHeader>
+      
+      <div className="p-4 pt-0">
+          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+            <DialogContent className="sm:max-w-[480px]">
+              <DialogHeader>
+                <DialogTitle>
+                  {selectedCategory ? "Edit Category" : "Add New Category"}
+                </DialogTitle>
+              </DialogHeader>
+              <CategoryForm 
+                setDialogOpen={setIsFormOpen} 
+                categoryToEdit={selectedCategory} 
+              />
+            </DialogContent>
+          </Dialog>
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[480px]">
-          <DialogHeader>
-            <DialogTitle>
-              {selectedCategory ? "Edit Category" : "Add New Category"}
-            </DialogTitle>
-          </DialogHeader>
-          <CategoryForm 
-            setDialogOpen={setIsFormOpen} 
-            categoryToEdit={selectedCategory} 
-          />
-        </DialogContent>
-      </Dialog>
+          <AlertDialog
+            open={isDeleteAlertOpen}
+            onOpenChange={setIsDeleteAlertOpen}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete the{" "}
+                  <span className="font-semibold">{selectedCategory?.name}</span> category. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
+                  className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
-      <AlertDialog
-        open={isDeleteAlertOpen}
-        onOpenChange={setIsDeleteAlertOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the{" "}
-              <span className="font-semibold">{selectedCategory?.name}</span> category. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              disabled={isDeleting}
-              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...
-                </>
-              ) : (
-                "Delete"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>All Categories</CardTitle>
-          <CardDescription>
-            A total of {categories?.length || 0} vendor categories.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Icon</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>
-                  <span className="sr-only">Actions</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <Card>
+            <CardHeader>
+              <CardTitle>All Categories</CardTitle>
+              <CardDescription>
+                A total of {categories?.length || 0} vendor categories.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               {loading && (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center py-10">
-                    <div className="flex justify-center items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        <span>Loading categories...</span>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                <div className="flex justify-center items-center gap-2 text-muted-foreground py-10">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>Loading categories...</span>
+                </div>
               )}
               {!loading && categories?.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center py-10">
-                     <div className="flex flex-col items-center gap-4">
-                        <LayoutGrid className="h-12 w-12 text-muted-foreground/50" />
-                        <p className="text-muted-foreground">No categories found.</p>
-                        <Button variant="secondary" onClick={handleAddClick} className="mt-2">Add your first category</Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                <div className="text-center py-10">
+                    <div className="flex flex-col items-center gap-4">
+                      <LayoutGrid className="h-12 w-12 text-muted-foreground/50" />
+                      <p className="text-muted-foreground">No categories found.</p>
+                      <Button variant="secondary" onClick={handleAddClick} className="mt-2">Add your first category</Button>
+                  </div>
+                </div>
               )}
+              <div className="space-y-4">
               {categories?.map((category) => (
-                <TableRow key={category.id}>
-                  <TableCell>{renderIcon(category.icon)}</TableCell>
-                  <TableCell className="font-medium">{category.name}</TableCell>
-                  <TableCell>{category.description}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
+                <Card key={category.id} className="flex items-center p-4">
+                  <div className="bg-primary/10 p-3 rounded-lg mr-4">
+                      {renderIcon(category.icon)}
+                  </div>
+                  <div className="flex-1 space-y-1">
+                      <p className="font-medium">{category.name}</p>
+                      <p className="text-sm text-muted-foreground">{category.description}</p>
+                  </div>
+                  <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           aria-haspopup="true"
@@ -264,13 +243,12 @@ export default function CategoryAdminPage() {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </TableCell>
-                </TableRow>
+                </Card>
               ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </>
+              </div>
+            </CardContent>
+          </Card>
+      </div>
+    </div>
   )
 }

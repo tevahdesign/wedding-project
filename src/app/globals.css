@@ -126,4 +126,7 @@ main.app-container {
   box-shadow: 0 0 20px rgba(0,0,0,0.1);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
+
