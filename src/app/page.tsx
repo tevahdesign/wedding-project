@@ -145,7 +145,7 @@ export default function RootPage() {
                       <Image src={item.imageId || "https://picsum.photos/seed/placeholder/400/600"} alt={item.name} width={400} height={600} className="rounded-2xl object-cover w-full aspect-[2/3] transition-transform duration-300 group-hover:scale-105" />
                       {item.isFeatured && <Badge className="absolute top-2 left-2">Featured</Badge>}
                     </CardContent>
-                    <div className="pt-2">
+                    <div className="pt-2 px-1">
                       <h3 className="font-semibold text-sm">{item.name}</h3>
                       <p className="text-xs text-muted-foreground">{item.category}</p>
                       <div className="flex items-center gap-2 mt-1">
@@ -234,5 +234,3 @@ export default function RootPage() {
     </div>
   )
 }
-
-    
