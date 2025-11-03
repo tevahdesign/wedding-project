@@ -202,7 +202,7 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
                 <FormLabel>{label}</FormLabel>
                 {field.value ? (
                     <div className="relative w-full h-40">
-                         <Image src={field.value} alt={`${label} preview`} layout="fill" className="rounded-md object-cover" />
+                         <Image src={field.value} alt={`${label} preview`} fill className="rounded-md object-cover" />
                          <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => setValue(name, "")}>
                              <Trash2 className="h-4 w-4" />
                          </Button>
@@ -361,7 +361,7 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
                          <div className="flex w-full overflow-x-auto space-x-4 pb-2">
                             {galleryFields.map((field, index) => (
                                 <div key={field.id} className="relative flex-shrink-0 w-32 h-32">
-                                    {field.value && <Image src={field.value} alt={`Gallery image ${index + 1}`} layout="fill" className="rounded-md object-cover" />}
+                                    {field.id && <Image src={field.id} alt={`Gallery image ${index + 1}`} fill className="rounded-md object-cover" />}
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                             <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6">
@@ -399,7 +399,7 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
                                         const files = Array.from(e.target.files || []);
                                         for (const file of files) {
                                             const dataUri = await fileToDataUri(file);
-                                            appendGallery({ value: dataUri });
+                                            appendGallery(dataUri);
                                         }
                                     }}
                                 />
