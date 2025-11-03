@@ -19,6 +19,7 @@ import {
   Mail,
   Gift,
   Store,
+  Shield,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -31,6 +32,7 @@ const menuItems = [
   { path: "/vendors", icon: Store, label: "Vendors" },
   { path: "/invitations", icon: Mail, label: "Digital Invitations" },
   { path: "/registry", icon: Gift, label: "Registry" },
+  { path: "/admin", icon: Shield, label: "Admin" },
 ]
 
 export function MainNav() {

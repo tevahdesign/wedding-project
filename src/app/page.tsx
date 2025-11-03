@@ -48,6 +48,12 @@ export default function RootPage() {
             >
               Testimonials
             </Link>
+             <Link
+              href="/admin"
+              className="text-muted-foreground hover:text-primary transition-colors font-medium"
+            >
+              Admin
+            </Link>
           </nav>
           <div className="flex items-center gap-2">
             <Button variant="ghost" asChild>
