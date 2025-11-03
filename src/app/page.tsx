@@ -37,6 +37,12 @@ export default function RootPage() {
               Features
             </Link>
             <Link
+              href="/vendors"
+              className="text-muted-foreground hover:text-primary transition-colors font-medium"
+            >
+              Vendors
+            </Link>
+            <Link
               href="#testimonials"
               className="text-muted-foreground hover:text-primary transition-colors font-medium"
             >
