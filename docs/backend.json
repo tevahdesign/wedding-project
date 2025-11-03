@@ -97,13 +97,26 @@
         "name": { "type": "string", "description": "The name of the vendor." },
         "category": { "type": "string", "description": "The category of the vendor (e.g., Venues, Photography)." },
         "location": { "type": "string", "description": "The location of the vendor." },
-        "priceRange": { "type": "string", "enum": ["$", "$$", "$$$", "$$$$"], "description": "The price range of the vendor." },
+        "priceRange": { "type": "string", "enum": ["₹", "₹₹", "₹₹₹", "₹₹₹₹"], "description": "The price range of the vendor." },
         "rating": { "type": "number", "description": "The average rating of the vendor." },
         "reviewCount": { "type": "number", "description": "The number of reviews for the vendor." },
         "isFeatured": { "type": "boolean", "description": "Whether the vendor is a featured vendor." },
-        "imageId": { "type": "string", "description": "The ID of the placeholder image for the vendor." }
+        "imageId": { "type": "string", "description": "The ID of the placeholder image for the vendor." },
+        "logoImageId": { "type": "string", "description": "The ID of the placeholder image for the vendor's logo." },
+        "galleryImageIds": { "type": "array", "items": { "type": "string" }, "description": "A list of placeholder image IDs for the vendor's gallery." },
+        "services": { "type": "array", "items": { "$ref": "#/entities/VendorService" } }
       },
       "required": ["id", "name", "category", "location", "priceRange", "rating", "reviewCount"]
+    },
+    "VendorService": {
+      "title": "Vendor Service",
+      "description": "A specific service offered by a vendor.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "The name of the service." },
+        "price": { "type": "number", "description": "The price of the service in rupees." }
+      },
+      "required": ["name", "price"]
     },
     "VendorCategory": {
         "title": "Vendor Category",
@@ -138,3 +151,5 @@
     "rules": "rules.json"
   }
 }
+
+    

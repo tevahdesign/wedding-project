@@ -3,7 +3,6 @@
 
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { vendorCategories as placeholderCategories, popularVendors as placeholderVendors } from '@/lib/placeholders';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,6 +15,7 @@ import { useList } from '@/firebase/database/use-list';
 import { ref } from 'firebase/database';
 import type { Icon } from 'lucide-react';
 import * as lucideIcons from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 // Define types for our data
 type Vendor = {
@@ -29,6 +29,7 @@ type Vendor = {
     isFeatured: boolean;
     imageId: string;
     isFavorited: boolean;
+    logoImageId?: string;
 };
 
 type VendorCategory = {
@@ -167,7 +168,7 @@ export default function VendorsPage() {
                                             {vendor.isFeatured && <Badge>Featured</Badge>}
                                         </div>
                                         <div className="flex items-center justify-between mt-4">
-                                            <p className="text-sm">{vendor.priceRange}</p>
+                                            <p className="text-sm font-bold">{vendor.priceRange}</p>
                                             <div className="flex items-center gap-1 text-sm">
                                                 <Star className="w-4 h-4 text-yellow-400 fill-current" />
                                                 <span className="font-semibold">{vendor.rating.toFixed(1)}</span>
@@ -188,3 +189,5 @@ export default function VendorsPage() {
         </>
     );
 }
+
+    
