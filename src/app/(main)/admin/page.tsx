@@ -6,12 +6,13 @@ import Link from "next/link"
 
 export default function AdminPage() {
   return (
-    <div className="flex flex-col flex-1 bg-gray-50 pb-20">
+    <div className="flex flex-col flex-1 pb-20">
       <PageHeader
         title="Admin Panel"
         description="Manage your application content and settings."
+        showBackButton
       />
-      <div className="p-4 pt-0 grid gap-4">
+      <div className="p-4 pt-4 grid gap-4">
         <Link href="/admin/vendors">
           <Card className="flex items-center p-4 transition-all hover:bg-muted">
              <div className="mr-4 text-primary bg-primary/10 p-3 rounded-lg">

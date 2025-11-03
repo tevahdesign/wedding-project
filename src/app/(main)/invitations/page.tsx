@@ -1,3 +1,4 @@
+
 import Image from "next/image"
 import { PageHeader } from "@/components/app/page-header"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -13,12 +14,13 @@ export default function InvitationsPage() {
   const invitationTemplate = PlaceHolderImages.find(img => img.id === 'invitation-template-1');
 
   return (
-    <div className="flex flex-col flex-1 bg-gray-50 pb-20">
+    <div className="flex flex-col flex-1 pb-20">
       <PageHeader
         title="Digital Invitations"
         description="Design and send beautiful invitations in minutes."
+        showBackButton
       />
-      <div className="p-4 pt-0 space-y-4">
+      <div className="p-4 pt-4 space-y-4">
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Customize Your Invitation</CardTitle>

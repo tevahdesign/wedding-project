@@ -36,17 +36,18 @@ export default function RegistryPage() {
   const progress = totalItems > 0 ? (purchasedCount / totalItems) * 100 : 0
 
   return (
-    <div className="flex flex-col flex-1 bg-gray-50 pb-20">
+    <div className="flex flex-col flex-1 pb-20">
       <PageHeader
         title="Wedding Registry"
         description="All your wishes in one place."
+        showBackButton
       >
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Item
         </Button>
       </PageHeader>
-      <div className="p-4 pt-0 space-y-4">
+      <div className="p-4 pt-4 space-y-4">
         <Card>
           <CardHeader>
             <CardTitle>Registry Progress</CardTitle>

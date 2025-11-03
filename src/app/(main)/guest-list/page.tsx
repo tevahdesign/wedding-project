@@ -10,8 +10,6 @@ import {
   CheckCircle,
   Circle,
   XCircle,
-  Download,
-  Mail,
   Users,
   Edit,
   Trash2
@@ -22,9 +20,6 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -162,10 +157,11 @@ export default function GuestListPage() {
   }
 
   return (
-    <div className="flex flex-col flex-1 bg-gray-50 pb-20">
+    <div className="flex flex-col flex-1 pb-20">
       <PageHeader
         title="Guest List"
         description="Manage your guests and track RSVPs"
+        showBackButton
       >
         <Button onClick={handleAddClick}>
           <PlusCircle className="mr-2 h-4 w-4" />
@@ -173,7 +169,7 @@ export default function GuestListPage() {
         </Button>
       </PageHeader>
 
-      <div className="p-4 pt-0">
+      <div className="p-4 pt-4">
           <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
@@ -219,93 +215,82 @@ export default function GuestListPage() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>All Guests</CardTitle>
-              <CardDescription>
-                A total of {guests?.length || 0} guests have been invited.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loading && (
-                  <div className="flex justify-center items-center gap-2 text-muted-foreground py-10">
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      <span>Loading guests...</span>
-                  </div>
-              )}
-              {!loading && guests?.length === 0 && (
-                  <div className="text-center py-10">
-                    <div className="flex flex-col items-center gap-4">
-                        <Users className="h-12 w-12 text-muted-foreground/50" />
-                        <p className="text-muted-foreground">No guests found.</p>
-                        <Button variant="secondary" onClick={handleAddClick} className="mt-2">Add your first guest</Button>
-                    </div>
-                  </div>
-              )}
-              <div className="space-y-4">
-              {guests?.map((guest) => (
-                <Card key={guest.id} className="flex items-center p-4">
-                    <div className="flex-1 space-y-1">
-                        <p className="font-medium">{guest.name}</p>
-                        <p className="text-sm text-muted-foreground">{guest.group}</p>
-                    </div>
-                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Badge
-                          variant="outline"
-                          className={cn("cursor-pointer transition-colors hover:bg-muted", getStatusBadgeClasses(guest.status))}
-                        >
-                          {guest.status}
-                        </Badge>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuLabel>Change Status</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {statusOptions.map(option => (
-                           <DropdownMenuItem
-                            key={option.value}
-                            onClick={() => handleStatusChange(guest, option.value)}
-                          >
-                            <option.icon className="mr-2 h-4 w-4" />
-                            <span>{option.label}</span>
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          aria-haspopup="true"
-                          size="icon"
-                          variant="ghost"
-                          className="ml-2"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          onClick={() => handleEditClick(guest)}
-                        >
-                          <Edit className="mr-2 h-4 w-4" /> Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() => handleDeleteClick(guest)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" /> Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                </Card>
-              ))}
+          {loading && (
+              <div className="flex justify-center items-center gap-2 text-muted-foreground py-10">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Loading guests...</span>
               </div>
-            </CardContent>
-          </Card>
+          )}
+          {!loading && guests?.length === 0 && (
+              <div className="text-center py-10">
+                <div className="flex flex-col items-center gap-4">
+                    <Users className="h-12 w-12 text-muted-foreground/50" />
+                    <p className="text-muted-foreground">No guests found.</p>
+                    <Button variant="secondary" onClick={handleAddClick} className="mt-2">Add your first guest</Button>
+                </div>
+              </div>
+          )}
+          <div className="space-y-4">
+          {guests?.map((guest) => (
+            <Card key={guest.id} className="flex items-center p-4">
+                <div className="flex-1 space-y-1">
+                    <p className="font-medium">{guest.name}</p>
+                    <p className="text-sm text-muted-foreground">{guest.group}</p>
+                </div>
+                  <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Badge
+                      variant="outline"
+                      className={cn("cursor-pointer transition-colors hover:bg-muted", getStatusBadgeClasses(guest.status))}
+                    >
+                      {guest.status}
+                    </Badge>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {statusOptions.map(option => (
+                        <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => handleStatusChange(guest, option.value)}
+                      >
+                        <option.icon className="mr-2 h-4 w-4" />
+                        <span>{option.label}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      aria-haspopup="true"
+                      size="icon"
+                      variant="ghost"
+                      className="ml-2"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                      <span className="sr-only">Toggle menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuItem
+                      onClick={() => handleEditClick(guest)}
+                    >
+                      <Edit className="mr-2 h-4 w-4" /> Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      onClick={() => handleDeleteClick(guest)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+            </Card>
+          ))}
+          </div>
       </div>
     </div>
   )

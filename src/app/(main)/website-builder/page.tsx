@@ -13,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -189,12 +188,13 @@ export default function WebsiteBuilderPage() {
   const formattedDate = weddingDate ? format(weddingDate, 'MMMM do, yyyy') : 'Select a date'
 
   return (
-    <div className="flex flex-col flex-1 bg-gray-50 pb-20">
+    <div className="flex flex-col flex-1 pb-20">
       <PageHeader
         title="Website Builder"
         description="Craft a beautiful home for your wedding story."
+        showBackButton
       />
-      <div className="p-4 pt-0 space-y-6">
+      <div className="p-4 pt-4 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Website Details</CardTitle>
@@ -349,6 +349,7 @@ export default function WebsiteBuilderPage() {
              <Card>
                 <CardHeader>
                     <CardTitle>Your Link is Ready!</CardTitle>
+                    <CardDescription>Share your beautiful website with your guests.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex items-center space-x-2">
@@ -365,49 +366,51 @@ export default function WebsiteBuilderPage() {
              </Card>
            )}
 
-          <Button
-            className="w-full"
-            size="lg"
-            onClick={handleSave}
-            disabled={isSaving || loading}
-          >
-            {isSaving ? (
+          <div className='flex flex-col gap-2'>
+            <Button
+              className="w-full"
+              size="lg"
+              onClick={handleSave}
+              disabled={isSaving || loading}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
+                </>
+              ) : (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
+                  <Globe className="mr-2 h-4 w-4" /> Save & Publish
               </>
-            ) : (
-             <>
-                <Globe className="mr-2 h-4 w-4" /> Save & Publish
-             </>
-            )}
-          </Button>
+              )}
+            </Button>
 
-          {initialVanityUrl && !loading && (
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button variant="destructive" className="w-full" disabled={isDeleting}>
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Website
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete your
-                            wedding website and all of its data.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
-                            {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Continue
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-          )}
+            {initialVanityUrl && !loading && (
+              <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                      <Button variant="destructive" className="w-full" disabled={isDeleting}>
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete Website
+                      </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                      <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete your
+                              wedding website and all of its data.
+                          </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                              Continue
+                          </AlertDialogAction>
+                      </AlertDialogFooter>
+                  </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
       </div>
     </div>
   )

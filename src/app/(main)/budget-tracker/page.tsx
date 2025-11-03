@@ -50,32 +50,27 @@ export default function BudgetTrackerPage() {
   }, [budgetData])
 
   const progressValue = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0
-  const chartData =
-    budgetData?.map((cat) => ({
-      name: cat.name,
-      spent: cat.spent,
-      budget: cat.budget,
-    })) || []
-
+  
   return (
-    <div className="flex flex-col flex-1 bg-gray-50 pb-20">
+    <div className="flex flex-col flex-1 pb-20">
       <PageHeader
         title="Budget Tracker"
         description="Keep your wedding finances in order."
+        showBackButton
       >
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Expense
         </Button>
       </PageHeader>
-      <div className="p-4 pt-0 space-y-4">
+      <div className="p-4 pt-4 space-y-4">
         <Card>
           <CardHeader>
             <CardTitle>Budget Overview</CardTitle>
             <CardDescription>
               {loading
                 ? "Loading budget..."
-                : `You've spent $${totalSpent.toLocaleString()} of your $${totalBudget.toLocaleString()} budget.`}
+                : `You've spent ₹${totalSpent.toLocaleString()} of your ₹${totalBudget.toLocaleString()} budget.`}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -86,7 +81,7 @@ export default function BudgetTrackerPage() {
           </CardContent>
           <CardFooter>
             <p className="text-sm text-muted-foreground">
-              ${(totalBudget - totalSpent).toLocaleString()} remaining.
+              ₹{(totalBudget - totalSpent).toLocaleString()} remaining.
             </p>
           </CardFooter>
         </Card>
@@ -118,7 +113,7 @@ export default function BudgetTrackerPage() {
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">{item.name}</TableCell>
                         <TableCell className="text-right">
-                          ${item.spent.toLocaleString()}
+                          ₹{item.spent.toLocaleString()}
                         </TableCell>
                       </TableRow>
                     ))}

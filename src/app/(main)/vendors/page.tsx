@@ -85,8 +85,8 @@ export default function VendorsPage() {
 
 
     return (
-        <div className="flex flex-col flex-1 bg-gray-50 pb-20">
-            <PageHeader title="Find Vendors">
+        <div className="flex flex-col flex-1 pb-20">
+            <PageHeader title="Find Vendors" showBackButton>
                 <Button variant="ghost" size="icon">
                     <SlidersHorizontal className="h-5 w-5" />
                 </Button>
@@ -105,7 +105,7 @@ export default function VendorsPage() {
             </div>
 
             <div className="px-4">
-                <div className="flex space-x-3 overflow-x-auto whitespace-nowrap pb-2">
+                <div className="flex space-x-3 overflow-x-auto whitespace-nowrap pb-2 -mx-4 px-4">
                     {categoriesLoading ? (
                         Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-9 w-24 bg-gray-200 rounded-full animate-pulse"></div>)
                     ) : (
@@ -115,7 +115,7 @@ export default function VendorsPage() {
                                 <Button 
                                     key={category.id} 
                                     variant={selectedCategory === category.name ? 'default' : 'secondary'}
-                                    className="rounded-full"
+                                    className="rounded-full shrink-0"
                                     onClick={() => setSelectedCategory(category.name)}
                                 >
                                     {Icon && <Icon className="mr-2 h-4 w-4" />}

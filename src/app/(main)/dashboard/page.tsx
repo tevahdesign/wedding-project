@@ -10,8 +10,9 @@ import {
   Wand2,
   Globe,
   Mail,
-  Bell,
-  Menu
+  Shield,
+  Heart,
+  Store,
 } from "lucide-react"
 import { useAuth, useDatabase } from "@/firebase"
 import { ref } from "firebase/database"
@@ -25,51 +26,56 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet"
-import { MainNav } from "@/components/app/main-nav"
 
 const features = [
   {
     title: "AI Style Quiz",
     description: "Personalized wedding style suggestions.",
-    icon: <Wand2 className="w-6 h-6" />,
+    icon: Wand2,
     href: "/style-quiz",
   },
   {
     title: "Website Builder",
     description: "Create your beautiful wedding website.",
-    icon: <Globe className="w-6 h-6" />,
+    icon: Globe,
     href: "/website-builder",
   },
   {
     title: "Guest List",
     description: "Manage your guests and track RSVPs.",
-    icon: <Users className="w-6 h-6" />,
+    icon: Users,
     href: "/guest-list",
   },
   {
     title: "Budget Tracker",
     description: "Keep your wedding expenses in control.",
-    icon: <PiggyBank className="w-6 h-6" />,
+    icon: PiggyBank,
     href: "/budget-tracker",
+  },
+   {
+    title: "Vendors",
+    description: "Browse and book top wedding vendors.",
+    icon: Store,
+    href: "/vendors",
   },
   {
     title: "Digital Invitations",
     description: "Design and send elegant invitations.",
-    icon: <Mail className="w-6 h-6" />,
+    icon: Mail,
     href: "/invitations",
   },
   {
     title: "Wedding Registry",
     description: "Combine gifts from any store.",
-    icon: <Gift className="w-6 h-6" />,
+    icon: Gift,
     href: "/registry",
+  },
+  {
+    title: "Admin Panel",
+    description: "Manage vendors and categories.",
+    icon: Shield,
+    href: "/admin",
   },
 ]
 
@@ -112,26 +118,15 @@ export default function DashboardPage() {
 
 
   return (
-    <div className="flex flex-col flex-1 bg-gray-50 pb-20">
-      <header className="p-4 flex items-center justify-between bg-white border-b">
-          <Sheet>
-            <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                    <Menu className="w-6 h-6" />
-                </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="p-0">
-                <MainNav />
-            </SheetContent>
-          </Sheet>
-        <h1 className="text-xl font-semibold">Dashboard</h1>
+    <div className="flex flex-col flex-1 pb-20">
+      <header className="p-4 flex items-center justify-between bg-background border-b">
+          <div className="flex items-center gap-3">
+             <Heart className="h-8 w-8 text-primary" />
+             <h1 className="text-xl font-bold text-foreground">WedEase</h1>
+          </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="w-6 h-6" />
-            <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500" />
-          </Button>
            <Link href="/login">
-            <Avatar className="h-8 w-8">
+            <Avatar className="h-9 w-9">
                 <AvatarImage src={user?.photoURL || "https://i.pravatar.cc/150"} />
                 <AvatarFallback>{user?.displayName?.charAt(0) || "U"}</AvatarFallback>
             </Avatar>
@@ -146,7 +141,7 @@ export default function DashboardPage() {
         </div>
       
         <div className="grid gap-4 md:grid-cols-3 mb-6">
-            <Card className="bg-primary/10 border-primary">
+            <Card className="bg-primary/10 border-primary/20">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-sm font-medium">Guests Attending</CardTitle>
                     <Users className="h-5 w-5 text-primary" />
@@ -155,16 +150,16 @@ export default function DashboardPage() {
                     <div className="text-2xl font-bold">{rsvpCount} / {guestCount}</div>
                 </CardContent>
             </Card>
-            <Card className="bg-secondary">
+            <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-sm font-medium">Budget Spent</CardTitle>
                     <PiggyBank className="h-5 w-5 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">${totalSpent.toLocaleString()}</div>
+                    <div className="text-2xl font-bold">₹{totalSpent.toLocaleString()}</div>
                 </CardContent>
             </Card>
-            <Card className="bg-secondary">
+            <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-sm font-medium">Registry</CardTitle>
                     <Gift className="h-5 w-5 text-muted-foreground" />
@@ -182,7 +177,7 @@ export default function DashboardPage() {
                 <Card
                     className="flex items-center p-4 transition-all hover:bg-muted"
                 >
-                    <div className="mr-4 text-primary">{feature.icon}</div>
+                    <div className="mr-4 text-primary bg-primary/10 p-3 rounded-lg"><feature.icon /></div>
                     <div className="flex-1">
                     <p className="font-semibold">{feature.title}</p>
                     <p className="text-sm text-muted-foreground">{feature.description}</p>
