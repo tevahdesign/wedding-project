@@ -97,7 +97,7 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
     },
   })
 
-  const { control, handleSubmit, reset, setValue } = form;
+  const { control, handleSubmit, reset, setValue, getValues } = form;
 
   const { fields: serviceFields, append: appendService, remove: removeService } = useFieldArray({
     control,
@@ -361,7 +361,7 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
                          <div className="flex w-full overflow-x-auto space-x-4 pb-2">
                             {galleryFields.map((field, index) => (
                                 <div key={field.id} className="relative flex-shrink-0 w-32 h-32">
-                                    {field.id && <Image src={field.id} alt={`Gallery image ${index + 1}`} fill className="rounded-md object-cover" />}
+                                    {field.value && <Image src={field.value} alt={`Gallery image ${index + 1}`} fill className="rounded-md object-cover" />}
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                             <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6">
@@ -397,10 +397,11 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
                                     multiple
                                     onChange={async (e) => {
                                         const files = Array.from(e.target.files || []);
-                                        for (const file of files) {
-                                            const dataUri = await fileToDataUri(file);
-                                            appendGallery(dataUri);
-                                        }
+                                        const currentValues = getValues("galleryImageIds") || [];
+                                        const newValues = await Promise.all(
+                                          files.map(file => fileToDataUri(file))
+                                        );
+                                        setValue("galleryImageIds", [...currentValues, ...newValues]);
                                     }}
                                 />
                             </label>
