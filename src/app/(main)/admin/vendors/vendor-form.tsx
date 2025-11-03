@@ -191,186 +191,197 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[80vh] overflow-y-auto pr-6 pl-1">
-        <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl><Input placeholder="Vendor's business name" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Category</FormLabel>
-                 <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {categories.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Location</FormLabel>
-                <FormControl><Input placeholder="e.g., New York, NY" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        <FormField
-            control={form.control}
-            name="priceRange"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Price Range</FormLabel>
-                <FormControl><Input placeholder="e.g., ₹50,000 - ₹1,00,000" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-              control={form.control}
-              name="rating"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Rating (0-5)</FormLabel>
-                  <FormControl><Input type="number" step="0.1" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          <FormField
-              control={form.control}
-              name="reviewCount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Review Count</FormLabel>
-                  <FormControl><Input type="number" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-        </div>
         
-        <FormField
-            control={form.control}
-            name="imageId"
-            render={({ field: { onChange, value, ...rest } }) => (
+        {/* Main Details Section */}
+        <div className="space-y-4">
+            <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
                 <FormItem>
-                    <FormLabel>Main Image</FormLabel>
-                    {value && <Image src={value} alt="Main image preview" width={100} height={100} className="rounded-md object-cover" />}
-                    <FormControl>
-                        <Input 
-                            type="file" 
-                            accept="image/*"
-                            onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                    const dataUri = await fileToDataUri(file);
-                                    onChange(dataUri);
-                                }
-                            }}
-                            {...rest} 
-                        />
-                    </FormControl>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl><Input placeholder="Vendor's business name" {...field} /></FormControl>
                     <FormMessage />
                 </FormItem>
-            )}
-        />
-
-        <FormField
-            control={form.control}
-            name="logoImageId"
-            render={({ field: { onChange, value, ...rest } }) => (
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
                 <FormItem>
-                    <FormLabel>Logo Image</FormLabel>
-                     {value && <Image src={value} alt="Logo preview" width={100} height={100} className="rounded-md object-cover" />}
+                    <FormLabel>Category</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                     <FormControl>
-                        <Input 
-                            type="file" 
-                            accept="image/*"
-                            onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                    const dataUri = await fileToDataUri(file);
-                                    onChange(dataUri);
-                                }
-                            }}
-                             {...rest}
-                        />
+                        <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
                     </FormControl>
+                    <SelectContent>
+                        {categories.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}
+                    </SelectContent>
+                    </Select>
                     <FormMessage />
                 </FormItem>
-            )}
-        />
-        
-        <div>
-           <Label>Gallery Images</Label>
-            <div className="grid grid-cols-3 gap-2 mt-2">
-                {galleryFields.map((field, index) => (
-                    <div key={field.id} className="relative">
-                        {field.value && <Image src={field.value} alt={`Gallery image ${index + 1}`} width={100} height={100} className="rounded-md object-cover w-full h-24" />}
-                        <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6" onClick={() => removeGallery(index)}>
-                            <X className="h-4 w-4" />
-                        </Button>
-                    </div>
-                ))}
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <FormControl><Input placeholder="e.g., New York, NY" {...field} /></FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="priceRange"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Price Range</FormLabel>
+                    <FormControl><Input placeholder="e.g., ₹50,000 - ₹1,00,000" {...field} /></FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <div className="grid grid-cols-2 gap-4">
+            <FormField
+                control={form.control}
+                name="rating"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Rating (0-5)</FormLabel>
+                    <FormControl><Input type="number" step="0.1" {...field} /></FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+            <FormField
+                control={form.control}
+                name="reviewCount"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Review Count</FormLabel>
+                    <FormControl><Input type="number" {...field} /></FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
             </div>
-            <Input 
-                type="file"
-                accept="image/*"
-                multiple
-                className="mt-2"
-                onChange={async (e) => {
-                    const files = Array.from(e.target.files || []);
-                    for (const file of files) {
-                        const dataUri = await fileToDataUri(file);
-                        appendGallery({ value: dataUri });
-                    }
-                }}
+
+            <FormField
+                control={form.control}
+                name="isFeatured"
+                render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                            <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                            />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                            <Label>Featured Vendor</Label>
+                            <p className="text-sm text-muted-foreground">
+                            Featured vendors appear more prominently in search results.
+                            </p>
+                            <FormMessage />
+                        </div>
+                    </FormItem>
+                )}
             />
         </div>
 
+        <Separator className="my-6" />
 
-        <FormField
-            control={form.control}
-            name="isFeatured"
-            render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                     <FormControl>
-                        <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                        />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                        <Label htmlFor="isFeatured">Featured Vendor</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Featured vendors appear more prominently in search results.
-                        </p>
-                        <FormMessage />
-                    </div>
-                </FormItem>
-            )}
-        />
-        
+        {/* Image Uploads Section */}
+        <div className="space-y-6">
+            <h3 className="text-lg font-medium">Vendor Images</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                    control={form.control}
+                    name="imageId"
+                    render={({ field: { onChange, value, ...rest } }) => (
+                        <FormItem>
+                            <FormLabel>Main Image</FormLabel>
+                            {value && <Image src={value} alt="Main image preview" width={100} height={100} className="rounded-md object-cover w-full h-32" />}
+                            <FormControl>
+                                <Input 
+                                    type="file" 
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            const dataUri = await fileToDataUri(file);
+                                            onChange(dataUri);
+                                        }
+                                    }}
+                                    {...rest} 
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="logoImageId"
+                    render={({ field: { onChange, value, ...rest } }) => (
+                        <FormItem>
+                            <FormLabel>Logo Image</FormLabel>
+                            {value && <Image src={value} alt="Logo preview" width={100} height={100} className="rounded-md object-cover w-full h-32" />}
+                            <FormControl>
+                                <Input 
+                                    type="file" 
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            const dataUri = await fileToDataUri(file);
+                                            onChange(dataUri);
+                                        }
+                                    }}
+                                    {...rest}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
+            <div>
+                <Label>Gallery Images</Label>
+                <div className="mt-2 flex w-full overflow-x-auto space-x-4 pb-2">
+                    {galleryFields.map((field, index) => (
+                        <div key={field.id} className="relative flex-shrink-0">
+                            {field.value && <Image src={field.value} alt={`Gallery image ${index + 1}`} width={100} height={100} className="rounded-md object-cover w-32 h-32" />}
+                            <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6" onClick={() => removeGallery(index)}>
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    ))}
+                </div>
+                <Input 
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="mt-2"
+                    onChange={async (e) => {
+                        const files = Array.from(e.target.files || []);
+                        for (const file of files) {
+                            const dataUri = await fileToDataUri(file);
+                            appendGallery({ value: dataUri });
+                        }
+                    }}
+                />
+            </div>
+        </div>
+
+        <Separator className="my-6" />
+
+        {/* Services Section */}
         <div>
-          <Separator className="my-6" />
           <h3 className="text-lg font-medium mb-4">Services</h3>
           <div className="space-y-4">
             {fields.map((field, index) => (
@@ -425,3 +436,5 @@ export function VendorForm({ setDialogOpen, vendorToEdit }: VendorFormProps) {
     </Form>
   )
 }
+
+    
