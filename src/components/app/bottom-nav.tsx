@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from "next/link"
@@ -20,16 +21,15 @@ export function BottomNav() {
     return null;
   }
 
-
   return (
-    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-gray-200">
+    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-card border-t border-border">
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => {
           const isActive = pathname === item.href
           return (
-            <Link key={item.href} href={item.href} className="flex flex-col items-center justify-center text-gray-500 hover:text-red-500 transition-colors w-1/4">
-              <item.icon className={cn("h-6 w-6", isActive && "text-red-500")} />
-              <span className={cn("text-xs mt-1", isActive ? "text-red-500 font-semibold" : "text-gray-500")}>
+            <Link key={item.href} href={item.href} className="flex flex-col items-center justify-center text-muted-foreground hover:text-primary transition-colors w-1/4">
+              <item.icon className={cn("h-6 w-6", isActive && "text-primary")} />
+              <span className={cn("text-xs mt-1", isActive ? "text-primary font-semibold" : "text-muted-foreground")}>
                 {item.label}
               </span>
             </Link>

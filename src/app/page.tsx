@@ -4,7 +4,7 @@
 import { useMemo, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Bell, Menu, Search, Star } from "lucide-react"
+import { ArrowRight, Bell, Menu, Search, Star } from "lucide-react"
 import { ref } from "firebase/database"
 
 import { Button } from "@/components/ui/button"
@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { useDatabase } from "@/firebase"
 import { useList } from "@/firebase/database/use-list"
+import { features } from "@/lib/placeholders"
 
 type Vendor = {
   id: string;
@@ -60,26 +61,28 @@ export default function RootPage() {
     if (!vendors) return [];
     return [...vendors]
       .sort((a, b) => b.rating - a.rating)
-      .slice(0, 2);
+      .slice(0, 4);
   }, [vendors]);
 
   return (
-    <div className="w-full min-h-screen bg-white text-foreground flex flex-col pb-20">
+    <div className="w-full min-h-screen bg-background text-foreground flex flex-col pb-20">
       {/* Header */}
       <header className="p-4 flex items-center justify-between">
         <Button variant="ghost" size="icon">
           <Menu className="w-6 h-6" />
         </Button>
-        <h1 className="text-2xl font-headline text-yellow-600">Majestic Moments</h1>
+        <h1 className="text-2xl font-headline text-primary">WedWise</h1>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="w-6 h-6" />
-            <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500" />
+            <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-primary" />
           </Button>
-          <Avatar className="h-8 w-8">
-            <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" />
-            <AvatarFallback>A</AvatarFallback>
-          </Avatar>
+          <Link href="/login">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src="https://i.pravatar.cc/150" />
+              <AvatarFallback>A</AvatarFallback>
+            </Avatar>
+          </Link>
         </div>
       </header>
 
@@ -87,13 +90,27 @@ export default function RootPage() {
       <div className="px-4 mt-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input placeholder="Search wedding items..." className="pl-10 h-12 rounded-lg bg-gray-100 border-transparent focus:bg-white focus:border-primary" />
+          <Input placeholder="Search for anything..." className="pl-10 h-12 rounded-lg bg-muted border-transparent focus:bg-white focus:border-primary" />
         </div>
       </div>
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
         
+         {/* Tools Section */}
+        <section className="mt-6 p-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {features.map((feature) => (
+                    <Card key={feature.title} className="p-4 flex flex-col items-center justify-center text-center transition-all hover:shadow-lg hover:-translate-y-1">
+                        <div className="p-3 bg-primary/10 rounded-full mb-2">
+                            <feature.icon className="h-6 w-6 text-primary" />
+                        </div>
+                        <p className="font-semibold text-sm">{feature.title}</p>
+                    </Card>
+                ))}
+            </div>
+        </section>
+
         {/* Categories */}
         <section className="mt-6">
           <h2 className="text-lg font-semibold px-4 mb-2">Categories</h2>
@@ -106,10 +123,7 @@ export default function RootPage() {
                 key={cat.id}
                 variant={selectedCategory === cat.name ? 'default' : 'secondary'}
                 onClick={() => setSelectedCategory(cat.name)}
-                className={cn("rounded-full", {
-                    "bg-red-500 hover:bg-red-600 text-white": selectedCategory === cat.name,
-                    "bg-gray-100 text-gray-800 hover:bg-gray-200": selectedCategory !== cat.name
-                })}
+                className="rounded-full"
               >
                 {cat.name}
               </Button>
@@ -121,24 +135,24 @@ export default function RootPage() {
         <section className="mt-8">
           <div className="flex justify-between items-center px-4">
             <h2 className="text-lg font-semibold">New Arrivals</h2>
-            <Link href="/vendors" className="text-sm text-red-500 font-medium">See All</Link>
+            <Link href="/vendors" className="text-sm text-primary font-medium">See All</Link>
           </div>
           <div className="grid grid-cols-2 gap-4 mt-4 px-4">
             {vendorsLoading ? (
-              Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none h-64 bg-gray-200 animate-pulse rounded-lg"></Card>)
+              Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none h-64 bg-muted animate-pulse rounded-lg"></Card>)
             ) : (
               newArrivals.map(item => (
                 <Link href={`/vendors/${item.id}`} key={item.id}>
-                  <Card className="border-0 shadow-none">
+                  <Card className="border-0 shadow-none overflow-hidden group">
                     <CardContent className="p-0 relative">
-                      <Image src={item.imageId || "https://picsum.photos/seed/placeholder/400/600"} alt={item.name} width={400} height={600} className="rounded-lg object-cover w-full aspect-[2/3]" />
-                      {item.isFeatured && <Badge className="absolute top-2 left-2 bg-yellow-400 text-yellow-900">Featured</Badge>}
+                      <Image src={item.imageId || "https://picsum.photos/seed/placeholder/400/600"} alt={item.name} width={400} height={600} className="rounded-lg object-cover w-full aspect-[2/3] transition-transform duration-300 group-hover:scale-105" />
+                      {item.isFeatured && <Badge className="absolute top-2 left-2">Featured</Badge>}
                     </CardContent>
                     <div className="pt-2">
                       <h3 className="font-semibold text-sm">{item.name}</h3>
                       <p className="text-xs text-muted-foreground">{item.category}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <p className="text-sm font-bold text-red-500">{item.priceRange}</p>
+                        <p className="text-sm font-bold text-primary">{item.priceRange}</p>
                       </div>
                     </div>
                   </Card>
@@ -152,15 +166,15 @@ export default function RootPage() {
         <section className="mt-8">
           <div className="flex justify-between items-center px-4">
             <h2 className="text-lg font-semibold">Popular Vendors</h2>
-            <Link href="/vendors" className="text-sm text-red-500 font-medium">See All</Link>
+            <Link href="/vendors" className="text-sm text-primary font-medium">See All</Link>
           </div>
           <div className="space-y-4 mt-4 px-4">
             {vendorsLoading ? (
-              Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-gray-200 shadow-sm h-28 bg-gray-200 animate-pulse"></Card>)
+              Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-muted shadow-sm h-28 bg-muted animate-pulse"></Card>)
             ) : (
               popularVendors.map(item => (
-                  <Link href={`/vendors/${item.id}`} key={item.id}>
-                    <Card className="border-gray-200 shadow-sm">
+                  <Link href={`/vendors/${item.id}`} key={item.id} className="block group">
+                    <Card className="border-muted shadow-sm transition-all group-hover:shadow-md">
                         <CardContent className="p-3 flex gap-4">
                             <Image src={item.imageId || "https://picsum.photos/seed/placeholder/100/100"} alt={item.name} width={100} height={100} className="rounded-md object-cover aspect-square h-24 w-24"/>
                             <div className="flex-1">
@@ -175,7 +189,7 @@ export default function RootPage() {
                                 <p className="text-xs text-muted-foreground mt-1">{item.location}</p>
                             </div>
                             <div className="text-right">
-                              <p className="font-bold text-green-600">{item.priceRange}</p>
+                              <p className="font-bold text-primary">{item.priceRange}</p>
                             </div>
                         </CardContent>
                     </Card>

@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
@@ -7,7 +8,7 @@ import { Suspense } from "react"
 import { BottomNav } from "@/components/app/bottom-nav"
 
 export const metadata: Metadata = {
-  title: "WedEase",
+  title: "WedWise",
   description: "Your personal wedding planning assistant",
 }
 
