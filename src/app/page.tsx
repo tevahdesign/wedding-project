@@ -2,10 +2,10 @@
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { ArrowRight, Star, Search, X } from "lucide-react"
 import { ref } from "firebase/database"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -41,7 +41,6 @@ type VendorCategory = {
 
 export default function RootPage() {
   const database = useDatabase();
-  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [isHeaderCompact, setIsHeaderCompact] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -80,14 +79,6 @@ export default function RootPage() {
       .slice(0, 4);
   }, [vendors]);
 
-  const handleCardClick = (path: string) => {
-    router.push(path);
-  };
-
-  const handleMouseEnter = (path: string) => {
-    router.prefetch(path);
-  };
-
   return (
     <div className="w-full min-h-screen bg-background text-foreground flex flex-col pb-28">
       {/* Header */}
@@ -98,12 +89,12 @@ export default function RootPage() {
                 <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)}>
                     <Search className="h-6 w-6" />
                 </Button>
-                <div className="cursor-pointer" onClick={() => handleCardClick('/login')} onMouseEnter={() => handleMouseEnter('/login')}>
+                <Link href="/login">
                     <Avatar className="h-9 w-9">
                         <AvatarImage src="https://i.pravatar.cc/150" />
                         <AvatarFallback>A</AvatarFallback>
                     </Avatar>
-                </div>
+                </Link>
             </div>
         </div>
         
@@ -154,13 +145,9 @@ export default function RootPage() {
         <section className="mt-4">
            <div className="flex justify-between items-center mb-4 px-4">
             <h2 className="text-xl font-semibold">New Arrivals</h2>
-            <div 
-              className="text-sm text-primary font-medium cursor-pointer"
-              onClick={() => handleCardClick('/vendors')}
-              onMouseEnter={() => handleMouseEnter('/vendors')}
-            >
+            <Link href="/vendors" className="text-sm text-primary font-medium">
               See All
-            </div>
+            </Link>
           </div>
           <ScrollArea className="w-full whitespace-nowrap">
             <div className="flex w-max space-x-4 px-4">
@@ -168,11 +155,10 @@ export default function RootPage() {
                     Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none w-80 h-52 bg-muted animate-pulse rounded-lg"></Card>)
                 ) : (
                     newArrivals.map(item => (
-                        <div 
-                        key={item.id}
-                        onClick={() => handleCardClick(`/vendors/${item.id}`)}
-                        onMouseEnter={() => handleMouseEnter(`/vendors/${item.id}`)}
-                        className="cursor-pointer group w-80"
+                        <Link
+                            key={item.id}
+                            href={`/vendors/${item.id}`}
+                            className="cursor-pointer group w-80"
                         >
                             <Card className="border-border bg-card shadow-sm overflow-hidden rounded-lg">
                                 <div className="relative h-40">
@@ -189,7 +175,7 @@ export default function RootPage() {
                                     </div>
                                 </div>
                             </Card>
-                        </div>
+                        </Link>
                     ))
                 )}
             </div>
@@ -198,16 +184,12 @@ export default function RootPage() {
         </section>
         
         {/* Popular Vendors */}
-        <section className="mt-4">
+        <section className="mt-8">
           <div className="flex justify-between items-center mb-4 px-4">
             <h2 className="text-xl font-semibold">Popular Vendors</h2>
-            <div 
-              className="text-sm text-primary font-medium cursor-pointer"
-              onClick={() => handleCardClick('/vendors')}
-              onMouseEnter={() => handleMouseEnter('/vendors')}
-            >
+             <Link href="/vendors" className="text-sm text-primary font-medium">
               See All
-            </div>
+            </Link>
           </div>
            <ScrollArea className="w-full whitespace-nowrap">
             <div className="flex w-max space-x-4 px-4">
@@ -215,11 +197,10 @@ export default function RootPage() {
                   Array.from({ length: 3 }).map((_, i) => <Card key={i} className="border-muted shadow-sm h-52 w-40 bg-muted animate-pulse rounded-lg"></Card>)
                 ) : (
                   popularVendors.map(item => (
-                      <div
+                      <Link
                         key={item.id} 
+                        href={`/vendors/${item.id}`}
                         className="w-40 space-y-3 cursor-pointer group"
-                        onClick={() => handleCardClick(`/vendors/${item.id}`)}
-                        onMouseEnter={() => handleMouseEnter(`/vendors/${item.id}`)}
                       >
                          <div className="overflow-hidden rounded-lg shadow-sm border border-border">
                             <Image src={item.imageId || "https://picsum.photos/seed/placeholder/160/160"} alt={item.name} width={160} height={160} className="h-auto w-auto object-cover aspect-square transition-transform duration-300 group-hover:scale-105"/>
@@ -236,7 +217,7 @@ export default function RootPage() {
                              )}
                            </div>
                          </div>
-                      </div>
+                      </Link>
                   ))
                 )}
             </div>
@@ -249,21 +230,20 @@ export default function RootPage() {
             <h2 className="text-xl font-semibold text-center mb-6">Your Complete Planning Toolkit</h2>
             <div className="grid grid-cols-1 gap-4">
                 {features.map((feature) => (
-                  <Card
-                    key={feature.title}
-                    onClick={() => handleCardClick(feature.href)}
-                    onMouseEnter={() => handleMouseEnter(feature.href)}
-                    className="cursor-pointer group flex items-center p-4 transition-all hover:bg-muted/60 hover:shadow-lg rounded-lg bg-card border-border shadow-sm"
-                  >
-                    <div className="p-3 bg-primary/10 rounded-full mr-4">
-                        <feature.icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                        <p className="font-semibold text-base">{feature.title}</p>
-                        <p className="text-sm text-muted-foreground">{feature.description}</p>
-                    </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                  </Card>
+                    <Link href={feature.href} key={feature.title}>
+                        <Card
+                            className="cursor-pointer group flex items-center p-4 transition-all hover:bg-muted/60 hover:shadow-lg rounded-lg bg-card border-border shadow-sm"
+                        >
+                            <div className="p-3 bg-primary/10 rounded-full mr-4">
+                                <feature.icon className="h-6 w-6 text-primary" />
+                            </div>
+                            <div className="flex-1">
+                                <p className="font-semibold text-base">{feature.title}</p>
+                                <p className="text-sm text-muted-foreground">{feature.description}</p>
+                            </div>
+                            <ArrowRight className="h-5 w-5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                        </Card>
+                    </Link>
                 ))}
             </div>
         </section>

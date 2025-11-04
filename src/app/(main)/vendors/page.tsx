@@ -15,7 +15,7 @@ import { ref } from 'firebase/database';
 import type { Icon } from 'lucide-react';
 import * as lucideIcons from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 // Define types for our data
 type Vendor = {
@@ -42,7 +42,6 @@ type VendorCategory = {
 export default function VendorsPage() {
     const { user } = useAuth();
     const database = useDatabase();
-    const router = useRouter();
     
     // Fetch categories and vendors from Firebase
     const categoriesRef = useMemo(() => database ? ref(database, 'vendorCategories') : null, [database]);
@@ -85,14 +84,6 @@ export default function VendorsPage() {
     const allCategories = useMemo(() => {
         return [{ id: 'All', name: 'All', description: 'All vendors', icon: 'LayoutGrid' as const }, ...(categories || [])];
     }, [categories]);
-
-    const handleCardClick = (path: string) => {
-        router.push(path);
-    };
-
-    const handleMouseEnter = (path: string) => {
-        router.prefetch(path);
-    };
 
     return (
         <div className="flex flex-col flex-1 pb-20">
@@ -147,61 +138,60 @@ export default function VendorsPage() {
                     <div className="grid grid-cols-2 gap-4">
                         {filteredVendors.map(vendor => {
                              return (
-                                <Card
-                                  key={vendor.id}
-                                  className="overflow-hidden group cursor-pointer border-none shadow-sm transition-shadow hover:shadow-xl rounded-xl"
-                                  onClick={() => handleCardClick(`/vendors/${vendor.id}`)}
-                                  onMouseEnter={() => handleMouseEnter(`/vendors/${vendor.id}`)}
-                                >
-                                  <CardContent className="p-0">
-                                    <div className="relative">
-                                      <Image
-                                        src={
-                                          vendor.imageId ||
-                                          "https://picsum.photos/seed/placeholder/400/300"
-                                        }
-                                        alt={vendor.name}
-                                        width={400}
-                                        height={500}
-                                        className="object-cover w-full aspect-[4/5] rounded-t-xl transition-transform duration-300 group-hover:scale-105"
-                                      />
-                                      <Button
-                                        size="icon"
-                                        variant="ghost"
-                                        className="absolute top-2 right-2 rounded-full bg-background/70 hover:bg-background h-8 w-8"
-                                        onClick={(e) => toggleFavorite(e, vendor.id)}
-                                      >
-                                        <Heart
-                                          className={cn(
-                                            "w-4 h-4",
-                                            favorited[vendor.id]
-                                              ? "text-red-500 fill-current"
-                                              : "text-gray-500"
-                                          )}
+                                <Link href={`/vendors/${vendor.id}`} key={vendor.id} className="overflow-hidden group cursor-pointer">
+                                    <Card
+                                    className="h-full border-none shadow-sm transition-shadow hover:shadow-xl rounded-xl"
+                                    >
+                                    <CardContent className="p-0">
+                                        <div className="relative">
+                                        <Image
+                                            src={
+                                            vendor.imageId ||
+                                            "https://picsum.photos/seed/placeholder/400/300"
+                                            }
+                                            alt={vendor.name}
+                                            width={400}
+                                            height={500}
+                                            className="object-cover w-full aspect-[4/5] rounded-t-xl transition-transform duration-300 group-hover:scale-105"
                                         />
-                                      </Button>
-                                      <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                                        <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                                        <span className="font-semibold">
-                                          {vendor.rating.toFixed(1)}
-                                        </span>
-                                        <span className="text-gray-300">|</span>
-                                        <span>{vendor.reviewCount}</span>
-                                      </div>
-                                    </div>
-                                    <div className="p-3">
-                                      <h3 className="font-bold text-base truncate">
-                                        {vendor.name}
-                                      </h3>
-                                      <p className="text-sm text-muted-foreground truncate">
-                                        {vendor.category}
-                                      </p>
-                                      <p className="text-sm font-bold mt-1">
-                                        {vendor.priceRange}
-                                      </p>
-                                    </div>
-                                  </CardContent>
-                                </Card>
+                                        <Button
+                                            size="icon"
+                                            variant="ghost"
+                                            className="absolute top-2 right-2 rounded-full bg-background/70 hover:bg-background h-8 w-8"
+                                            onClick={(e) => toggleFavorite(e, vendor.id)}
+                                        >
+                                            <Heart
+                                            className={cn(
+                                                "w-4 h-4",
+                                                favorited[vendor.id]
+                                                ? "text-red-500 fill-current"
+                                                : "text-gray-500"
+                                            )}
+                                            />
+                                        </Button>
+                                        <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                            <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                                            <span className="font-semibold">
+                                            {vendor.rating.toFixed(1)}
+                                            </span>
+                                            <span className="text-gray-300">|</span>
+                                            <span>{vendor.reviewCount}</span>
+                                        </div>
+                                        </div>
+                                        <div className="p-3">
+                                        <h3 className="font-bold text-base truncate">
+                                            {vendor.name}
+                                        </h3>
+                                        <p className="text-sm text-muted-foreground truncate">
+                                            {vendor.category}
+                                        </p>
+                                        <p className="text-sm font-bold mt-1">
+                                            {vendor.priceRange}
+                                        </p>
+                                        </div>
+                                    </CardContent>
+                                    </Card>
+                                </Link>
                             )
                         })}
                     </div>
