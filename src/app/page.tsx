@@ -113,7 +113,7 @@ export default function RootPage() {
         </div>
 
         {/* New Arrivals */}
-        <section className="px-4 mt-4">
+        <section className="px-4 mt-8">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">New Arrivals</h2>
             <div 
@@ -155,7 +155,7 @@ export default function RootPage() {
         </section>
         
         {/* Popular Vendors */}
-        <section className="px-4 mt-8">
+        <section className="px-4 mt-12">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Popular Vendors</h2>
             <div 
@@ -203,7 +203,7 @@ export default function RootPage() {
         </section>
 
         {/* Tools Section */}
-        <section className="p-4 mt-8">
+        <section className="p-4 mt-12">
             <h2 className="text-xl font-semibold text-center mb-4">Your Complete Planning Toolkit</h2>
             <div className="pt-0">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
