@@ -97,7 +97,9 @@ export default function RootPage() {
                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                <Input placeholder="Search for anything..." className="pl-12 h-12 rounded-md bg-card border-border focus:bg-white focus:border-primary" />
              </div>
-            <div className="flex space-x-3 overflow-x-auto whitespace-nowrap -mx-4 px-4 pb-2">
+        </div>
+        <div className="p-4 pt-0">
+             <div className="flex space-x-3 overflow-x-auto whitespace-nowrap -mx-4 px-4 pb-2">
             {categoriesLoading ? (
                 Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-9 w-24 bg-muted rounded-md animate-pulse"></div>)
             ) : (
@@ -115,7 +117,7 @@ export default function RootPage() {
         </div>
 
         {/* New Arrivals */}
-        <section className="px-4 mt-4">
+        <section className="px-4 mt-2">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">New Arrivals</h2>
             <div 
@@ -202,26 +204,26 @@ export default function RootPage() {
         </section>
 
         {/* Tools Section */}
-        <section className="p-4 mt-6">
-            <h2 className="text-xl font-semibold text-center mb-4">Your Complete Planning Toolkit</h2>
-            <div className="pt-0">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    {features.map((feature) => (
-                      <div
-                        key={feature.title}
-                        onClick={() => handleCardClick(feature.href)}
-                        onMouseEnter={() => handleMouseEnter(feature.href)}
-                        className="cursor-pointer"
-                      >
-                        <Card className="p-4 flex flex-col items-center justify-center text-center transition-all hover:shadow-lg hover:-translate-y-1 h-full rounded-lg bg-card border-border shadow-sm">
-                            <div className="p-3 bg-primary/10 rounded-full mb-2">
-                                <feature.icon className="h-6 w-6 text-primary" />
-                            </div>
-                            <p className="font-semibold text-sm">{feature.title}</p>
-                        </Card>
-                      </div>
-                    ))}
-                </div>
+        <section className="p-4 mt-8">
+            <h2 className="text-xl font-semibold text-center mb-6">Your Complete Planning Toolkit</h2>
+            <div className="grid grid-cols-1 gap-4">
+                {features.map((feature) => (
+                  <Card
+                    key={feature.title}
+                    onClick={() => handleCardClick(feature.href)}
+                    onMouseEnter={() => handleMouseEnter(feature.href)}
+                    className="cursor-pointer group flex items-center p-4 transition-all hover:bg-muted/60 hover:shadow-lg rounded-lg bg-card border-border shadow-sm"
+                  >
+                    <div className="p-3 bg-primary/10 rounded-full mr-4">
+                        <feature.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                        <p className="font-semibold text-base">{feature.title}</p>
+                        <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                  </Card>
+                ))}
             </div>
         </section>
       </main>
