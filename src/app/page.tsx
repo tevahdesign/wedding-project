@@ -90,7 +90,7 @@ export default function RootPage() {
       <main className="flex-1 overflow-y-auto">
 
         {/* Search & Categories */}
-        <div className="p-4 pt-6 sticky top-[73px] bg-background/80 backdrop-blur-sm z-10">
+        <div className="p-4 pt-6 sticky top-[73px] bg-background/80 backdrop-blur-sm z-10 pb-4">
            <div className="relative">
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
              <Input placeholder="Search for anything..." className="pl-10 h-12 rounded-lg bg-muted border-transparent focus:bg-white focus:border-primary" />
@@ -114,8 +114,8 @@ export default function RootPage() {
 
         {/* New Arrivals */}
         <section className="px-4 mt-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold">New Arrivals</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">New Arrivals</h2>
             <div 
               className="text-sm text-primary font-medium cursor-pointer"
               onClick={() => handleCardClick('/vendors')}
@@ -124,7 +124,7 @@ export default function RootPage() {
               See All
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-2 gap-4">
             {vendorsLoading ? (
               Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none h-64 bg-muted animate-pulse rounded-2xl"></Card>)
             ) : (
@@ -140,8 +140,8 @@ export default function RootPage() {
                       <Image src={item.imageId || "https://picsum.photos/seed/placeholder/400/600"} alt={item.name} width={400} height={600} className="rounded-2xl object-cover w-full aspect-[2/3] transition-transform duration-300 group-hover:scale-105" />
                       {item.isFeatured && <Badge className="absolute top-2 left-2">Featured</Badge>}
                     </CardContent>
-                    <div className="pt-2">
-                      <h3 className="font-semibold text-sm">{item.name}</h3>
+                    <div className="pt-3 px-1">
+                      <h3 className="font-semibold text-sm truncate">{item.name}</h3>
                       <p className="text-xs text-muted-foreground">{item.category}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <p className="text-sm font-bold text-primary">{item.priceRange}</p>
@@ -156,8 +156,8 @@ export default function RootPage() {
         
         {/* Popular Vendors */}
         <section className="px-4 mt-8">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Popular Vendors</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Popular Vendors</h2>
             <div 
               className="text-sm text-primary font-medium cursor-pointer"
               onClick={() => handleCardClick('/vendors')}
@@ -166,7 +166,7 @@ export default function RootPage() {
               See All
             </div>
           </div>
-          <div className="space-y-4 mt-4">
+          <div className="space-y-4">
             {vendorsLoading ? (
               Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-muted shadow-sm h-28 bg-muted animate-pulse"></Card>)
             ) : (
@@ -204,7 +204,7 @@ export default function RootPage() {
 
         {/* Tools Section */}
         <section className="p-4 mt-8">
-            <h2 className="text-lg font-semibold text-center mb-4">Your Complete Planning Toolkit</h2>
+            <h2 className="text-xl font-semibold text-center mb-4">Your Complete Planning Toolkit</h2>
             <div className="pt-0">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     {features.map((feature) => (
@@ -229,5 +229,3 @@ export default function RootPage() {
     </div>
   )
 }
-
-    
