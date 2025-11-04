@@ -19,6 +19,7 @@ import { useDatabase } from "@/firebase"
 import { useList } from "@/firebase/database/use-list"
 import { features } from "@/lib/placeholders"
 import { Search } from "lucide-react"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
 type Vendor = {
   id: string;
@@ -88,7 +89,7 @@ export default function RootPage() {
       
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-         <div className="p-4 sticky top-[73px] bg-background/80 backdrop-blur-sm z-10 pb-4">
+        <div className="p-4 pt-0 sticky top-[73px] bg-background/80 backdrop-blur-sm z-10 pb-4">
             {/* Categories */}
             <div className="flex space-x-3 overflow-x-auto whitespace-nowrap -mx-4 px-4 pb-2">
               {categoriesLoading ? (
@@ -116,7 +117,7 @@ export default function RootPage() {
         </div>
 
         {/* New Arrivals */}
-        <section className="px-4 mt-6">
+        <section className="px-4 mt-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">New Arrivals</h2>
             <div 
@@ -146,7 +147,7 @@ export default function RootPage() {
                       <h3 className="font-semibold text-sm truncate">{item.name}</h3>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <p>{item.category}</p>
-                        {item.isFeatured && <Badge>Featured</Badge>}
+                        {item.isFeatured && <Badge variant="outline" className="border-primary text-primary">Featured</Badge>}
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         <p className="text-sm font-bold text-primary">{item.priceRange}</p>
@@ -160,8 +161,8 @@ export default function RootPage() {
         </section>
         
         {/* Popular Vendors */}
-        <section className="px-4 mt-6">
-          <div className="flex justify-between items-center mb-4">
+        <section className="mt-4">
+          <div className="flex justify-between items-center mb-4 px-4">
             <h2 className="text-xl font-semibold">Popular Vendors</h2>
             <div 
               className="text-sm text-primary font-medium cursor-pointer"
@@ -171,44 +172,42 @@ export default function RootPage() {
               See All
             </div>
           </div>
-          <div className="space-y-4">
-            {vendorsLoading ? (
-              Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-muted shadow-sm h-28 bg-muted animate-pulse rounded-xl"></Card>)
-            ) : (
-              popularVendors.map(item => (
-                  <div
-                    key={item.id} 
-                    className="block group cursor-pointer"
-                    onClick={() => handleCardClick(`/vendors/${item.id}`)}
-                    onMouseEnter={() => handleMouseEnter(`/vendors/${item.id}`)}
-                  >
-                    <Card className="border-border shadow-sm transition-all hover:shadow-md rounded-xl bg-card">
-                        <CardContent className="p-3 flex gap-4">
-                            <Image src={item.imageId || "https://picsum.photos/seed/placeholder/100/100"} alt={item.name} width={100} height={100} className="rounded-lg object-cover aspect-square h-24 w-24"/>
-                            <div className="flex-1">
-                                <h3 className="font-semibold">{item.name}</h3>
-                                <p className="text-sm text-muted-foreground">{item.category}</p>
-                                {item.rating && (
-                                    <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
-                                        <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                                        <span>{item.rating.toFixed(1)} ({item.reviewCount} reviews)</span>
-                                    </div>
-                                )}
-                                <p className="text-xs text-muted-foreground mt-1">{item.location}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-bold text-primary">{item.priceRange}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                  </div>
-              ))
-            )}
-          </div>
+           <ScrollArea className="w-full whitespace-nowrap">
+            <div className="flex w-max space-x-4 px-4">
+                {vendorsLoading ? (
+                  Array.from({ length: 3 }).map((_, i) => <Card key={i} className="border-muted shadow-sm h-52 w-40 bg-muted animate-pulse rounded-xl"></Card>)
+                ) : (
+                  popularVendors.map(item => (
+                      <div
+                        key={item.id} 
+                        className="w-40 space-y-3 cursor-pointer group"
+                        onClick={() => handleCardClick(`/vendors/${item.id}`)}
+                        onMouseEnter={() => handleMouseEnter(`/vendors/${item.id}`)}
+                      >
+                         <div className="overflow-hidden rounded-xl">
+                            <Image src={item.imageId || "https://picsum.photos/seed/placeholder/160/200"} alt={item.name} width={160} height={200} className="h-auto w-auto object-cover aspect-[4/5] transition-transform duration-300 group-hover:scale-105"/>
+                         </div>
+                         <div className="space-y-1 text-sm">
+                           <h3 className="font-medium leading-none truncate">{item.name}</h3>
+                           <p className="text-xs text-muted-foreground truncate">{item.category}</p>
+                            {item.rating && (
+                                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                                    <span className="font-semibold text-foreground">{item.rating.toFixed(1)}</span>
+                                    <span>({item.reviewCount})</span>
+                                </div>
+                            )}
+                         </div>
+                      </div>
+                  ))
+                )}
+            </div>
+            <ScrollBar orientation="horizontal" className="h-0" />
+           </ScrollArea>
         </section>
 
         {/* Tools Section */}
-        <section className="p-4 mt-6">
+        <section className="p-4 mt-4">
             <h2 className="text-xl font-semibold text-center mb-4">Your Complete Planning Toolkit</h2>
             <div className="pt-0">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -234,3 +233,5 @@ export default function RootPage() {
     </div>
   )
 }
+
+    
