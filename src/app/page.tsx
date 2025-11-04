@@ -76,7 +76,7 @@ export default function RootPage() {
   return (
     <div className="w-full min-h-screen bg-background text-foreground flex flex-col pb-20">
       {/* Header */}
-      <header className="p-4 flex items-center justify-between sticky top-0 bg-background/80 backdrop-blur-sm z-20">
+      <header className="p-4 flex items-center justify-between sticky top-0 bg-background/80 backdrop-blur-sm z-20 border-b">
         <h1 className="text-3xl font-logo text-primary">WedWise</h1>
         <div className="cursor-pointer" onClick={() => handleCardClick('/login')} onMouseEnter={() => handleMouseEnter('/login')}>
             <Avatar className="h-9 w-9">
@@ -85,40 +85,35 @@ export default function RootPage() {
             </Avatar>
         </div>
       </header>
-
-      {/* Search Bar */}
-      <div className="px-4 mt-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input placeholder="Search for anything..." className="pl-10 h-12 rounded-lg bg-muted border-transparent focus:bg-white focus:border-primary" />
-        </div>
-      </div>
-
+      
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-        
-        {/* Categories */}
-        <section className="mt-6">
-          <h2 className="text-lg font-semibold px-4 mb-2">Categories</h2>
-          <div className="flex space-x-3 overflow-x-auto whitespace-nowrap px-4 pb-2">
-            {categoriesLoading ? (
-              Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-9 w-24 bg-gray-200 rounded-full animate-pulse"></div>)
-            ) : (
-              allCategories.map((cat, index) => (
-              <Button 
-                key={cat.id}
-                variant={selectedCategory === cat.name ? 'default' : 'secondary'}
-                onClick={() => setSelectedCategory(cat.name)}
-                className="rounded-full"
-              >
-                {cat.name}
-              </Button>
-            )))}
-          </div>
-        </section>
+
+        {/* Search & Categories */}
+        <div className="p-4 sticky top-[73px] bg-background/80 backdrop-blur-sm z-10">
+           <div className="relative">
+             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+             <Input placeholder="Search for anything..." className="pl-10 h-12 rounded-lg bg-muted border-transparent focus:bg-white focus:border-primary" />
+           </div>
+            <div className="flex space-x-3 overflow-x-auto whitespace-nowrap pt-3 -mx-4 px-4">
+              {categoriesLoading ? (
+                Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-9 w-24 bg-gray-200 rounded-full animate-pulse"></div>)
+              ) : (
+                allCategories.map((cat, index) => (
+                <Button 
+                  key={cat.id}
+                  variant={selectedCategory === cat.name ? 'default' : 'secondary'}
+                  onClick={() => setSelectedCategory(cat.name)}
+                  className="rounded-full"
+                >
+                  {cat.name}
+                </Button>
+              )))}
+            </div>
+        </div>
 
         {/* New Arrivals */}
-        <section className="mt-8">
+        <section className="mt-4">
           <div className="flex justify-between items-center px-4">
             <h2 className="text-lg font-semibold">New Arrivals</h2>
             <div 
@@ -182,7 +177,7 @@ export default function RootPage() {
                     onClick={() => handleCardClick(`/vendors/${item.id}`)}
                     onMouseEnter={() => handleMouseEnter(`/vendors/${item.id}`)}
                   >
-                    <Card className="border-muted shadow-sm transition-all group-hover:shadow-md">
+                    <Card className="border-muted shadow-sm transition-all hover:shadow-md">
                         <CardContent className="p-3 flex gap-4">
                             <Image src={item.imageId || "https://picsum.photos/seed/placeholder/100/100"} alt={item.name} width={100} height={100} className="rounded-md object-cover aspect-square h-24 w-24"/>
                             <div className="flex-1">
@@ -234,3 +229,5 @@ export default function RootPage() {
     </div>
   )
 }
+
+    
