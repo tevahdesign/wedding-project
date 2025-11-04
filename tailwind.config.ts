@@ -125,6 +125,10 @@ export default {
         blob: 'blob 7s infinite',
         'fade-in': 'fade-in 0.5s ease-out',
       },
+      animationDelay: {
+        '2000': '2000ms',
+        '4000': '4000ms',
+      }
     },
   },
   plugins: [require('tailwindcss-animate')],
