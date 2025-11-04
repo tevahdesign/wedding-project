@@ -149,7 +149,7 @@ export default function VendorsPage() {
                              return (
                                 <Card
                                   key={vendor.id}
-                                  className="overflow-hidden group cursor-pointer border-none shadow-sm transition-shadow hover:shadow-xl"
+                                  className="overflow-hidden group cursor-pointer border-none shadow-sm transition-shadow hover:shadow-xl rounded-xl"
                                   onClick={() => handleCardClick(`/vendors/${vendor.id}`)}
                                   onMouseEnter={() => handleMouseEnter(`/vendors/${vendor.id}`)}
                                 >
@@ -180,7 +180,7 @@ export default function VendorsPage() {
                                           )}
                                         />
                                       </Button>
-                                      <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                      <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
                                         <Star className="w-3 h-3 text-yellow-400 fill-current" />
                                         <span className="font-semibold">
                                           {vendor.rating.toFixed(1)}
@@ -214,5 +214,4 @@ export default function VendorsPage() {
         </div>
     );
 }
-
 
