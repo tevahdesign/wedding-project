@@ -90,7 +90,7 @@ export default function RootPage() {
       <main className="flex-1 overflow-y-auto">
 
         {/* Search & Categories */}
-        <div className="p-4 pt-6 sticky top-[65px] bg-background/80 backdrop-blur-sm z-10 pb-4">
+        <div className="p-4 pt-6 sticky top-[73px] bg-background/80 backdrop-blur-sm z-10 pb-4">
            <div className="relative">
              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
              <Input placeholder="Search for anything..." className="pl-12 h-12 rounded-full bg-card border-transparent focus:bg-white focus:border-primary" />
@@ -138,11 +138,13 @@ export default function RootPage() {
                   <Card className="border-0 bg-card shadow-none overflow-hidden group rounded-3xl">
                     <CardContent className="p-0 relative">
                       <Image src={item.imageId || "https://picsum.photos/seed/placeholder/400/600"} alt={item.name} width={400} height={600} className="rounded-3xl object-cover w-full aspect-[2/3] transition-transform duration-300 group-hover:scale-105" />
-                      {item.isFeatured && <Badge className="absolute top-3 left-3">Featured</Badge>}
                     </CardContent>
                     <div className="pt-3 px-1">
                       <h3 className="font-semibold text-sm truncate">{item.name}</h3>
-                      <p className="text-xs text-muted-foreground">{item.category}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-muted-foreground">{item.category}</p>
+                        {item.isFeatured && <Badge>Featured</Badge>}
+                      </div>
                       <div className="flex items-center gap-2 mt-1">
                         <p className="text-sm font-bold text-primary">{item.priceRange}</p>
                       </div>
