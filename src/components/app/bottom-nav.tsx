@@ -23,7 +23,7 @@ export function BottomNav() {
 
   // Do not render bottom nav on sub-pages of main sections for a cleaner look
   const mainRoutes = navItems.map(item => item.href);
-  const isSubPage = mainRoutes.some(route => route !== '/' && pathname.startsWith(route));
+  const isSubPage = mainRoutes.some(route => route !== '/' && pathname.startsWith(route) && pathname !== route);
   
   if (isSubPage) {
     return null;
@@ -32,7 +32,7 @@ export function BottomNav() {
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] z-50">
-      <div className="flex justify-around items-center h-16 bg-card/90 backdrop-blur-lg border border-border rounded-full shadow-lg">
+      <div className="flex justify-around items-center h-16 bg-background/80 backdrop-blur-xl border border-white/20 rounded-full shadow-lg">
         {navItems.map((item) => {
           const isActive = pathname === item.href
           return (
