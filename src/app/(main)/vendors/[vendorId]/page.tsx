@@ -1,25 +1,26 @@
 
 "use client"
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { ref } from 'firebase/database';
 import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel"
+  ChevronLeft,
+  Heart,
+  Loader2,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Star,
+} from 'lucide-react';
+
 import { useDatabase } from '@/firebase';
 import { useObjectValue } from '@/firebase/database/use-object-value';
-import { PageHeader } from '@/components/app/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Star, MapPin, Phone, MessageCircle, Loader2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 
 type Service = {
     name: string;
@@ -28,7 +29,7 @@ type Service = {
 
 type Vendor = {
     id: string;
-    name: string;
+    name:string;
     category: string;
     location: string;
     priceRange: string;
@@ -43,8 +44,10 @@ type Vendor = {
 
 export default function VendorDetailPage() {
     const params = useParams();
+    const router = useRouter();
     const vendorId = params.vendorId as string;
     const database = useDatabase();
+    const [isFavorited, setIsFavorited] = useState(false);
 
     const vendorRef = useMemo(() => {
         if (!database || !vendorId) return null;
@@ -53,17 +56,9 @@ export default function VendorDetailPage() {
 
     const { data: vendor, loading } = useObjectValue<Vendor>(vendorRef);
 
-    const allImages = useMemo(() => {
-        if (!vendor) return [];
-        const images = [];
-        if (vendor.imageId) images.push(vendor.imageId);
-        if (vendor.galleryImageIds) images.push(...vendor.galleryImageIds);
-        return images;
-    }, [vendor]);
-
     if (loading) {
         return (
-            <div className="flex h-screen items-center justify-center">
+            <div className="flex h-screen items-center justify-center bg-background">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
         );
@@ -72,7 +67,12 @@ export default function VendorDetailPage() {
     if (!vendor) {
         return (
             <div className="flex flex-col flex-1 pb-20">
-                <PageHeader title="Vendor Not Found" showBackButton />
+                <div className="p-4 border-b">
+                    <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                        <ChevronLeft className="h-6 w-6" />
+                    </Button>
+                    <h1 className="text-xl font-semibold mt-2">Vendor Not Found</h1>
+                </div>
                 <div className="flex-1 flex items-center justify-center">
                     <p className="text-muted-foreground">The vendor you are looking for does not exist.</p>
                 </div>
@@ -81,111 +81,100 @@ export default function VendorDetailPage() {
     }
 
     return (
-        <div className="flex flex-col flex-1 pb-20 bg-muted/30">
-            <PageHeader title={vendor.name} showBackButton />
+        <div className="flex flex-col flex-1 bg-muted/20 pb-28">
+            <div className="relative w-full h-[40vh] bg-muted">
+                <Image
+                    src={vendor.imageId}
+                    alt={vendor.name}
+                    fill
+                    className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                
+                <div className="absolute top-4 left-4 z-10">
+                     <Button variant="ghost" size="icon" className="rounded-full bg-black/30 hover:bg-black/50 text-white hover:text-white" onClick={() => router.back()}>
+                        <ChevronLeft className="h-6 w-6" />
+                    </Button>
+                </div>
+                <div className="absolute top-4 right-4 z-10">
+                     <Button variant="ghost" size="icon" className="rounded-full bg-black/30 hover:bg-black/50 text-white hover:text-white" onClick={() => setIsFavorited(!isFavorited)}>
+                        <Heart className={cn("h-6 w-6", isFavorited && "fill-red-500 text-red-500")} />
+                    </Button>
+                </div>
 
-            <div className='-mt-2'>
-                <Carousel className="w-full">
-                    <CarouselContent>
-                        {allImages.length > 0 ? allImages.map((img, index) => (
-                            <CarouselItem key={index}>
-                                <div className="relative aspect-video">
-                                    <Image
-                                        src={img}
-                                        alt={`${vendor.name} gallery image ${index + 1}`}
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </div>
-                            </CarouselItem>
-                        )) : (
-                             <CarouselItem>
-                                <div className="relative aspect-video bg-muted flex items-center justify-center">
-                                   <p className="text-muted-foreground">No images</p>
-                                </div>
-                            </CarouselItem>
-                        )}
-                    </CarouselContent>
-                    {allImages.length > 1 && (
-                      <>
-                        <CarouselPrevious className="ml-16" />
-                        <CarouselNext className="mr-16" />
-                      </>
-                    )}
-                </Carousel>
+                <div className="absolute bottom-0 left-0 p-4 text-white z-10 w-full">
+                    {vendor.isFeatured && <Badge className="mb-2 backdrop-blur-sm bg-white/20 border-none">Featured</Badge>}
+                    <h1 className="text-3xl font-bold">{vendor.name}</h1>
+                    <div className="flex items-center gap-4 text-sm mt-2">
+                        <div className="flex items-center gap-1">
+                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                            <span className="font-semibold">{vendor.rating.toFixed(1)}</span>
+                            <span className="text-gray-300">({vendor.reviewCount} reviews)</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div className="p-4 space-y-6">
-                <Card>
-                    <CardHeader className="flex flex-row items-start justify-between">
-                         <div>
-                            {vendor.isFeatured && <Badge className="mb-2">Featured</Badge>}
-                            <CardTitle className="text-2xl">{vendor.name}</CardTitle>
-                            <p className="text-md text-muted-foreground">{vendor.category}</p>
-                        </div>
-                        {vendor.logoImageId && (
-                            <Image
-                                src={vendor.logoImageId}
-                                alt={`${vendor.name} logo`}
-                                width={64}
-                                height={64}
-                                className="rounded-lg object-contain"
-                            />
-                        )}
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                         <div className="flex items-center gap-4 text-sm">
-                            <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                <span className="font-semibold">{vendor.rating.toFixed(1)}</span>
-                                <span className="text-muted-foreground">({vendor.reviewCount} reviews)</span>
+            <Tabs defaultValue="about" className="w-full">
+                 <TabsList className="grid w-full grid-cols-3 bg-background sticky top-0 z-10 rounded-none h-14">
+                    <TabsTrigger value="about">About</TabsTrigger>
+                    <TabsTrigger value="services">Services</TabsTrigger>
+                    <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                </TabsList>
+                <div className='p-4 space-y-4'>
+                    <TabsContent value="about" className="m-0 space-y-4">
+                        <div className='bg-background rounded-lg p-4'>
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                                <MapPin className="w-5 h-5" />
+                                <span className="text-base">{vendor.location}</span>
                             </div>
-                            <Separator orientation="vertical" className="h-4" />
-                            <div className="flex items-center gap-1">
-                                <MapPin className="w-4 h-4 text-muted-foreground" />
-                                <span>{vendor.location}</span>
+                            <div className="mt-4">
+                                 <p className="text-lg font-bold text-primary">{vendor.priceRange}</p>
+                                 <p className="text-xs text-muted-foreground">Typical price range</p>
                             </div>
                         </div>
-                         <p className="text-lg font-bold text-primary">{vendor.priceRange}</p>
-                    </CardContent>
-                </Card>
 
-                {vendor.services && vendor.services.length > 0 && (
-                     <Card>
-                        <CardHeader>
-                            <CardTitle>Services</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                {vendor.services.map((service, index) => (
-                                    <div key={index} className="flex justify-between items-center">
-                                        <p>{service.name}</p>
-                                        <p className="font-semibold text-primary">₹{service.price.toLocaleString()}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>About {vendor.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-muted-foreground">
-                            Detailed information about this vendor is not yet available. Please check back later or contact the vendor directly for more details.
-                        </p>
-                    </CardContent>
-                </Card>
-            </div>
+                         <div className='bg-background rounded-lg p-4'>
+                            <h2 className="font-bold text-lg mb-2">About {vendor.name}</h2>
+                             <p className="text-muted-foreground">
+                                Detailed information about this vendor is not yet available. Please check back later or contact the vendor directly for more details.
+                            </p>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="services" className="m-0">
+                         <div className='bg-background rounded-lg p-4'>
+                            <h2 className="font-bold text-lg mb-4">Services & Pricing</h2>
+                             {vendor.services && vendor.services.length > 0 ? (
+                                <div className="space-y-4">
+                                    {vendor.services.map((service, index) => (
+                                        <div key={index} className="flex justify-between items-center pb-4 border-b last:border-b-0 last:pb-0">
+                                            <p>{service.name}</p>
+                                            <p className="font-semibold text-primary">₹{service.price.toLocaleString()}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-muted-foreground text-center py-8">No specific services listed.</p>
+                            )}
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="reviews" className="m-0">
+                        <div className='bg-background rounded-lg p-4'>
+                            <h2 className="font-bold text-lg mb-4">{vendor.reviewCount} Reviews</h2>
+                             <div className="text-center py-8 text-muted-foreground">
+                                <p>Reviews are not yet available for this vendor.</p>
+                             </div>
+                        </div>
+                    </TabsContent>
+                </div>
+            </Tabs>
             
-            <div className="mt-auto p-4 bg-background border-t sticky bottom-0">
-                <div className="flex gap-4">
-                    <Button variant="outline" className="w-full">
+            <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] z-50">
+                 <div className="flex gap-4 p-2 bg-background/70 backdrop-blur-2xl border border-white/20 rounded-full shadow-lg">
+                    <Button variant="outline" className="w-full rounded-full border-primary text-primary hover:bg-primary/10 hover:text-primary">
                         <MessageCircle className="mr-2 h-4 w-4" /> Message
                     </Button>
-                    <Button className="w-full">
+                    <Button className="w-full rounded-full">
                         <Phone className="mr-2 h-4 w-4" /> Book Now
                     </Button>
                 </div>
@@ -193,3 +182,5 @@ export default function VendorDetailPage() {
         </div>
     );
 }
+
+    
