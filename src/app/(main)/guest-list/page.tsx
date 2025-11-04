@@ -12,7 +12,8 @@ import {
   XCircle,
   Users,
   Edit,
-  Trash2
+  Trash2,
+  Download,
 } from "lucide-react"
 
 import { PageHeader } from "@/components/app/page-header"
@@ -148,6 +149,46 @@ export default function GuestListPage() {
     }
   }
 
+  const handleDownloadCSV = () => {
+    if (!guests || guests.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No Guests",
+        description: "There are no guests to download.",
+      });
+      return;
+    }
+
+    const headers = ["Name", "Email", "Phone Number", "Group", "Status"];
+    const csvContent = [
+      headers.join(","),
+      ...guests.map(guest => [
+        `"${guest.name || ""}"`,
+        `"${guest.email || ""}"`,
+        `"${guest.phoneNumber || ""}"`,
+        `"${guest.group || ""}"`,
+        `"${guest.status || ""}"`
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "guest-list.csv");
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    toast({
+      title: "Download Started",
+      description: "Your guest list is being downloaded.",
+    });
+  }
+
   const getStatusBadgeClasses = (status: GuestStatus) => {
     return cn({
         "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300": status === "Attending",
@@ -163,10 +204,16 @@ export default function GuestListPage() {
         description="Manage your guests and track RSVPs"
         showBackButton
       >
-        <Button onClick={handleAddClick}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Guest
-        </Button>
+        <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleDownloadCSV} disabled={!guests || guests.length === 0}>
+                <Download className="mr-2 h-4 w-4" />
+                Download
+            </Button>
+            <Button onClick={handleAddClick}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Guest
+            </Button>
+        </div>
       </PageHeader>
 
       <div className="p-4 pt-4">
