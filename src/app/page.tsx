@@ -91,32 +91,27 @@ export default function RootPage() {
       
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-        <div className="sticky top-[73px] bg-background/80 backdrop-blur-sm z-10">
-            <div className="px-4 pt-2">
-                <div className="flex space-x-3 overflow-x-auto whitespace-nowrap -mx-4 px-4 pb-2">
-                {categoriesLoading ? (
-                    Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-9 w-24 bg-muted rounded-md animate-pulse"></div>)
-                ) : (
-                    allCategories.map((cat, index) => (
-                    <Button 
-                    key={cat.id}
-                    variant={selectedCategory === cat.name ? 'default' : 'outline'}
-                    onClick={() => setSelectedCategory(cat.name)}
-                    className="rounded-md h-9 px-4 border-border"
-                    >
-                    {cat.name}
-                    </Button>
-                )))}
-                </div>
+        <div className="p-4 sticky top-[73px] bg-background/80 backdrop-blur-sm z-10 pb-4 space-y-4">
+            {/* Search */}
+             <div className="relative">
+               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+               <Input placeholder="Search for anything..." className="pl-12 h-12 rounded-md bg-card border-border focus:bg-white focus:border-primary" />
+             </div>
+            <div className="flex space-x-3 overflow-x-auto whitespace-nowrap -mx-4 px-4 pb-2">
+            {categoriesLoading ? (
+                Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-9 w-24 bg-muted rounded-md animate-pulse"></div>)
+            ) : (
+                allCategories.map((cat, index) => (
+                <Button 
+                key={cat.id}
+                variant={selectedCategory === cat.name ? 'default' : 'outline'}
+                onClick={() => setSelectedCategory(cat.name)}
+                className="rounded-md h-9 px-4 border-border"
+                >
+                {cat.name}
+                </Button>
+            )))}
             </div>
-        </div>
-
-        {/* Search */}
-        <div className="px-4 mt-4">
-           <div className="relative">
-             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-             <Input placeholder="Search for anything..." className="pl-12 h-12 rounded-md bg-card border-border focus:bg-white focus:border-primary" />
-           </div>
         </div>
 
         {/* New Arrivals */}
@@ -207,7 +202,7 @@ export default function RootPage() {
         </section>
 
         {/* Tools Section */}
-        <section className="p-4 mt-4">
+        <section className="p-4 mt-6">
             <h2 className="text-xl font-semibold text-center mb-4">Your Complete Planning Toolkit</h2>
             <div className="pt-0">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
