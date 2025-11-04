@@ -151,8 +151,8 @@ export default function RootPage() {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
         {/* New Arrivals */}
-        <section className="px-4 mt-4">
-          <div className="flex justify-between items-center mb-4">
+        <section className="mt-4">
+           <div className="flex justify-between items-center mb-4 px-4">
             <h2 className="text-xl font-semibold">New Arrivals</h2>
             <div 
               className="text-sm text-primary font-medium cursor-pointer"
@@ -162,32 +162,39 @@ export default function RootPage() {
               See All
             </div>
           </div>
-          <div className="space-y-4">
-            {vendorsLoading ? (
-              Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none h-40 bg-muted animate-pulse rounded-lg"></Card>)
-            ) : (
-              newArrivals.map(item => (
-                <div 
-                  key={item.id}
-                  onClick={() => handleCardClick(`/vendors/${item.id}`)}
-                  onMouseEnter={() => handleMouseEnter(`/vendors/${item.id}`)}
-                  className="cursor-pointer group"
-                >
-                  <Card className="border-border bg-card shadow-sm overflow-hidden rounded-lg relative h-40">
-                    <Image src={item.imageId || "https://picsum.photos/seed/placeholder/800/400"} alt={item.name} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                    <div className="absolute bottom-0 left-0 p-4 text-white">
-                        <h3 className="font-bold text-lg">{item.name}</h3>
-                        <p className="text-sm">{item.category}</p>
-                    </div>
-                    <div className="absolute top-4 right-4">
-                        <Button size="sm" variant="secondary" className="h-8 rounded-md">View</Button>
-                    </div>
-                  </Card>
-                </div>
-              ))
-            )}
-          </div>
+          <ScrollArea className="w-full whitespace-nowrap">
+            <div className="flex w-max space-x-4 px-4">
+                {vendorsLoading ? (
+                    Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none w-80 h-52 bg-muted animate-pulse rounded-lg"></Card>)
+                ) : (
+                    newArrivals.map(item => (
+                        <div 
+                        key={item.id}
+                        onClick={() => handleCardClick(`/vendors/${item.id}`)}
+                        onMouseEnter={() => handleMouseEnter(`/vendors/${item.id}`)}
+                        className="cursor-pointer group w-80"
+                        >
+                            <Card className="border-border bg-card shadow-sm overflow-hidden rounded-lg">
+                                <div className="relative h-40">
+                                    <Image src={item.imageId || "https://picsum.photos/seed/placeholder/800/400"} alt={item.name} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                </div>
+                                <div className="p-3">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h3 className="font-bold text-base">{item.name}</h3>
+                                            <p className="text-sm text-muted-foreground">{item.category}</p>
+                                        </div>
+                                        {item.isFeatured && <Badge>Featured</Badge>}
+                                    </div>
+                                </div>
+                            </Card>
+                        </div>
+                    ))
+                )}
+            </div>
+             <ScrollBar orientation="horizontal" className="h-0" />
+           </ScrollArea>
         </section>
         
         {/* Popular Vendors */}
