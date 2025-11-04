@@ -88,9 +88,8 @@ export default function RootPage() {
       
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-
-        {/* Categories */}
-        <div className="p-4 pt-4 sticky top-[73px] bg-background/80 backdrop-blur-sm z-10">
+        <div className="p-4 pt-4 sticky top-[73px] bg-background/80 backdrop-blur-sm z-10 pb-4">
+            {/* Categories */}
             <div className="flex space-x-3 overflow-x-auto whitespace-nowrap -mx-4 px-4 pb-2">
               {categoriesLoading ? (
                 Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-9 w-24 bg-muted rounded-full animate-pulse"></div>)
@@ -109,7 +108,7 @@ export default function RootPage() {
         </div>
 
         {/* Search */}
-        <div className="p-4 pt-2">
+        <div className="px-4">
            <div className="relative">
              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
              <Input placeholder="Search for anything..." className="pl-12 h-12 rounded-full bg-card border-transparent focus:bg-white focus:border-primary" />
@@ -117,7 +116,7 @@ export default function RootPage() {
         </div>
 
         {/* New Arrivals */}
-        <section className="px-4 mt-4">
+        <section className="px-4 mt-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">New Arrivals</h2>
             <div 
@@ -161,7 +160,7 @@ export default function RootPage() {
         </section>
         
         {/* Popular Vendors */}
-        <section className="px-4 mt-8">
+        <section className="px-4 mt-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Popular Vendors</h2>
             <div 
@@ -209,7 +208,7 @@ export default function RootPage() {
         </section>
 
         {/* Tools Section */}
-        <section className="p-4 mt-8">
+        <section className="p-4 mt-6">
             <h2 className="text-xl font-semibold text-center mb-4">Your Complete Planning Toolkit</h2>
             <div className="pt-0">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -235,5 +234,3 @@ export default function RootPage() {
     </div>
   )
 }
-
-    
