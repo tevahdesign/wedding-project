@@ -251,11 +251,15 @@ export default function GuestListPage() {
         showBackButton
       >
         <div className="flex items-center gap-2">
+            <Button onClick={handleAddClick} size="sm">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" disabled={!guests || guests.length === 0}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Download
+                <Button variant="ghost" size="icon" disabled={!guests || guests.length === 0}>
+                    <MoreHorizontal className="h-5 w-5" />
+                    <span className="sr-only">More actions</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -289,11 +293,6 @@ export default function GuestListPage() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <Button onClick={handleAddClick}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Guest
-            </Button>
         </div>
       </PageHeader>
 
@@ -423,3 +422,5 @@ export default function GuestListPage() {
     </div>
   )
 }
+
+    
