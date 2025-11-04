@@ -88,7 +88,7 @@ export default function RootPage() {
       
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-        <div className="p-4 pt-4 sticky top-[73px] bg-background/80 backdrop-blur-sm z-10 pb-4">
+         <div className="p-4 sticky top-[73px] bg-background/80 backdrop-blur-sm z-10 pb-4">
             {/* Categories */}
             <div className="flex space-x-3 overflow-x-auto whitespace-nowrap -mx-4 px-4 pb-2">
               {categoriesLoading ? (
@@ -144,8 +144,8 @@ export default function RootPage() {
                     </CardContent>
                     <div className="pt-3 px-1">
                       <h3 className="font-semibold text-sm truncate">{item.name}</h3>
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs text-muted-foreground">{item.category}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <p>{item.category}</p>
                         {item.isFeatured && <Badge>Featured</Badge>}
                       </div>
                       <div className="flex items-center gap-2 mt-1">
