@@ -1,10 +1,11 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import { ArrowRight, Star, Search, X } from "lucide-react"
 import Link from "next/link"
+import Autoplay from "embla-carousel-autoplay"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,6 +18,7 @@ import { Badge } from "@/components/ui/badge"
 import { features } from "@/lib/placeholders"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel"
 
 type Vendor = {
   id: string;
@@ -46,6 +48,10 @@ export function HomePageClient({ vendors, categories }: HomePageClientProps) {
   const [isHeaderCompact, setIsHeaderCompact] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  const plugin = useRef(
+    Autoplay({ delay: 3000, stopOnInteraction: true, stopOnMouseEnter: true })
+  )
+
   useEffect(() => {
     const handleScroll = () => {
       setIsHeaderCompact(window.scrollY > 50);
@@ -56,7 +62,7 @@ export function HomePageClient({ vendors, categories }: HomePageClientProps) {
   
   const allCategories = [{ id: 'All', name: 'All' }, ...categories];
 
-  const newArrivals = vendors.filter(vendor => vendor.isFeatured).slice(0, 3);
+  const newArrivals = vendors.filter(vendor => vendor.isFeatured).slice(0, 5);
   
   const popularVendors = [...vendors]
       .sort((a, b) => b.rating - a.rating)
@@ -129,38 +135,49 @@ export function HomePageClient({ vendors, categories }: HomePageClientProps) {
               See All
             </Link>
           </div>
-          <ScrollArea className="w-full whitespace-nowrap">
-            <div className="flex w-max space-x-4 px-4">
+           <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            plugins={[plugin.current]}
+            className="w-full"
+            >
+            <CarouselContent className="-ml-2">
                 {newArrivals.length === 0 ? (
-                    Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none w-80 h-52 bg-muted animate-pulse rounded-lg"></Card>)
+                    Array.from({ length: 2 }).map((_, i) => (
+                        <CarouselItem key={i} className="pl-4 md:basis-1/2">
+                             <Card className="border-0 shadow-none w-full h-52 bg-muted animate-pulse rounded-lg"></Card>
+                        </CarouselItem>
+                    ))
                 ) : (
                     newArrivals.map(item => (
-                        <Link
-                            key={item.id}
-                            href={`/vendors/${item.id}`}
-                            className="cursor-pointer group w-80"
-                        >
-                            <Card className="border-border bg-card shadow-sm overflow-hidden rounded-lg">
-                                <div className="relative h-40">
-                                    <Image src={item.imageId || "https://picsum.photos/seed/placeholder/800/400"} alt={item.name} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                </div>
-                                <div className="p-3">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <h3 className="font-bold text-base">{item.name}</h3>
-                                            <p className="text-sm text-muted-foreground">{item.category}</p>
-                                        </div>
-                                        {item.isFeatured && <Badge>Featured</Badge>}
+                       <CarouselItem key={item.id} className="pl-4 basis-[85%] sm:basis-1/2">
+                            <Link
+                                href={`/vendors/${item.id}`}
+                                className="cursor-pointer group block"
+                            >
+                                <Card className="border-border bg-card shadow-sm overflow-hidden rounded-lg">
+                                    <div className="relative h-40">
+                                        <Image src={item.imageId || "https://picsum.photos/seed/placeholder/800/400"} alt={item.name} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                                     </div>
-                                </div>
-                            </Card>
-                        </Link>
+                                    <div className="p-3">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h3 className="font-bold text-base">{item.name}</h3>
+                                                <p className="text-sm text-muted-foreground">{item.category}</p>
+                                            </div>
+                                            {item.isFeatured && <Badge>Featured</Badge>}
+                                        </div>
+                                    </div>
+                                </Card>
+                            </Link>
+                        </CarouselItem>
                     ))
                 )}
-            </div>
-             <ScrollBar orientation="horizontal" className="h-0" />
-           </ScrollArea>
+            </CarouselContent>
+            </Carousel>
         </section>
         
         <section className="mt-8">
