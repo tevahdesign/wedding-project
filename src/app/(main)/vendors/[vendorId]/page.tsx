@@ -116,8 +116,9 @@ export default function VendorDetailPage() {
             </div>
 
             <Tabs defaultValue="about" className="w-full">
-                 <TabsList className="grid w-full grid-cols-3 bg-background sticky top-0 z-10 rounded-none h-14">
+                 <TabsList className="grid w-full grid-cols-4 bg-background sticky top-0 z-10 rounded-none h-14">
                     <TabsTrigger value="about">About</TabsTrigger>
+                    <TabsTrigger value="gallery">Gallery</TabsTrigger>
                     <TabsTrigger value="services">Services</TabsTrigger>
                     <TabsTrigger value="reviews">Reviews</TabsTrigger>
                 </TabsList>
@@ -139,6 +140,27 @@ export default function VendorDetailPage() {
                              <p className="text-muted-foreground">
                                 Detailed information about this vendor is not yet available. Please check back later or contact the vendor directly for more details.
                             </p>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="gallery" className="m-0">
+                        <div className='bg-background rounded-lg p-4'>
+                            <h2 className="font-bold text-lg mb-4">Gallery</h2>
+                            {vendor.galleryImageIds && vendor.galleryImageIds.length > 0 ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                    {vendor.galleryImageIds.map((imageUrl, index) => (
+                                        <div key={index} className="relative aspect-square w-full h-auto rounded-lg overflow-hidden">
+                                            <Image
+                                                src={imageUrl}
+                                                alt={`Gallery image ${index + 1}`}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-muted-foreground text-center py-8">This vendor hasn't uploaded any gallery images yet.</p>
+                            )}
                         </div>
                     </TabsContent>
                     <TabsContent value="services" className="m-0">
