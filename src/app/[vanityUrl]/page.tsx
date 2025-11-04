@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import { useParams } from 'next/navigation'
 import { doc, getDoc } from 'firebase/firestore'
 import { format } from 'date-fns'
 
@@ -11,12 +12,9 @@ import { useFirestore } from '@/firebase'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { Gem } from 'lucide-react'
 
-type PublicWebsitePageProps = {
-  params: { vanityUrl: string }
-}
-
-export default function PublicWebsitePage({ params }: PublicWebsitePageProps) {
-  const { vanityUrl } = params
+export default function PublicWebsitePage() {
+  const params = useParams()
+  const { vanityUrl } = params as { vanityUrl: string }
   const firestore = useFirestore()
   const [websiteData, setWebsiteData] = useState<any | null>(null)
   const [loading, setLoading] = useState(true)
