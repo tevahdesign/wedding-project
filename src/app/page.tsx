@@ -79,43 +79,42 @@ export default function RootPage() {
   return (
     <div className="w-full min-h-screen bg-background text-foreground flex flex-col pb-28">
       {/* Header */}
-      <header className="p-4 flex items-center justify-between sticky top-0 bg-background/80 backdrop-blur-sm z-20">
-        <h1 className="text-3xl font-logo text-primary">WedWise</h1>
-        <div className="cursor-pointer" onClick={() => handleCardClick('/login')} onMouseEnter={() => handleMouseEnter('/login')}>
-            <Avatar className="h-9 w-9">
-                <AvatarImage src="https://i.pravatar.cc/150" />
-                <AvatarFallback>A</AvatarFallback>
-            </Avatar>
+      <header className="p-4 space-y-4 sticky top-0 bg-background/80 backdrop-blur-sm z-20">
+        <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-logo text-primary">WedWise</h1>
+            <div className="cursor-pointer" onClick={() => handleCardClick('/login')} onMouseEnter={() => handleMouseEnter('/login')}>
+                <Avatar className="h-9 w-9">
+                    <AvatarImage src="https://i.pravatar.cc/150" />
+                    <AvatarFallback>A</AvatarFallback>
+                </Avatar>
+            </div>
         </div>
+        <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input placeholder="Search for anything..." className="pl-12 h-12 rounded-md bg-card border-border focus:bg-white focus:border-primary" />
+        </div>
+        <ScrollArea className="w-full whitespace-nowrap">
+            <div className="flex space-x-3 pb-2">
+            {categoriesLoading ? (
+                Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-9 w-24 bg-muted rounded-md animate-pulse"></div>)
+            ) : (
+                allCategories.map((cat) => (
+                <Button 
+                    key={cat.id}
+                    variant={selectedCategory === cat.name ? 'default' : 'outline'}
+                    onClick={() => setSelectedCategory(cat.name)}
+                    className="rounded-md h-9 px-4 border-border shrink-0"
+                >
+                    {cat.name}
+                </Button>
+            )))}
+            </div>
+            <ScrollBar orientation="horizontal" className="h-0" />
+        </ScrollArea>
       </header>
       
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-        <div className="p-4 pt-0 sticky top-[73px] bg-background/80 backdrop-blur-sm z-10 space-y-4">
-             <div className="relative">
-               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-               <Input placeholder="Search for anything..." className="pl-12 h-12 rounded-md bg-card border-border focus:bg-white focus:border-primary" />
-             </div>
-            <ScrollArea className="w-full whitespace-nowrap">
-              <div className="flex space-x-3 pb-2">
-                {categoriesLoading ? (
-                    Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-9 w-24 bg-muted rounded-md animate-pulse"></div>)
-                ) : (
-                    allCategories.map((cat) => (
-                    <Button 
-                      key={cat.id}
-                      variant={selectedCategory === cat.name ? 'default' : 'outline'}
-                      onClick={() => setSelectedCategory(cat.name)}
-                      className="rounded-md h-9 px-4 border-border shrink-0"
-                    >
-                      {cat.name}
-                    </Button>
-                )))}
-              </div>
-              <ScrollBar orientation="horizontal" className="h-0" />
-            </ScrollArea>
-        </div>
-
         {/* New Arrivals */}
         <section className="px-4 mt-4">
           <div className="flex justify-between items-center mb-4">
@@ -233,3 +232,4 @@ export default function RootPage() {
     
 
     
+
