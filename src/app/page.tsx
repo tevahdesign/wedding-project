@@ -56,7 +56,7 @@ export default function RootPage() {
 
   const newArrivals = useMemo(() => {
     if (!vendors) return [];
-    return vendors.filter(vendor => vendor.isFeatured).slice(0, 2);
+    return vendors.filter(vendor => vendor.isFeatured).slice(0, 3);
   }, [vendors]);
 
   const popularVendors = useMemo(() => {
@@ -90,8 +90,7 @@ export default function RootPage() {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
         <div className="p-4 pt-0 sticky top-[73px] bg-background/80 backdrop-blur-sm z-10 pb-4">
-            {/* Categories */}
-            <div className="flex space-x-3 overflow-x-auto whitespace-nowrap -mx-4 px-4 pb-2">
+            <div className="flex space-x-3 overflow-x-auto whitespace-nowrap pt-2 -mx-4 px-4 pb-2">
               {categoriesLoading ? (
                 Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-9 w-24 bg-muted rounded-full animate-pulse"></div>)
               ) : (
@@ -117,7 +116,7 @@ export default function RootPage() {
         </div>
 
         {/* New Arrivals */}
-        <section className="px-4 mt-4">
+        <section className="px-4 mt-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">New Arrivals</h2>
             <div 
@@ -128,30 +127,26 @@ export default function RootPage() {
               See All
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
             {vendorsLoading ? (
-              Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none h-64 bg-muted animate-pulse rounded-xl"></Card>)
+              Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none h-40 bg-muted animate-pulse rounded-xl"></Card>)
             ) : (
               newArrivals.map(item => (
                 <div 
                   key={item.id}
                   onClick={() => handleCardClick(`/vendors/${item.id}`)}
                   onMouseEnter={() => handleMouseEnter(`/vendors/${item.id}`)}
-                  className="cursor-pointer"
+                  className="cursor-pointer group"
                 >
-                  <Card className="border-0 bg-card shadow-none overflow-hidden group rounded-xl">
-                    <CardContent className="p-0 relative">
-                      <Image src={item.imageId || "https://picsum.photos/seed/placeholder/400/600"} alt={item.name} width={400} height={600} className="rounded-xl object-cover w-full aspect-[2/3] transition-transform duration-300 group-hover:scale-105" />
-                    </CardContent>
-                    <div className="pt-3 px-1">
-                      <h3 className="font-semibold text-sm truncate">{item.name}</h3>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <p>{item.category}</p>
-                        {item.isFeatured && <Badge variant="outline" className="border-primary text-primary">Featured</Badge>}
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <p className="text-sm font-bold text-primary">{item.priceRange}</p>
-                      </div>
+                  <Card className="border-0 bg-card shadow-none overflow-hidden rounded-xl relative h-40">
+                    <Image src={item.imageId || "https://picsum.photos/seed/placeholder/800/400"} alt={item.name} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 p-4 text-white">
+                        <h3 className="font-bold text-lg">{item.name}</h3>
+                        <p className="text-sm">{item.category}</p>
+                    </div>
+                    <div className="absolute top-4 right-4">
+                        <Button size="sm" variant="secondary" className="h-8 rounded-full">View</Button>
                     </div>
                   </Card>
                 </div>
@@ -161,7 +156,7 @@ export default function RootPage() {
         </section>
         
         {/* Popular Vendors */}
-        <section className="mt-4">
+        <section className="mt-8">
           <div className="flex justify-between items-center mb-4 px-4">
             <h2 className="text-xl font-semibold">Popular Vendors</h2>
             <div 
@@ -184,11 +179,11 @@ export default function RootPage() {
                         onClick={() => handleCardClick(`/vendors/${item.id}`)}
                         onMouseEnter={() => handleMouseEnter(`/vendors/${item.id}`)}
                       >
-                         <div className="overflow-hidden rounded-xl">
-                            <Image src={item.imageId || "https://picsum.photos/seed/placeholder/160/200"} alt={item.name} width={160} height={200} className="h-auto w-auto object-cover aspect-[4/5] transition-transform duration-300 group-hover:scale-105"/>
+                         <div className="overflow-hidden rounded-xl shadow-md">
+                            <Image src={item.imageId || "https://picsum.photos/seed/placeholder/160/160"} alt={item.name} width={160} height={160} className="h-auto w-auto object-cover aspect-square transition-transform duration-300 group-hover:scale-105"/>
                          </div>
                          <div className="space-y-1 text-sm">
-                           <h3 className="font-medium leading-none truncate">{item.name}</h3>
+                           <h3 className="font-semibold leading-none truncate">{item.name}</h3>
                            <p className="text-xs text-muted-foreground truncate">{item.category}</p>
                             {item.rating && (
                                 <div className="text-xs text-muted-foreground flex items-center gap-1">
@@ -207,7 +202,7 @@ export default function RootPage() {
         </section>
 
         {/* Tools Section */}
-        <section className="p-4 mt-4">
+        <section className="p-4 mt-6">
             <h2 className="text-xl font-semibold text-center mb-4">Your Complete Planning Toolkit</h2>
             <div className="pt-0">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -233,5 +228,4 @@ export default function RootPage() {
     </div>
   )
 }
-
     
