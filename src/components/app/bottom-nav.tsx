@@ -17,14 +17,14 @@ export function BottomNav() {
   const pathname = usePathname()
 
   // Do not render bottom nav on login page or public website pages
-  if (pathname === '/login' || pathname.startsWith('/wedding-')) {
+  if (pathname === '/login' || pathname.includes('/wedding-')) {
     return null;
   }
-
-  // Do not render bottom nav on sub-pages of main sections for a cleaner look
-  const mainRoutes = navItems.map(item => item.href);
-  const isSubPage = mainRoutes.some(route => route !== '/' && pathname.startsWith(route) && pathname !== route);
   
+  const isSubPage = navItems.some(item => 
+    item.href !== '/' && pathname.startsWith(item.href) && pathname !== item.href
+  );
+
   if (isSubPage) {
     return null;
   }
