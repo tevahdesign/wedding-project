@@ -49,7 +49,7 @@ export function HomePageClient({ vendors, categories }: HomePageClientProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const plugin = useRef(
-    Autoplay({ delay: 3000, stopOnInteraction: true, stopOnMouseEnter: true })
+    Autoplay({ delay: 2000, stopOnInteraction: true })
   )
 
   useEffect(() => {
@@ -142,6 +142,8 @@ export function HomePageClient({ vendors, categories }: HomePageClientProps) {
             }}
             plugins={[plugin.current]}
             className="w-full"
+            onMouseEnter={plugin.current.stop}
+            onMouseLeave={plugin.current.reset}
             >
             <CarouselContent className="-ml-2">
                 {newArrivals.length === 0 ? (
@@ -246,3 +248,5 @@ export function HomePageClient({ vendors, categories }: HomePageClientProps) {
     </div>
   )
 }
+
+    
