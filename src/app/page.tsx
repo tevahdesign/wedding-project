@@ -1,10 +1,10 @@
 
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { ArrowRight, Star } from "lucide-react"
+import { ArrowRight, Star, Search, X } from "lucide-react"
 import { ref } from "firebase/database"
 
 import { Button } from "@/components/ui/button"
@@ -18,8 +18,8 @@ import { Badge } from "@/components/ui/badge"
 import { useDatabase } from "@/firebase"
 import { useList } from "@/firebase/database/use-list"
 import { features } from "@/lib/placeholders"
-import { Search } from "lucide-react"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { cn } from "@/lib/utils"
 
 type Vendor = {
   id: string;
@@ -43,6 +43,20 @@ export default function RootPage() {
   const database = useDatabase();
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [isHeaderCompact, setIsHeaderCompact] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsHeaderCompact(true);
+      } else {
+        setIsHeaderCompact(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const categoriesRef = useMemo(() => database ? ref(database, 'vendorCategories') : null, [database]);
   const { data: categories, loading: categoriesLoading } = useList<VendorCategory>(categoriesRef);
@@ -56,8 +70,6 @@ export default function RootPage() {
 
   const newArrivals = useMemo(() => {
     if (!vendors) return [];
-    // In a real app, you'd sort by a `createdAt` timestamp.
-    // Here we'll just take the first few that are featured.
     return vendors.filter(vendor => vendor.isFeatured).slice(0, 3);
   }, [vendors]);
 
@@ -82,36 +94,59 @@ export default function RootPage() {
       <header className="p-4 space-y-4 sticky top-0 bg-background/80 backdrop-blur-sm z-20">
         <div className="flex items-center justify-between">
             <h1 className="text-3xl font-logo text-primary">WedWise</h1>
-            <div className="cursor-pointer" onClick={() => handleCardClick('/login')} onMouseEnter={() => handleMouseEnter('/login')}>
-                <Avatar className="h-9 w-9">
-                    <AvatarImage src="https://i.pravatar.cc/150" />
-                    <AvatarFallback>A</AvatarFallback>
-                </Avatar>
-            </div>
-        </div>
-        <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input placeholder="Search for anything..." className="pl-12 h-12 rounded-md bg-card border-border focus:bg-white focus:border-primary" />
-        </div>
-        <ScrollArea className="w-full whitespace-nowrap">
-            <div className="flex space-x-3 pb-2">
-            {categoriesLoading ? (
-                Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-9 w-24 bg-muted rounded-md animate-pulse"></div>)
-            ) : (
-                allCategories.map((cat) => (
-                <Button 
-                    key={cat.id}
-                    variant={selectedCategory === cat.name ? 'default' : 'outline'}
-                    onClick={() => setSelectedCategory(cat.name)}
-                    className="rounded-md h-9 px-4 border-border shrink-0"
-                >
-                    {cat.name}
+             <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)}>
+                    <Search className="h-6 w-6" />
                 </Button>
-            )))}
+                <div className="cursor-pointer" onClick={() => handleCardClick('/login')} onMouseEnter={() => handleMouseEnter('/login')}>
+                    <Avatar className="h-9 w-9">
+                        <AvatarImage src="https://i.pravatar.cc/150" />
+                        <AvatarFallback>A</AvatarFallback>
+                    </Avatar>
+                </div>
             </div>
-            <ScrollBar orientation="horizontal" className="h-0" />
-        </ScrollArea>
+        </div>
+        
+        <div className={cn("transition-all duration-300 ease-in-out", isHeaderCompact ? 'max-h-0 overflow-hidden opacity-0' : 'max-h-96 opacity-100')}>
+             <div className="relative mb-4">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input placeholder="Search for anything..." className="pl-12 h-12 rounded-md bg-card border-border focus:bg-white focus:border-primary" />
+            </div>
+            <ScrollArea className="w-full whitespace-nowrap">
+                <div className="flex space-x-3 pb-2">
+                {categoriesLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-9 w-24 bg-muted rounded-md animate-pulse shrink-0"></div>)
+                ) : (
+                    allCategories.map((cat) => (
+                    <Button 
+                        key={cat.id}
+                        variant={selectedCategory === cat.name ? 'default' : 'outline'}
+                        onClick={() => setSelectedCategory(cat.name)}
+                        className="rounded-md h-9 px-4 border-border shrink-0"
+                    >
+                        {cat.name}
+                    </Button>
+                )))}
+                </div>
+                <ScrollBar orientation="horizontal" className="h-0" />
+            </ScrollArea>
+        </div>
       </header>
+
+       {isSearchOpen && (
+        <div className="fixed inset-0 bg-background z-50 flex flex-col p-4 animate-fade-in">
+          <div className="flex items-center justify-between mb-4">
+             <h2 className="text-xl font-semibold">Search</h2>
+             <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(false)}>
+               <X className="h-6 w-6" />
+             </Button>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input autoFocus placeholder="Search for venues, photographers..." className="pl-12 h-12 rounded-md text-lg" />
+          </div>
+        </div>
+      )}
       
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
@@ -230,6 +265,3 @@ export default function RootPage() {
   )
 }
     
-
-    
-
