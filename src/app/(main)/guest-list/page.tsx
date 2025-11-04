@@ -3,6 +3,8 @@
 
 import { useMemo, useState } from "react"
 import { ref, remove, update } from "firebase/database"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 import {
   PlusCircle,
   MoreHorizontal,
@@ -14,6 +16,8 @@ import {
   Edit,
   Trash2,
   Download,
+  FileText,
+  File,
 } from "lucide-react"
 
 import { PageHeader } from "@/components/app/page-header"
@@ -30,6 +34,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu"
 import {
   Dialog,
@@ -148,8 +156,8 @@ export default function GuestListPage() {
       setIsDeleting(false)
     }
   }
-
-  const handleDownloadCSV = () => {
+  
+  const handleDownload = (format: 'csv' | 'pdf', group?: 'Bride' | 'Groom') => {
     if (!guests || guests.length === 0) {
       toast({
         variant: "destructive",
@@ -158,11 +166,36 @@ export default function GuestListPage() {
       });
       return;
     }
+    
+    const listToDownload = group ? guests.filter(g => g.group === group) : guests;
+    const fileName = group ? `${group.toLowerCase()}-guest-list` : 'guest-list';
 
+    if (listToDownload.length === 0) {
+        toast({
+            variant: "destructive",
+            title: `No Guests in ${group}'s Group`,
+            description: "There are no guests to download for the selected group.",
+        });
+        return;
+    }
+
+    if (format === 'csv') {
+        downloadCSV(listToDownload, fileName);
+    } else {
+        downloadPDF(listToDownload, fileName);
+    }
+
+    toast({
+      title: "Download Started",
+      description: `Your ${group || 'full'} guest list is being downloaded.`,
+    });
+  }
+
+  const downloadCSV = (data: Guest[], fileName: string) => {
     const headers = ["Name", "Email", "Phone Number", "Group", "Status"];
     const csvContent = [
       headers.join(","),
-      ...guests.map(guest => [
+      ...data.map(guest => [
         `"${guest.name || ""}"`,
         `"${guest.email || ""}"`,
         `"${guest.phoneNumber || ""}"`,
@@ -176,18 +209,31 @@ export default function GuestListPage() {
     if (link.download !== undefined) {
       const url = URL.createObjectURL(blob);
       link.setAttribute("href", url);
-      link.setAttribute("download", "guest-list.csv");
+      link.setAttribute("download", `${fileName}.csv`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     }
-
-    toast({
-      title: "Download Started",
-      description: "Your guest list is being downloaded.",
-    });
   }
+
+  const downloadPDF = (data: Guest[], fileName: string) => {
+    const doc = new jsPDF();
+    autoTable(doc, {
+      head: [["Name", "Email", "Phone Number", "Group", "Status"]],
+      body: data.map(guest => [
+        guest.name || "",
+        guest.email || "",
+        guest.phoneNumber || "",
+        guest.group || "",
+        guest.status || ""
+      ]),
+      didDrawPage: (data) => {
+        doc.text(`${fileName.replace('-', ' ').toUpperCase()}`, data.settings.margin.left, 15);
+      },
+    });
+    doc.save(`${fileName}.pdf`);
+  };
 
   const getStatusBadgeClasses = (status: GuestStatus) => {
     return cn({
@@ -205,10 +251,45 @@ export default function GuestListPage() {
         showBackButton
       >
         <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleDownloadCSV} disabled={!guests || guests.length === 0}>
-                <Download className="mr-2 h-4 w-4" />
-                Download
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" disabled={!guests || guests.length === 0}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Download Options</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                        <File className="mr-2 h-4 w-4" />
+                        <span>Full List</span>
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                        <DropdownMenuSubContent>
+                            <DropdownMenuItem onClick={() => handleDownload('csv')}>
+                                <FileText className="mr-2 h-4 w-4" />
+                                <span>CSV</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDownload('pdf')}>
+                                <FileText className="mr-2 h-4 w-4" />
+                                <span>PDF</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                </DropdownMenuSub>
+                <DropdownMenuItem onClick={() => handleDownload('pdf', 'Bride')}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    <span>Bride's List (PDF)</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleDownload('pdf', 'Groom')}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    <span>Groom's List (PDF)</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button onClick={handleAddClick}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Guest
