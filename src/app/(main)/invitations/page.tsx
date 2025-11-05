@@ -29,7 +29,6 @@ export default function InvitationsPage() {
   const titleRef = useRef(null);
   const namesRef = useRef(null);
   const detailsRef = useRef(null);
-  const rsvpRef = useRef(null);
 
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,11 +158,6 @@ export default function InvitationsPage() {
                               </p>
                           </div>
                       </Draggable>
-                       <Draggable bounds="parent" nodeRef={rsvpRef}>
-                          <div ref={rsvpRef} className="cursor-move pt-8">
-                            <Button variant="outline" className="text-black bg-white/80 hover:bg-white">RSVP</Button>
-                          </div>
-                       </Draggable>
                   </div>
                 </CardContent>
               </Card>

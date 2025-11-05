@@ -401,9 +401,6 @@ export default function WebsiteBuilderPage() {
                       <p className="mt-6 max-w-md text-sm">
                         {welcomeMessage}
                       </p>
-                      <Button variant="outline" className="mt-8 text-black">
-                        RSVP
-                      </Button>
                     </div>
                   </div>
                 )}

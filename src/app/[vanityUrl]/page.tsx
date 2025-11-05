@@ -122,9 +122,6 @@ export default function PublicWebsitePage() {
             <p className="mt-8 max-w-md text-base md:text-lg">
               {welcomeMessage}
             </p>
-            <Button variant="outline" className="mt-12 text-black">
-              RSVP
-            </Button>
           </div>
         </div>
       )}
