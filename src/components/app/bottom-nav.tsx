@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Home, Compass, LayoutGrid, User } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useSidebar } from "@/components/ui/sidebar"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
@@ -16,7 +16,7 @@ const navItems = [
 
 export function BottomNav() {
   const pathname = usePathname()
-  const { isMobile } = useSidebar();
+  const isMobile = useIsMobile();
 
 
   const isPublicVanityPage = !navItems.some(item => pathname.startsWith(item.href)) && pathname !== '/';
