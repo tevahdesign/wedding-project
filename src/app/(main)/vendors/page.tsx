@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { useMemo, useState } from 'react';
@@ -93,7 +94,7 @@ export default function VendorsPage() {
                 </Button>
             </PageHeader>
 
-            <div className="px-4 pb-4">
+            <div className="px-4 pb-4 sticky top-16 z-10 bg-background/80 backdrop-blur-sm -mb-4">
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input 
@@ -103,10 +104,8 @@ export default function VendorsPage() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-            </div>
-
-            <div className="px-4">
-                <div className="flex space-x-3 overflow-x-auto whitespace-nowrap pb-2 -mx-4 px-4">
+            
+                <div className="flex space-x-3 overflow-x-auto whitespace-nowrap pt-4 pb-2 -mx-4 px-4">
                     {categoriesLoading ? (
                         Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-9 w-24 bg-gray-200 rounded-full animate-pulse"></div>)
                     ) : (
@@ -128,14 +127,14 @@ export default function VendorsPage() {
                 </div>
             </div>
 
-             <div className="p-4">
+             <div className="p-4 pt-8">
                 <h2 className="text-xl font-bold mb-4">{selectedCategory} Vendors</h2>
                 {vendorsLoading ? (
-                     <div className="grid grid-cols-2 gap-4">
-                        {Array.from({ length: 4 }).map((_, i) => <Card key={i} className="h-64 animate-pulse bg-muted"></Card>)}
+                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {Array.from({ length: 8 }).map((_, i) => <Card key={i} className="h-64 animate-pulse bg-muted"></Card>)}
                     </div>
                 ) : filteredVendors.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {filteredVendors.map(vendor => {
                              return (
                                 <Link href={`/vendors/${vendor.id}`} key={vendor.id} className="overflow-hidden group cursor-pointer">
@@ -151,8 +150,8 @@ export default function VendorsPage() {
                                             }
                                             alt={vendor.name}
                                             width={400}
-                                            height={500}
-                                            className="object-cover w-full aspect-[4/5] rounded-t-xl transition-transform duration-300 group-hover:scale-105"
+                                            height={400}
+                                            className="object-cover w-full aspect-square rounded-t-xl transition-transform duration-300 group-hover:scale-105"
                                         />
                                         <Button
                                             size="icon"
