@@ -30,6 +30,15 @@
     --chart-4: 0 55% 45%;
     --chart-5: 0 45% 40%;
     --radius: 0.5rem;
+
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 0 84.2% 60.2%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 15%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 0 84.2% 60.2%;
   }
 
   .dark {
@@ -52,6 +61,15 @@
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
     --ring: 0 84.2% 60.2%;
+
+    --sidebar-background: 0 0% 3.9%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 0 84.2% 60.2%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 0% 14.9%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 14.9%;
+    --sidebar-ring: 0 84.2% 60.2%;
   }
 }
 
@@ -60,7 +78,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-body;
+    @apply bg-secondary text-foreground font-body;
   }
   h1,
   h2,
@@ -84,28 +102,4 @@
     width: 100%;
     height: 3px;
   }
-}
-
-html,
-body {
-  height: 100%;
-}
-
-body {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  background-color: hsl(var(--secondary));
-}
-
-main.app-container {
-  width: 100%;
-  max-width: 430px; /* iPhone 14 Pro Max width */
-  min-height: 100vh;
-  background-color: hsl(var(--background));
-  box-shadow: 0 0 20px rgba(0,0,0,0.1);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }

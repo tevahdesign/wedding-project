@@ -80,7 +80,7 @@ export default function RootPage() {
   }, [vendors]);
 
   return (
-    <div className="w-full min-h-screen bg-background text-foreground flex flex-col pb-28">
+    <div className="w-full min-h-screen bg-background text-foreground flex flex-col pb-20 md:pb-0">
       {/* Header */}
       <header className="p-4 space-y-4 sticky top-0 bg-background/80 backdrop-blur-sm z-20">
         <div className="flex items-center justify-between">
@@ -228,11 +228,11 @@ export default function RootPage() {
         {/* Tools Section */}
         <section className="p-4 mt-6">
             <h2 className="text-xl font-semibold text-center mb-6">Your Complete Planning Toolkit</h2>
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {features.map((feature) => (
                     <Link href={feature.href} key={feature.title}>
                         <Card
-                            className="cursor-pointer group flex items-center p-4 transition-all hover:bg-muted/60 hover:shadow-lg rounded-lg bg-card border-border shadow-sm"
+                            className="cursor-pointer group flex items-center p-4 transition-all hover:bg-muted/60 hover:shadow-lg rounded-lg bg-card border-border shadow-sm h-full"
                         >
                             <div className="p-3 bg-primary/10 rounded-full mr-4">
                                 <feature.icon className="h-6 w-6 text-primary" />

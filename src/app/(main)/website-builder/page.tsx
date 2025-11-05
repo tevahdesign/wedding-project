@@ -188,13 +188,13 @@ export default function WebsiteBuilderPage() {
   const formattedDate = weddingDate ? format(weddingDate, 'MMMM do, yyyy') : 'Select a date'
 
   return (
-    <div className="flex flex-col flex-1 pb-20">
+    <div className="flex flex-col flex-1">
       <PageHeader
         title="Website Builder"
         description="Craft a beautiful home for your wedding story."
-        showBackButton
       />
-      <div className="p-4 pt-4 space-y-6">
+      <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Website Details</CardTitle>
@@ -305,68 +305,7 @@ export default function WebsiteBuilderPage() {
               )}
             </CardContent>
           </Card>
-
-           <Card>
-            <CardHeader>
-              <CardTitle>Live Preview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="w-full aspect-[9/16] bg-muted rounded-lg border overflow-hidden">
-                {previewImage && (
-                  <div className="relative w-full h-full text-white bg-slate-800">
-                    <Image
-                      src={previewImage.imageUrl}
-                      alt={previewImage.description}
-                      fill
-                      className="object-cover opacity-30"
-                      data-ai-hint={previewImage.imageHint}
-                    />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-                      <h1 className="font-headline text-4xl font-bold">
-                        {coupleNames}
-                      </h1>
-                      <p className="mt-2 text-md uppercase tracking-widest">
-                        Are getting married!
-                      </p>
-                      <div className="w-16 h-px bg-white my-6" />
-                      <p className="text-lg font-semibold">
-                        {formattedDate}
-                      </p>
-                      <p className="mt-6 max-w-md text-sm">
-                        {welcomeMessage}
-                      </p>
-                      <Button variant="outline" className="mt-8 text-black">
-                        RSVP
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-           {initialVanityUrl && !loading && (
-             <Card>
-                <CardHeader>
-                    <CardTitle>Your Link is Ready!</CardTitle>
-                    <CardDescription>Share your beautiful website with your guests.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                        <LinkIcon className="h-4 w-4 text-muted-foreground" />
-                        <Link href={shareableUrl} target="_blank" className="text-sm font-medium text-primary hover:underline truncate">
-                            {shareableUrl}
-                        </Link>
-                    </div>
-                    <Button onClick={handleCopyToClipboard} className="w-full">
-                        {isCopied ? <Check className="mr-2" /> : <Copy className="mr-2" />}
-                        {isCopied ? 'Copied!' : 'Copy Link'}
-                    </Button>
-                </CardContent>
-             </Card>
-           )}
-
-          <div className='flex flex-col gap-2'>
+           <div className='flex flex-col gap-2'>
             <Button
               className="w-full"
               size="lg"
@@ -411,6 +350,68 @@ export default function WebsiteBuilderPage() {
               </AlertDialog>
             )}
           </div>
+        </div>
+        <div className="lg:col-span-2 space-y-6">
+           {initialVanityUrl && !loading && (
+             <Card>
+                <CardHeader>
+                    <CardTitle>Your Link is Ready!</CardTitle>
+                    <CardDescription>Share your beautiful website with your guests.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                        <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                        <Link href={shareableUrl} target="_blank" className="text-sm font-medium text-primary hover:underline truncate">
+                            {shareableUrl}
+                        </Link>
+                    </div>
+                    <Button onClick={handleCopyToClipboard} className="w-full">
+                        {isCopied ? <Check className="mr-2" /> : <Copy className="mr-2" />}
+                        {isCopied ? 'Copied!' : 'Copy Link'}
+                    </Button>
+                </CardContent>
+             </Card>
+           )}
+           <Card>
+            <CardHeader>
+              <CardTitle>Live Preview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="w-full aspect-[9/16] bg-muted rounded-lg border overflow-hidden">
+                {previewImage && (
+                  <div className="relative w-full h-full text-white bg-slate-800">
+                    <Image
+                      src={previewImage.imageUrl}
+                      alt={previewImage.description}
+                      fill
+                      className="object-cover opacity-30"
+                      data-ai-hint={previewImage.imageHint}
+                    />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                      <h1 className="font-headline text-4xl font-bold">
+                        {coupleNames}
+                      </h1>
+                      <p className="mt-2 text-md uppercase tracking-widest">
+                        Are getting married!
+                      </p>
+                      <div className="w-16 h-px bg-white my-6" />
+                      <p className="text-lg font-semibold">
+                        {formattedDate}
+                      </p>
+                      <p className="mt-6 max-w-md text-sm">
+                        {welcomeMessage}
+                      </p>
+                      <Button variant="outline" className="mt-8 text-black">
+                        RSVP
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+        </div>
       </div>
     </div>
   )

@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/toaster"
 import { FirebaseClientProvider } from "@/firebase/client-provider"
 import { ProgressBar } from "@/components/app/progress-bar"
 import { Suspense } from "react"
-import { BottomNav } from "@/components/app/bottom-nav"
 
 export const metadata: Metadata = {
   title: "WedWise",
@@ -36,10 +35,7 @@ export default function RootLayout({
           <ProgressBar />
         </Suspense>
         <FirebaseClientProvider>
-          <main className="app-container bg-background">
             {children}
-          </main>
-          <BottomNav />
           <Toaster />
         </FirebaseClientProvider>
       </body>

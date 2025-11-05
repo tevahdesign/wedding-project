@@ -14,13 +14,12 @@ export default function InvitationsPage() {
   const invitationTemplate = PlaceHolderImages.find(img => img.id === 'invitation-template-1');
 
   return (
-    <div className="flex flex-col flex-1 pb-20">
+    <div className="flex flex-col flex-1">
       <PageHeader
         title="Digital Invitations"
         description="Design and send beautiful invitations in minutes."
-        showBackButton
       />
-      <div className="p-4 pt-4 space-y-4">
+      <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Customize Your Invitation</CardTitle>

@@ -9,19 +9,20 @@ import {
   Mail,
   Store,
   Shield,
+  PenSquare,
 } from "lucide-react"
 import { useAuth } from "@/firebase"
 import { useRouter } from "next/navigation"
 
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
+import { PageHeader } from "@/components/app/page-header"
 
 const features = [
   {
@@ -55,6 +56,12 @@ const features = [
     href: "/registry",
   },
   {
+    title: "Website Builder",
+    description: "Create your public wedding site.",
+    icon: PenSquare,
+    href: "/website-builder",
+  },
+  {
     title: "Admin Panel",
     description: "Manage vendors and categories.",
     icon: Shield,
@@ -67,29 +74,14 @@ export default function DashboardPage() {
   const router = useRouter()
 
   return (
-    <div className="flex flex-col flex-1 pb-20 bg-muted/20">
-      <header className="p-4 flex items-center justify-between bg-background border-b">
-          <div className="flex items-center gap-3">
-             <h1 className="text-3xl font-logo text-primary">WedWise</h1>
-          </div>
-        <div className="flex items-center gap-2">
-            <Link href="/login">
-                <Avatar className="h-9 w-9">
-                    <AvatarImage src={user?.photoURL || "https://i.pravatar.cc/150"} />
-                    <AvatarFallback>{user?.displayName?.charAt(0) || "U"}</AvatarFallback>
-                </Avatar>
-            </Link>
-        </div>
-      </header>
-
-      <main className="flex-1 overflow-y-auto p-4">
-        <div className="mb-8 text-center">
-            <h2 className="text-3xl font-headline">Welcome, {user?.displayName?.split(" ")[0] || 'Planner'}!</h2>
-            <p className="text-muted-foreground">Let's continue planning your perfect day.</p>
-        </div>
-
-        <h3 className="text-lg font-semibold mb-4 text-center font-headline">Your Planning Tools</h3>
-        <div className="grid gap-4 sm:grid-cols-2">
+    <div className="flex flex-col flex-1">
+      <PageHeader
+        title={`Welcome, ${user?.displayName?.split(" ")[0] || 'Planner'}!`}
+        description="Let's continue planning your perfect day."
+      />
+      <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <h3 className="text-lg font-semibold mb-4 font-headline">Your Planning Tools</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {features.map((feature) => (
                 <Link href={feature.href} key={feature.href}>
                     <Card

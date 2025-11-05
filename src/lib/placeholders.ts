@@ -1,5 +1,5 @@
 
-import { Church, Camera, Utensils, Music, ClipboardList, Flower, Gem, Users, Wand2, Star, Heart, LayoutGrid, PiggyBank, Mail, Gift, Shield, Store } from "lucide-react";
+import { Church, Camera, Utensils, Music, ClipboardList, Flower, Gem, Users, Wand2, Star, Heart, LayoutGrid, PiggyBank, Mail, Gift, Shield, Store, PenSquare } from "lucide-react";
 
 export const features = [
   {
@@ -31,6 +31,12 @@ export const features = [
     description: "Combine gifts from any store.",
     icon: Gift,
     href: "/registry",
+  },
+  {
+    title: "Website Builder",
+    description: "Create your public wedding site.",
+    icon: PenSquare,
+    href: "/website-builder",
   },
   {
     title: "Admin Panel",
