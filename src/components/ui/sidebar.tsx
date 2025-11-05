@@ -199,7 +199,7 @@ const Sidebar = React.forwardRef<
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-full bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+            className="w-full bg-sidebar/80 p-0 text-sidebar-foreground backdrop-blur-sm [&>button]:hidden"
             side={side}
           >
             <div className="flex h-full w-full flex-col">{children}</div>
