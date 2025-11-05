@@ -97,7 +97,7 @@ export function InvitationToolbar({
     onDownload
 }: InvitationToolbarProps) {
     return (
-        <div className="bg-background border-b p-2 flex items-center justify-between gap-4 flex-wrap">
+        <div className="bg-background border-b p-2 flex items-center justify-between gap-4 flex-wrap sticky top-16 z-10">
             <div className="flex items-center gap-2">
                 <Input id="image-upload-toolbar" type="file" accept="image/*" onChange={onImageUpload} className="hidden" />
                 <Button asChild variant="ghost" size="sm">
