@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { Download, Send, Upload, Plus, Trash2 } from "lucide-react"
-import { useRef, useState, useCallback } from "react"
+import { useRef, useState, useCallback, createRef, RefObject } from "react"
 import { toPng } from 'html-to-image';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 import { cn } from "@/lib/utils"
@@ -23,6 +23,7 @@ type TextElement = {
   size: number;
   color: string;
   position: { x: number; y: number };
+  ref: RefObject<HTMLDivElement>;
 }
 
 export default function InvitationsPage() {
@@ -30,9 +31,9 @@ export default function InvitationsPage() {
   
   const [backgroundImage, setBackgroundImage] = useState(invitationTemplate?.imageUrl || '');
   const [textElements, setTextElements] = useState<TextElement[]>([
-    { id: 'title', text: 'The Wedding Of', font: 'font-headline', size: 20, color: '#FFFFFF', position: { x: 0, y: 50 } },
-    { id: 'names', text: 'Alex & Jordan', font: 'font-great-vibes', size: 72, color: '#FFFFFF', position: { x: 0, y: 120 } },
-    { id: 'details', text: 'Saturday, October 26, 2024\n4:00 PM\nThe Grand Ballroom\n123 Celebration Ave', font: 'font-body', size: 18, color: '#FFFFFF', position: { x: 0, y: 250 } },
+    { id: 'title', text: 'The Wedding Of', font: 'font-headline', size: 20, color: '#FFFFFF', position: { x: 0, y: 50 }, ref: createRef() },
+    { id: 'names', text: 'Alex & Jordan', font: 'font-great-vibes', size: 72, color: '#FFFFFF', position: { x: 0, y: 120 }, ref: createRef() },
+    { id: 'details', text: 'Saturday, October 26, 2024\n4:00 PM\nThe Grand Ballroom\n123 Celebration Ave', font: 'font-body', size: 18, color: '#FFFFFF', position: { x: 0, y: 250 }, ref: createRef() },
   ]);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
 
@@ -72,7 +73,7 @@ export default function InvitationsPage() {
 
   }, [cardRef]);
 
-  const updateTextElement = (id: string, updates: Partial<TextElement>) => {
+  const updateTextElement = (id: string, updates: Partial<Omit<TextElement, 'ref'>>) => {
     setTextElements(prev => prev.map(el => el.id === id ? { ...el, ...updates } : el));
   };
   
@@ -89,6 +90,7 @@ export default function InvitationsPage() {
       size: 24,
       color: '#FFFFFF',
       position: { x: 0, y: 100 },
+      ref: createRef(),
     };
     setTextElements(prev => [...prev, newElement]);
     setSelectedElementId(newId);
@@ -234,8 +236,10 @@ export default function InvitationsPage() {
                             bounds="parent"
                             position={el.position}
                             onStop={(e, data) => handleDragStop(el.id, e, data)}
+                            nodeRef={el.ref}
                           >
                             <div 
+                                ref={el.ref}
                                 className={cn(
                                     "absolute cursor-move p-2",
                                     el.font,
@@ -262,5 +266,3 @@ export default function InvitationsPage() {
     </div>
   )
 }
-
-    
