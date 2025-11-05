@@ -152,13 +152,13 @@ export default function RootPage() {
           <ScrollArea className="w-full whitespace-nowrap">
             <div className="flex w-max space-x-4 px-4">
                 {vendorsLoading ? (
-                    Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none w-80 h-52 bg-muted animate-pulse rounded-lg"></Card>)
+                    Array.from({ length: 2 }).map((_, i) => <Card key={i} className="border-0 shadow-none w-64 md:w-72 h-52 bg-muted animate-pulse rounded-lg"></Card>)
                 ) : (
                     newArrivals.map(item => (
                         <Link
                             key={item.id}
                             href={`/vendors/${item.id}`}
-                            className="cursor-pointer group w-80"
+                            className="cursor-pointer group w-64 md:w-72"
                         >
                             <Card className="border-border bg-card shadow-sm overflow-hidden rounded-lg">
                                 <div className="relative h-40">
