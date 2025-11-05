@@ -6,6 +6,8 @@ import Image from "next/image"
 import { ArrowRight, Star, Search, X } from "lucide-react"
 import Link from "next/link"
 import Autoplay from "embla-carousel-autoplay"
+import { useRouter } from 'next/navigation';
+
 
 import { Button } from "@/components/ui/button"
 import {
@@ -47,10 +49,16 @@ export function HomePageClient({ vendors, categories }: HomePageClientProps) {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [isHeaderCompact, setIsHeaderCompact] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const router = useRouter();
+
 
   const plugin = useRef(
     Autoplay({ delay: 2000, stopOnInteraction: true })
   )
+  
+  useEffect(() => {
+    router.prefetch('/vendors');
+  }, [router]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -248,5 +256,3 @@ export function HomePageClient({ vendors, categories }: HomePageClientProps) {
     </div>
   )
 }
-
-    
