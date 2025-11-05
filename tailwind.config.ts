@@ -11,11 +11,14 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Poppins', 'sans-serif'],
-        body: ['Poppins', 'sans-serif'],
-        headline: ['Poppins', 'sans-serif'],
+        sans: ['var(--font-poppins)', 'sans-serif'],
+        body: ['var(--font-poppins)', 'sans-serif'],
+        headline: ['var(--font-playfair-display)', 'serif'],
         logo: ['Great Vibes', 'cursive'],
         code: ['monospace'],
+        'great-vibes': ['var(--font-great-vibes)', 'cursive'],
+        'dancing-script': ['var(--font-dancing-script)', 'cursive'],
+        'sacramento': ['var(--font-sacramento)', 'cursive'],
       },
       colors: {
         background: 'hsl(var(--background))',
