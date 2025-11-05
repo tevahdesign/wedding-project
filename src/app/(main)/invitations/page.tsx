@@ -26,6 +26,11 @@ export default function InvitationsPage() {
   const [font, setFont] = useState('font-headline');
 
   const cardRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef(null);
+  const namesRef = useRef(null);
+  const detailsRef = useRef(null);
+  const rsvpRef = useRef(null);
+
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -137,25 +142,25 @@ export default function InvitationsPage() {
                   />
                   <div className="absolute inset-0 bg-black/30"></div>
                   <div className="absolute inset-0 p-6 text-center text-white">
-                      <Draggable bounds="parent">
-                          <div className={cn("cursor-move", font)}>
+                      <Draggable bounds="parent" nodeRef={titleRef}>
+                          <div ref={titleRef} className={cn("cursor-move", font)}>
                               <h2 className="text-lg uppercase tracking-widest text-white/80">{eventTitle}</h2>
                           </div>
                       </Draggable>
-                      <Draggable bounds="parent">
-                          <div className={cn("cursor-move py-4", font)}>
+                      <Draggable bounds="parent" nodeRef={namesRef}>
+                          <div ref={namesRef} className={cn("cursor-move py-4", font)}>
                               <h1 className="text-6xl my-3">{coupleNames}</h1>
                           </div>
                       </Draggable>
-                      <Draggable bounds="parent">
-                          <div className={cn("cursor-move", font)}>
+                      <Draggable bounds="parent" nodeRef={detailsRef}>
+                          <div ref={detailsRef} className={cn("cursor-move", font)}>
                               <p className="whitespace-pre-line text-lg">
                                   {details}
                               </p>
                           </div>
                       </Draggable>
-                       <Draggable bounds="parent">
-                          <div className="cursor-move pt-8">
+                       <Draggable bounds="parent" nodeRef={rsvpRef}>
+                          <div ref={rsvpRef} className="cursor-move pt-8">
                             <Button variant="outline" className="text-black bg-white/80 hover:bg-white">RSVP</Button>
                           </div>
                        </Draggable>
