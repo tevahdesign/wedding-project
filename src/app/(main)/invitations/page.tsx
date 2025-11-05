@@ -14,6 +14,7 @@ import { Download, Send, Upload } from "lucide-react"
 import { useRef, useState, useCallback } from "react"
 import { toPng } from 'html-to-image';
 import Draggable from 'react-draggable';
+import { cn } from "@/lib/utils"
 
 export default function InvitationsPage() {
   const invitationTemplate = PlaceHolderImages.find(img => img.id === 'invitation-template-1');
