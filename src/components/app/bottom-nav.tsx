@@ -38,7 +38,10 @@ export function BottomNav() {
           return (
             <Link key={item.href} href={item.href} prefetch={true} className="flex flex-col items-center justify-center text-muted-foreground hover:text-primary transition-colors w-1/4">
               <item.icon className={cn("h-6 w-6", isActive && "text-primary")} />
-              <span className={cn("text-xs mt-1", isActive ? "text-primary font-semibold" : "text-muted-foreground")}>
+              <span className={cn(
+                "text-xs mt-1",
+                isActive ? "text-primary font-semibold" : "text-muted-foreground"
+              )}>
                 {item.label}
               </span>
             </Link>
