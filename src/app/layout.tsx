@@ -38,8 +38,8 @@ export default function RootLayout({
         <FirebaseClientProvider>
           <main className="app-container bg-background">
             {children}
-            <BottomNav />
           </main>
+          <BottomNav />
           <Toaster />
         </FirebaseClientProvider>
       </body>
