@@ -18,10 +18,18 @@ export function BottomNav() {
   const pathname = usePathname()
   const isMobile = useIsMobile();
 
+  // This check determines if the current page is one of the main nav items.
+  const isKnownRoute = navItems.some(item => {
+    if (item.href === "/") return pathname === "/";
+    return pathname.startsWith(item.href);
+  });
+  
+  // This checks if the route is a dynamic public vanity URL (e.g., /alex-and-jordan)
+  // We want to hide the nav on these pages, but not on the root '/' page.
+  const isPublicVanityPage = !isKnownRoute && pathname !== '/';
 
-  const isPublicVanityPage = !navItems.some(item => pathname.startsWith(item.href)) && pathname !== '/';
 
-  if (!isMobile || pathname === '/login' || (isPublicVanityPage && pathname !== '/')) {
+  if (!isMobile || pathname === '/login' || isPublicVanityPage) {
     return null;
   }
   
