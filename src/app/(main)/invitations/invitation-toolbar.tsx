@@ -4,12 +4,15 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
-import { Download, Plus, Send, Trash2, Upload } from "lucide-react";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Check, ChevronsUpDown, Download, Plus, Send, Trash2, Upload } from "lucide-react";
 import type { TextElement } from "./page";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 export type FontOption = {
     value: string;
@@ -31,7 +34,59 @@ const fontOptions: FontOption[] = [
     {value: 'font-great-vibes', label: 'Great Vibes'},
     {value: 'font-dancing-script', label: 'Dancing Script'},
     {value: 'font-sacramento', label: 'Sacramento'},
+    { value: "font-arial", label: "Arial" },
+    { value: "font-times", label: "Times New Roman" },
+    { value: "font-georgia", label: "Georgia" },
 ];
+
+function FontCombobox({ value, onSelect }: { value: string, onSelect: (font: string) => void }) {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-[180px] justify-between h-9"
+                >
+                    <span className="truncate">
+                        {fontOptions.find(f => f.value === value)?.label || 'Select font...'}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[200px] p-0">
+                <Command>
+                    <CommandInput placeholder="Search font..." />
+                    <CommandEmpty>No font found.</CommandEmpty>
+                    <CommandGroup className="max-h-60 overflow-y-auto">
+                        {fontOptions.map((option) => (
+                            <CommandItem
+                                key={option.value}
+                                value={option.label}
+                                onSelect={() => {
+                                    onSelect(option.value);
+                                    setOpen(false);
+                                }}
+                                className={cn(option.value, "cursor-pointer")}
+                            >
+                                <Check
+                                    className={cn(
+                                        "mr-2 h-4 w-4",
+                                        value === option.value ? "opacity-100" : "opacity-0"
+                                    )}
+                                />
+                                {option.label}
+                            </CommandItem>
+                        ))}
+                    </CommandGroup>
+                </Command>
+            </PopoverContent>
+        </Popover>
+    );
+}
 
 export function InvitationToolbar({
     selectedElement,
@@ -71,19 +126,10 @@ export function InvitationToolbar({
                      </div>
                      <div className="flex items-center gap-2">
                         <Label htmlFor="font-style" className="text-sm">Font</Label>
-                        <Select 
-                            value={selectedElement.font} 
-                            onValueChange={font => onUpdate(selectedElement.id, { font })}
-                        >
-                            <SelectTrigger id="font-style" className="w-[150px] h-9">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                            {fontOptions.map(option => (
-                                <SelectItem key={option.value} value={option.value} className={option.value}>{option.label}</SelectItem>
-                            ))}
-                            </SelectContent>
-                        </Select>
+                        <FontCombobox 
+                            value={selectedElement.font}
+                            onSelect={font => onUpdate(selectedElement.id, { font })}
+                        />
                     </div>
                      <div className="flex items-center gap-2">
                         <Label htmlFor="font-size" className="text-sm">Size</Label>
@@ -137,3 +183,5 @@ export function InvitationToolbar({
         </div>
     );
 }
+
+    

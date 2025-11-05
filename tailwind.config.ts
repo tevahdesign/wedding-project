@@ -19,6 +19,9 @@ export default {
         'great-vibes': ['var(--font-great-vibes)', 'cursive'],
         'dancing-script': ['var(--font-dancing-script)', 'cursive'],
         'sacramento': ['var(--font-sacramento)', 'cursive'],
+        'arial': ['Arial', 'sans-serif'],
+        'times': ['Times New Roman', 'serif'],
+        'georgia': ['Georgia', 'serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -133,3 +136,5 @@ export default {
   },
   plugins: [require('tailwindcss-animate')],
 } satisfies Config;
+
+    
