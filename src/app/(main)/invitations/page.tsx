@@ -5,7 +5,7 @@ import Image from "next/image"
 import { PageHeader } from "@/components/app/page-header"
 import { Card, CardContent } from "@/components/ui/card"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
-import { createRef, useRef, useState, useCallback, RefObject } from "react"
+import { createRef, useRef, useState, useCallback, RefObject, useEffect } from "react"
 import { toPng } from 'html-to-image';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 import { cn } from "@/lib/utils"
@@ -43,6 +43,22 @@ export default function InvitationsPage() {
   const cardRef = useRef<HTMLDivElement>(null);
   
   const selectedElement = textElements.find(el => el.id === selectedElementId);
+  
+  // Set contentEditable false when an element is not selected
+  useEffect(() => {
+    textElements.forEach(el => {
+      if (el.ref.current) {
+        el.ref.current.querySelector('[contentEditable]')?.setAttribute('contentEditable', 'false');
+      }
+    });
+    if (selectedElement && selectedElement.ref.current) {
+        const editableDiv = selectedElement.ref.current.querySelector('[contentEditable]');
+        if(editableDiv) {
+            editableDiv.setAttribute('contentEditable', 'true');
+        }
+    }
+  }, [selectedElement, textElements]);
+
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -64,8 +80,6 @@ export default function InvitationsPage() {
     setTimeout(() => {
         toPng(cardRef.current!, { 
             cacheBust: true,
-            // The library struggles with external fonts, so we provide them.
-            // This is a known workaround for cross-origin issues with fonts.
             fontEmbedCSS: `
               @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins&family=Great+Vibes&family=Dancing+Script&family=Sacramento&display=swap');
             `
@@ -130,7 +144,11 @@ export default function InvitationsPage() {
         <Card 
             className="w-full max-w-sm shadow-lg overflow-hidden flex-shrink-0" 
             ref={cardRef}
-            onClick={(e) => { if (e.target === e.currentTarget) setSelectedElementId(null)}}
+            onClick={(e) => { 
+                const target = e.target as HTMLElement;
+                if (target.closest('.draggable-element')) return;
+                setSelectedElementId(null)
+            }}
         >
             <CardContent className="p-0 relative h-[600px] w-[400px]">
                 <Image 
@@ -153,14 +171,14 @@ export default function InvitationsPage() {
                         <div 
                             ref={el.ref}
                             className={cn(
-                                "absolute cursor-move p-2 transition-all duration-75",
+                                "absolute cursor-move p-2 transition-all duration-75 draggable-element",
                                 el.font,
                                 selectedElementId === el.id && "outline-dashed outline-1 outline-white"
                             )}
                             style={{
                                 color: el.color,
                                 fontSize: `${el.size}px`,
-                                top: 0, // Positions are handled by Draggable
+                                top: 0, 
                                 left: '50%',
                                 transform: `translateX(-50%)`
                             }}
@@ -168,8 +186,24 @@ export default function InvitationsPage() {
                                 e.stopPropagation();
                                 setSelectedElementId(el.id);
                             }}
+                            onDoubleClick={(e) => {
+                                const target = e.currentTarget.querySelector('[contentEditable]');
+                                if (target) {
+                                    target.setAttribute('contentEditable', 'true');
+                                    (target as HTMLDivElement).focus();
+                                }
+                            }}
                         >
-                            <div className="whitespace-pre-line">{el.text}</div>
+                            <div 
+                                className="whitespace-pre-line outline-none"
+                                contentEditable={selectedElementId === el.id}
+                                suppressContentEditableWarning={true}
+                                onBlur={(e) => {
+                                    updateTextElement(el.id, { text: e.currentTarget.innerText });
+                                }}
+                            >
+                                {el.text}
+                            </div>
                         </div>
                         </Draggable>
                     ))}

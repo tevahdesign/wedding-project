@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
 import { Download, Plus, Send, Trash2, Upload } from "lucide-react";
 import type { TextElement } from "./page";
 
@@ -59,6 +60,15 @@ export function InvitationToolbar({
             
             {selectedElement ? (
                  <div className="flex items-center gap-4 flex-wrap animate-fade-in">
+                     <div className="flex flex-col gap-2">
+                        <Label htmlFor="text-content" className="text-sm">Text</Label>
+                        <Textarea 
+                            id="text-content"
+                            value={selectedElement.text}
+                            onChange={e => onUpdate(selectedElement.id, { text: e.target.value })}
+                            className="w-[200px] h-20"
+                        />
+                     </div>
                      <div className="flex items-center gap-2">
                         <Label htmlFor="font-style" className="text-sm">Font</Label>
                         <Select 
@@ -127,4 +137,3 @@ export function InvitationToolbar({
         </div>
     );
 }
-
