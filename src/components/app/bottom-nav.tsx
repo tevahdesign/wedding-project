@@ -17,8 +17,10 @@ export function BottomNav() {
   const pathname = usePathname()
 
   // Do not render bottom nav on login page or public website pages
-  if (pathname === '/login' || pathname.startsWith('/wedding-')) {
-    return null;
+  if (pathname === '/login' || pathname.match(/^\/([a-zA-Z0-9-]+)$/) && !navItems.some(item => item.href === pathname)) {
+    if (pathname !== '/' && !pathname.startsWith('/vendors') && !pathname.startsWith('/dashboard')) {
+       return null;
+    }
   }
   
   const isSubPage = navItems.some(item => 
