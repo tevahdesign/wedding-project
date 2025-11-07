@@ -70,12 +70,7 @@ export default function InvitationsPage() {
     setSelectedElementId(null); // Deselect to hide outlines before download
     
     setTimeout(() => {
-        toPng(cardRef.current!, { 
-            cacheBust: true,
-            fontEmbedCSS: `
-              @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins&family=Great+Vibes&family=Dancing+Script&family=Sacramento&display=swap');
-            `
-        })
+        toPng(cardRef.current!, { cacheBust: true })
           .then((dataUrl) => {
             const link = document.createElement('a')
             link.download = 'my-invitation.png'
