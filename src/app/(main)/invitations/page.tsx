@@ -21,14 +21,6 @@ export type TextElement = {
   ref: RefObject<HTMLDivElement>;
 }
 
-export const fontOptions: FontOption[] = [
-    {value: 'font-headline', label: 'Playfair Display'},
-    {value: 'font-body', label: 'Poppins'},
-    {value: 'font-great-vibes', label: 'Great Vibes'},
-    {value: 'font-dancing-script', label: 'Dancing Script'},
-    {value: 'font-sacramento', label: 'Sacramento'},
-];
-
 export default function InvitationsPage() {
   const invitationTemplate = PlaceHolderImages.find(img => img.id === 'invitation-template-1');
   
@@ -214,5 +206,3 @@ export default function InvitationsPage() {
     </div>
   )
 }
-
-    
