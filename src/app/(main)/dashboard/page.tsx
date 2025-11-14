@@ -8,7 +8,6 @@ import {
   Gift,
   Mail,
   Store,
-  Shield,
   PenSquare,
 } from "lucide-react"
 import { useAuth } from "@/firebase"
@@ -61,13 +60,6 @@ const features = [
     icon: PenSquare,
     href: "/website-builder",
   },
-  {
-    title: "Admin Panel",
-    description: "Manage vendors and categories.",
-    icon: Shield,
-    href: "/admin",
-    admin: true,
-  },
 ]
 
 export default function DashboardPage() {
@@ -75,9 +67,6 @@ export default function DashboardPage() {
   const router = useRouter()
 
   const getHref = (feature: typeof features[number]) => {
-    if (feature.admin) {
-      return user ? feature.href : "/admin-login";
-    }
     return feature.href;
   }
 

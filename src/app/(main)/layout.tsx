@@ -25,7 +25,6 @@ import {
   PiggyBank,
   Mail,
   Gift,
-  Shield,
   Settings,
   LogOut,
   PenSquare,
@@ -43,7 +42,6 @@ const navItems = [
     { href: "/invitations", label: "Invitations", icon: Mail },
     { href: "/registry", label: "Registry", icon: Gift },
     { href: "/website-builder", label: "Website", icon: PenSquare },
-    { href: "/admin", label: "Admin", icon: Shield },
 ];
 
 function AppSidebar() {
@@ -116,5 +114,3 @@ export default function MainLayout({
       </SidebarProvider>
   );
 }
-
-    

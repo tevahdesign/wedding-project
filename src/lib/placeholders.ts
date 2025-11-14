@@ -38,12 +38,6 @@ export const features = [
     icon: PenSquare,
     href: "/website-builder",
   },
-  {
-    title: "Admin Panel",
-    description: "Manage vendors and categories.",
-    icon: Shield,
-    href: "/admin",
-  },
 ];
 
 export const allYourNeeds = [
@@ -155,5 +149,3 @@ export const blogPosts = [
         author: "Emily Clark"
     }
 ]
-
-    
