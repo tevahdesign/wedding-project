@@ -5,12 +5,13 @@ import { useMemo } from 'react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, PlusCircle, Search, Star, Store } from 'lucide-react';
+import { Loader2, PlusCircle, Search, Star, Store, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/app/page-header';
 import { useAuth, useDatabase } from '@/firebase';
 import Link from 'next/link';
-import { ref } from 'firebase/database';
+import { ref, remove } from 'firebase/database';
 import { useList } from '@/firebase/database/use-list';
+import { useToast } from '@/hooks/use-toast';
 
 type Vendor = {
     id: string;
@@ -27,6 +28,7 @@ type Vendor = {
 export default function MyVendorsPage() {
     const { user } = useAuth();
     const database = useDatabase();
+    const { toast } = useToast();
     
     const myVendorsRef = useMemo(() => {
         if (!user || !database) return null;
@@ -34,6 +36,35 @@ export default function MyVendorsPage() {
     }, [user, database]);
 
     const { data: savedVendors, loading } = useList<Vendor>(myVendorsRef);
+
+    const handleDeleteVendor = async (e: React.MouseEvent, vendorId: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!user || !database) {
+            toast({
+                variant: 'destructive',
+                title: 'Not logged in',
+                description: 'You need to be logged in to modify your vendors.',
+            });
+            return;
+        }
+
+        const vendorRef = ref(database, `users/${user.uid}/myVendors/${vendorId}`);
+        try {
+            await remove(vendorRef);
+            toast({
+                title: 'Vendor Removed',
+                description: 'The vendor has been removed from your list.',
+            });
+        } catch (error) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Could not remove the vendor. Please try again.',
+            });
+        }
+    };
     
     return (
         <div className="flex flex-col flex-1 pb-20">
@@ -66,6 +97,15 @@ export default function MyVendorsPage() {
                                         height={400}
                                         className="object-cover w-full aspect-square rounded-t-xl transition-transform duration-300 group-hover:scale-105"
                                     />
+                                     <Button
+                                        size="icon"
+                                        variant="destructive"
+                                        className="absolute top-2 right-2 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={(e) => handleDeleteVendor(e, vendor.id)}
+                                        aria-label="Remove vendor"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
                                     <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
                                         <Star className="w-3 h-3 text-yellow-400 fill-current" />
                                         <span className="font-semibold">{vendor.rating.toFixed(1)}</span>
