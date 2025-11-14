@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Heart, Loader2, PlusCircle, Search, SlidersHorizontal, Star, Store } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PageHeader } from '@/components/app/page-header';
-import { useAuth, useDatabase, useFirestore } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import Link from 'next/link';
 import { collection, onSnapshot, query, where, getDocs } from 'firebase/firestore';
 
@@ -34,6 +34,7 @@ export default function MyVendorsPage() {
     useEffect(() => {
         if (!user || !firestore) return;
 
+        setLoading(true);
         const savedVendorsRef = collection(firestore, `users/${user.uid}/savedVendors`);
         const unsubscribe = onSnapshot(savedVendorsRef, (snapshot) => {
             const ids = snapshot.docs.map(doc => doc.id);
@@ -45,19 +46,42 @@ export default function MyVendorsPage() {
 
     useEffect(() => {
         const fetchSavedVendors = async () => {
-            if (!firestore || savedVendorIds.length === 0) {
+            if (!firestore) return;
+            
+            if (savedVendorIds.length === 0) {
                 setSavedVendors([]);
                 setLoading(false);
                 return;
             }
-            setLoading(true);
-            const vendorsRef = collection(firestore, 'vendors');
-            const vendorsQuery = query(vendorsRef, where('__name__', 'in', savedVendorIds));
             
-            const querySnapshot = await getDocs(vendorsQuery);
-            const vendorsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Vendor));
-            setSavedVendors(vendorsList);
-            setLoading(false);
+            setLoading(true);
+            try {
+                const vendorsRef = collection(firestore, 'vendors');
+                // Firestore 'in' queries are limited to 30 elements.
+                // If the user can save more, we need to batch the requests.
+                const MAX_IN_QUERIES = 30;
+                const vendorPromises = [];
+
+                for (let i = 0; i < savedVendorIds.length; i += MAX_IN_QUERIES) {
+                    const chunk = savedVendorIds.slice(i, i + MAX_IN_QUERIES);
+                    const vendorsQuery = query(vendorsRef, where('__name__', 'in', chunk));
+                    vendorPromises.push(getDocs(vendorsQuery));
+                }
+                
+                const querySnapshots = await Promise.all(vendorPromises);
+                const vendorsList: Vendor[] = [];
+                querySnapshots.forEach(querySnapshot => {
+                    querySnapshot.docs.forEach(doc => {
+                        vendorsList.push({ id: doc.id, ...doc.data() } as Vendor);
+                    });
+                });
+
+                setSavedVendors(vendorsList);
+            } catch (error) {
+                console.error("Error fetching saved vendors:", error);
+            } finally {
+                setLoading(false);
+            }
         };
 
         fetchSavedVendors();
@@ -132,5 +156,3 @@ export default function MyVendorsPage() {
         </div>
     );
 }
-
-    
