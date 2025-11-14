@@ -66,12 +66,20 @@ const features = [
     description: "Manage vendors and categories.",
     icon: Shield,
     href: "/admin",
+    admin: true,
   },
 ]
 
 export default function DashboardPage() {
   const { user } = useAuth()
   const router = useRouter()
+
+  const getHref = (feature: typeof features[number]) => {
+    if (feature.admin) {
+      return user ? feature.href : "/admin-login";
+    }
+    return feature.href;
+  }
 
   return (
     <div className="flex flex-col flex-1">
@@ -83,7 +91,7 @@ export default function DashboardPage() {
         <h3 className="text-lg font-semibold mb-4 font-headline">Your Planning Tools</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {features.map((feature) => (
-                <Link href={feature.href} key={feature.href}>
+                <Link href={getHref(feature)} key={feature.href}>
                     <Card
                         className="flex items-center p-4 transition-all hover:bg-muted/60 hover:shadow-lg cursor-pointer h-full"
                     >
