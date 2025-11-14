@@ -3,13 +3,14 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Compass, LayoutGrid, User } from "lucide-react"
+import { Home, Compass, LayoutGrid, User, Heart } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/vendors", label: "Vendors", icon: Compass },
+  { href: "/vendors", label: "Discover", icon: Compass },
+  { href: "/my-vendors", label: "My Vendors", icon: Heart },
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { href: "/login", label: "Profile", icon: User },
 ]
@@ -39,7 +40,7 @@ export function BottomNav() {
         {navItems.map((item) => {
           const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
           return (
-            <Link key={item.href} href={item.href} prefetch={true} className="flex flex-col items-center justify-center text-muted-foreground hover:text-primary transition-colors w-1/4 pt-1">
+            <Link key={item.href} href={item.href} prefetch={true} className="flex flex-col items-center justify-center text-muted-foreground hover:text-primary transition-colors w-1/5 pt-1">
               <item.icon className={cn("h-6 w-6", isActive && "text-primary")} />
               <span className={cn(
                 "text-xs mt-1",
@@ -54,3 +55,5 @@ export function BottomNav() {
     </div>
   )
 }
+
+    

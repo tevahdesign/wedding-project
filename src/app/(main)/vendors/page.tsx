@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,13 +10,16 @@ import { Button } from '@/components/ui/button';
 import { Heart, Search, SlidersHorizontal, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PageHeader } from '@/components/app/page-header';
-import { useAuth, useDatabase } from '@/firebase';
+import { useAuth, useDatabase, useFirestore } from '@/firebase';
 import { useList } from '@/firebase/database/use-list';
 import { ref } from 'firebase/database';
 import type { Icon } from 'lucide-react';
 import * as lucideIcons from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
+import { collection, deleteDoc, doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
+
 
 // Define types for our data
 type Vendor = {
@@ -43,12 +46,14 @@ type VendorCategory = {
 export default function VendorsPage() {
     const { user } = useAuth();
     const database = useDatabase();
+    const firestore = useFirestore();
+    const { toast } = useToast();
     
     // Fetch categories and vendors from Firebase
     const categoriesRef = useMemo(() => database ? ref(database, 'vendorCategories') : null, [database]);
-    const vendorsRef = useMemo(() => database ? ref(database, 'vendors') : null, [database]);
-
     const { data: categories, loading: categoriesLoading } = useList<VendorCategory>(categoriesRef);
+    
+    const vendorsRef = useMemo(() => database ? ref(database, 'vendors') : null, [database]);
     const { data: vendors, loading: vendorsLoading } = useList<Vendor>(vendorsRef);
 
     const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -56,29 +61,63 @@ export default function VendorsPage() {
 
     const [favorited, setFavorited] = useState<Record<string, boolean>>({});
 
-    useState(() => {
-        if (vendors) {
-            setFavorited(vendors.reduce((acc, vendor) => {
-                acc[vendor.id] = vendor.isFavorited;
+    useEffect(() => {
+        if (!user || !firestore) return;
+        const savedVendorsRef = collection(firestore, `users/${user.uid}/savedVendors`);
+        const unsubscribe = onSnapshot(savedVendorsRef, (snapshot) => {
+            const savedIds = snapshot.docs.reduce((acc, doc) => {
+                acc[doc.id] = true;
                 return acc;
-            }, {} as Record<string, boolean>));
-        }
-    });
+            }, {} as Record<string, boolean>);
+            setFavorited(savedIds);
+        });
+        return () => unsubscribe();
+    }, [user, firestore]);
 
-    const toggleFavorite = (e: React.MouseEvent, id: string) => {
+    const toggleFavorite = async (e: React.MouseEvent, vendorId: string) => {
         e.preventDefault();
         e.stopPropagation();
-        setFavorited(prev => ({ ...prev, [id]: !prev[id] }));
-        // Here you would also update the database
+
+        if (!user || !firestore) {
+            toast({
+                variant: 'destructive',
+                title: 'Not logged in',
+                description: 'You need to be logged in to save vendors.',
+            });
+            return;
+        }
+
+        const savedVendorRef = doc(firestore, `users/${user.uid}/savedVendors/${vendorId}`);
+        const isFavorited = favorited[vendorId];
+
+        try {
+            if (isFavorited) {
+                await deleteDoc(savedVendorRef);
+                toast({ title: 'Vendor removed from your list.' });
+            } else {
+                await setDoc(savedVendorRef, { 
+                    vendorId: vendorId,
+                    savedAt: serverTimestamp() 
+                });
+                toast({ title: 'Vendor added to your list!' });
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Could not update your vendor list.',
+            });
+        }
     };
+
 
     const filteredVendors = useMemo(() => {
         if (!vendors) return [];
         return vendors.filter(vendor => {
-            const hasImage = !!vendor.imageId;
             const matchesCategory = selectedCategory === 'All' || vendor.category === selectedCategory;
             const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase());
-            return hasImage && matchesCategory && matchesSearch;
+            return matchesCategory && matchesSearch;
         });
     }, [vendors, selectedCategory, searchTerm]);
 
@@ -88,7 +127,7 @@ export default function VendorsPage() {
 
     return (
         <div className="flex flex-col flex-1 pb-20">
-            <PageHeader title="Find Vendors" showBackButton>
+            <PageHeader title="Discover Vendors" showBackButton>
                 <Button variant="ghost" size="icon">
                     <SlidersHorizontal className="h-5 w-5" />
                 </Button>
@@ -203,3 +242,5 @@ export default function VendorsPage() {
         </div>
     );
 }
+
+    

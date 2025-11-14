@@ -9,11 +9,6 @@
  * Data Structure:
  * - User-private data is nested under /users/{userId}.
  * - Public website data is stored in a top-level /websites collection, with document IDs matching the vanityUrl.
- *
- * Key Security Decisions:
- * - User listing is disallowed.
- * - All user-private write operations are protected by ownership checks.
- * - The /websites collection is publicly readable but writable only by the owning user of the data.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -70,5 +65,23 @@ service cloud.firestore {
       allow create, update: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
       allow delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
     }
+
+    /**
+     * @description Publicly readable collections for vendors and categories.
+     * These are managed by an admin role, so they are read-only for regular users.
+     */
+    match /vendors/{vendorId} {
+      allow get: if true;
+      allow list: if true;
+      allow write: if false; // Managed by admins
+    }
+
+    match /vendorCategories/{categoryId} {
+      allow get: if true;
+      allow list: if true;
+      allow write: if false; // Managed by admins
+    }
   }
 }
+
+    

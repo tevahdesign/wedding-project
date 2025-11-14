@@ -9,6 +9,7 @@ import {
   Mail,
   Store,
   PenSquare,
+  Heart,
 } from "lucide-react"
 import { useAuth } from "@/firebase"
 import { useRouter } from "next/navigation"
@@ -36,8 +37,14 @@ const features = [
     icon: PiggyBank,
     href: "/budget-tracker",
   },
+  {
+    title: "My Vendors",
+    description: "Your saved list of favorite vendors.",
+    icon: Heart,
+    href: "/my-vendors",
+  },
    {
-    title: "Vendors",
+    title: "Discover Vendors",
     description: "Browse and book top wedding vendors.",
     icon: Store,
     href: "/vendors",
@@ -98,3 +105,5 @@ export default function DashboardPage() {
     </div>
   )
 }
+
+    

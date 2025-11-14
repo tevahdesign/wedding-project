@@ -28,6 +28,7 @@ import {
   Settings,
   LogOut,
   PenSquare,
+  Heart,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/firebase";
@@ -36,7 +37,8 @@ import { BottomNav } from "@/components/app/bottom-nav";
 
 const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
-    { href: "/vendors", label: "Vendors", icon: Compass },
+    { href: "/my-vendors", label: "My Vendors", icon: Heart },
+    { href: "/vendors", label: "Discover", icon: Compass },
     { href: "/guest-list", label: "Guests", icon: Users },
     { href: "/budget-tracker", label: "Budget", icon: PiggyBank },
     { href: "/invitations", label: "Invitations", icon: Mail },
@@ -114,3 +116,5 @@ export default function MainLayout({
       </SidebarProvider>
   );
 }
+
+    

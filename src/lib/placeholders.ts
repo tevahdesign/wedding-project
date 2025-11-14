@@ -1,5 +1,5 @@
 
-import { Church, Camera, Utensils, Music, ClipboardList, Flower, Gem, Users, Wand2, Star, Heart, LayoutGrid, PiggyBank, Mail, Gift, Shield, Store, PenSquare } from "lucide-react";
+import { Church, Camera, Utensils, Music, ClipboardList, Flower, Gem, Users, Wand2, Star, Heart, LayoutGrid, PiggyBank, Mail, Gift, Shield, Store, PenSquare, Compass } from "lucide-react";
 
 export const features = [
   {
@@ -14,10 +14,16 @@ export const features = [
     icon: PiggyBank,
     href: "/budget-tracker",
   },
+  {
+    title: "My Vendors",
+    description: "Your saved list of favorite vendors.",
+    icon: Heart,
+    href: "/my-vendors",
+  },
    {
-    title: "Vendors",
+    title: "Discover Vendors",
     description: "Browse and book top wedding vendors.",
-    icon: Store,
+    icon: Compass,
     href: "/vendors",
   },
   {
@@ -149,3 +155,5 @@ export const blogPosts = [
         author: "Emily Clark"
     }
 ]
+
+    

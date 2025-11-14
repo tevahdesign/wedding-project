@@ -1,10 +1,10 @@
 
 "use client"
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
-import { ref } from 'firebase/database';
+import { doc, onSnapshot, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import {
   ChevronLeft,
   Heart,
@@ -15,12 +15,14 @@ import {
   Star,
 } from 'lucide-react';
 
-import { useDatabase } from '@/firebase';
-import { useObjectValue } from '@/firebase/database/use-object-value';
+import { useAuth, useDatabase, useFirestore } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { ref } from 'firebase/database';
+import { useObjectValue } from '@/firebase/database/use-object-value';
 
 type Service = {
     name: string;
@@ -47,14 +49,63 @@ export default function VendorDetailPage() {
     const router = useRouter();
     const vendorId = params.vendorId as string;
     const database = useDatabase();
+    const firestore = useFirestore();
+    const { user } = useAuth();
+    const { toast } = useToast();
+    
     const [isFavorited, setIsFavorited] = useState(false);
-
+    
     const vendorRef = useMemo(() => {
         if (!database || !vendorId) return null;
         return ref(database, `vendors/${vendorId}`);
     }, [database, vendorId]);
 
     const { data: vendor, loading } = useObjectValue<Vendor>(vendorRef);
+
+    useEffect(() => {
+        if (!user || !firestore || !vendorId) return;
+        const savedVendorRef = doc(firestore, `users/${user.uid}/savedVendors/${vendorId}`);
+        const unsubscribe = onSnapshot(savedVendorRef, (doc) => {
+            setIsFavorited(doc.exists());
+        });
+        return () => unsubscribe();
+    }, [user, firestore, vendorId]);
+
+    const toggleFavorite = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!user || !firestore || !vendorId) {
+            toast({
+                variant: 'destructive',
+                title: 'Not logged in',
+                description: 'You need to be logged in to save vendors.',
+            });
+            return;
+        }
+
+        const savedVendorRef = doc(firestore, `users/${user.uid}/savedVendors/${vendorId}`);
+        try {
+            if (isFavorited) {
+                await deleteDoc(savedVendorRef);
+                toast({ title: 'Vendor removed from your list.' });
+            } else {
+                await setDoc(savedVendorRef, { 
+                    vendorId: vendorId,
+                    savedAt: serverTimestamp() 
+                });
+                toast({ title: 'Vendor added to your list!' });
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Could not update your vendor list.',
+            });
+        }
+    };
+
 
     if (loading) {
         return (
@@ -97,7 +148,7 @@ export default function VendorDetailPage() {
                     </Button>
                 </div>
                 <div className="absolute top-4 right-4 z-10">
-                     <Button variant="ghost" size="icon" className="rounded-full bg-black/30 hover:bg-black/50 text-white hover:text-white" onClick={() => setIsFavorited(!isFavorited)}>
+                     <Button variant="ghost" size="icon" className="rounded-full bg-black/30 hover:bg-black/50 text-white hover:text-white" onClick={toggleFavorite}>
                         <Heart className={cn("h-6 w-6", isFavorited && "fill-red-500 text-red-500")} />
                     </Button>
                 </div>

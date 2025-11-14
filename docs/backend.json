@@ -143,6 +143,16 @@
           "comment": { "type": "string" }
         },
         "required": ["id", "vendorId", "userId", "rating"]
+    },
+    "SavedVendor": {
+      "title": "Saved Vendor",
+      "description": "Represents a link between a user and a vendor they have saved.",
+      "type": "object",
+      "properties": {
+        "vendorId": { "type": "string", "description": "The ID of the saved vendor." },
+        "savedAt": { "type": "string", "format": "date-time", "description": "The timestamp when the vendor was saved." }
+      },
+      "required": ["vendorId", "savedAt"]
     }
   },
   "auth": {
@@ -169,6 +179,10 @@
         "schema": { "$ref": "#/entities/WeddingWebsite" },
         "description": "Document storing a user's private website configuration."
     },
+    "/users/{userId}/savedVendors/{vendorId}": {
+      "schema": { "$ref": "#/entities/SavedVendor" },
+      "description": "Subcollection for a user's saved vendors."
+    },
     "/websites/{vanityUrl}": {
         "schema": { "$ref": "#/entities/WeddingWebsite" },
         "description": "Publicly accessible collection of wedding websites, identified by their vanity URL."
@@ -186,3 +200,5 @@
     "rules": "rules.json"
   }
 }
+
+    
