@@ -92,7 +92,7 @@ export default function MyVendorsPage() {
             </PageHeader>
             
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-4xl">
                     <DialogHeader>
                         <DialogTitle>Add Custom Vendor</DialogTitle>
                     </DialogHeader>
@@ -107,10 +107,10 @@ export default function MyVendorsPage() {
                         <span>Loading your vendors...</span>
                     </div>
                 ) : savedVendors && savedVendors.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {savedVendors.map(vendor => (
                             <Link href={`/vendors/${vendor.id}`} key={vendor.id} className="overflow-hidden group cursor-pointer">
-                                <Card className="h-full border-none shadow-sm transition-shadow hover:shadow-xl rounded-xl">
+                                <Card className="h-full border shadow-sm transition-shadow hover:shadow-xl rounded-xl">
                                 <CardContent className="p-0">
                                     <div className="relative">
                                     <Image
