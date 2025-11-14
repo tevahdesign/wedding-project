@@ -10,15 +10,14 @@ import { Button } from '@/components/ui/button';
 import { Plus, Search, SlidersHorizontal, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PageHeader } from '@/components/app/page-header';
-import { useAuth, useDatabase, useFirestore } from '@/firebase';
+import { useAuth, useDatabase } from '@/firebase';
 import { useList } from '@/firebase/database/use-list';
-import { ref } from 'firebase/database';
+import { ref, set, onValue, remove } from 'firebase/database';
 import type { Icon } from 'lucide-react';
 import * as lucideIcons from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
-import { collection, deleteDoc, doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
 
 
 // Define types for our data
@@ -32,7 +31,6 @@ type Vendor = {
     reviewCount: number;
     isFeatured: boolean;
     imageId: string; 
-    isFavorited: boolean;
     logoImageId?: string;
 };
 
@@ -46,7 +44,6 @@ type VendorCategory = {
 export default function VendorsPage() {
     const { user } = useAuth();
     const database = useDatabase();
-    const firestore = useFirestore();
     const { toast } = useToast();
     
     // Fetch categories and vendors from Firebase
@@ -59,26 +56,27 @@ export default function VendorsPage() {
     const [selectedCategory, setSelectedCategory] = useState<string>('All');
     const [searchTerm, setSearchTerm] = useState('');
 
-    const [favorited, setFavorited] = useState<Record<string, boolean>>({});
+    const [savedVendorIds, setSavedVendorIds] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
-        if (!user || !firestore) return;
-        const savedVendorsRef = collection(firestore, `users/${user.uid}/savedVendors`);
-        const unsubscribe = onSnapshot(savedVendorsRef, (snapshot) => {
-            const savedIds = snapshot.docs.reduce((acc, doc) => {
-                acc[doc.id] = true;
+        if (!user || !database) return;
+        const savedVendorsRef = ref(database, `users/${user.uid}/myVendors`);
+        const unsubscribe = onValue(savedVendorsRef, (snapshot) => {
+            const savedIds = snapshot.val() || {};
+            const idMap = Object.keys(savedIds).reduce((acc, key) => {
+                acc[key] = true;
                 return acc;
-            }, {} as Record<string, boolean>);
-            setFavorited(savedIds);
+            }, {} as Record<string, boolean>)
+            setSavedVendorIds(idMap);
         });
         return () => unsubscribe();
-    }, [user, firestore]);
+    }, [user, database]);
 
-    const toggleFavorite = async (e: React.MouseEvent, vendorId: string) => {
+    const handleAddVendor = async (e: React.MouseEvent, vendor: Vendor) => {
         e.preventDefault();
         e.stopPropagation();
 
-        if (!user || !firestore) {
+        if (!user || !database) {
             toast({
                 variant: 'destructive',
                 title: 'Not logged in',
@@ -87,26 +85,17 @@ export default function VendorsPage() {
             return;
         }
 
-        const savedVendorRef = doc(firestore, `users/${user.uid}/savedVendors/${vendorId}`);
-        const isFavorited = favorited[vendorId];
-
+        const savedVendorRef = ref(database, `users/${user.uid}/myVendors/${vendor.id}`);
+        
         try {
-            if (isFavorited) {
-                await deleteDoc(savedVendorRef);
-                toast({ title: 'Vendor removed from your list.' });
-            } else {
-                await setDoc(savedVendorRef, { 
-                    vendorId: vendorId,
-                    savedAt: serverTimestamp() 
-                });
-                toast({ title: 'Vendor added to your list!' });
-            }
+            await set(savedVendorRef, vendor);
+            toast({ title: 'Vendor added to your list!' });
         } catch (error) {
-            console.error('Error toggling favorite:', error);
+            console.error('Error saving vendor:', error);
             toast({
                 variant: 'destructive',
                 title: 'Error',
-                description: 'Could not update your vendor list.',
+                description: 'Could not add vendor to your list.',
             });
         }
     };
@@ -175,7 +164,7 @@ export default function VendorsPage() {
                 ) : filteredVendors.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {filteredVendors.map(vendor => {
-                             const isFavorited = favorited[vendor.id];
+                             const isSaved = savedVendorIds[vendor.id];
                              return (
                                 <Card key={vendor.id} className="overflow-hidden group cursor-pointer flex flex-col">
                                     <Link href={`/vendors/${vendor.id}`} className="block h-full">
@@ -202,12 +191,12 @@ export default function VendorsPage() {
                                                 <div className="flex-grow"></div>
                                                 <Button
                                                     size="sm"
-                                                    variant={isFavorited ? 'secondary' : 'default'}
+                                                    variant={isSaved ? 'secondary' : 'default'}
                                                     className="w-full mt-3"
-                                                    onClick={(e) => toggleFavorite(e, vendor.id)}
-                                                    disabled={isFavorited}
+                                                    onClick={(e) => handleAddVendor(e, vendor)}
+                                                    disabled={isSaved}
                                                 >
-                                                    {isFavorited ? 'Added' : (<><Plus className="mr-2 h-4 w-4" /> Add</>)}
+                                                    {isSaved ? 'Added' : (<><Plus className="mr-2 h-4 w-4" /> Add</>)}
                                                 </Button>
                                             </div>
                                         </CardContent>
@@ -226,4 +215,3 @@ export default function VendorsPage() {
     );
 }
 
-    

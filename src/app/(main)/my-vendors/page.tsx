@@ -1,15 +1,16 @@
 
 'use client'
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, PlusCircle, Search, Star, Store } from 'lucide-react';
 import { PageHeader } from '@/components/app/page-header';
-import { useAuth, useFirestore } from '@/firebase';
+import { useAuth, useDatabase } from '@/firebase';
 import Link from 'next/link';
-import { collection, onSnapshot, query, where, getDocs } from 'firebase/firestore';
+import { ref } from 'firebase/database';
+import { useList } from '@/firebase/database/use-list';
 
 type Vendor = {
     id: string;
@@ -25,62 +26,14 @@ type Vendor = {
 
 export default function MyVendorsPage() {
     const { user } = useAuth();
-    const firestore = useFirestore();
-    const [savedVendors, setSavedVendors] = useState<Vendor[]>([]);
-    const [loading, setLoading] = useState(true);
+    const database = useDatabase();
+    
+    const myVendorsRef = useMemo(() => {
+        if (!user || !database) return null;
+        return ref(database, `users/${user.uid}/myVendors`);
+    }, [user, database]);
 
-    useEffect(() => {
-        if (!user || !firestore) {
-            setLoading(false);
-            return;
-        }
-
-        setLoading(true);
-        const savedVendorsRef = collection(firestore, `users/${user.uid}/savedVendors`);
-        
-        const unsubscribe = onSnapshot(savedVendorsRef, async (snapshot) => {
-            const ids = snapshot.docs.map(doc => doc.id);
-            
-            if (ids.length === 0) {
-                setSavedVendors([]);
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const vendorsRef = collection(firestore, 'vendors');
-                const vendorPromises = [];
-                // Firestore 'in' queries are limited to 30 elements.
-                // If the user can save more, we need to batch the requests.
-                const MAX_IN_QUERIES = 30;
-                for (let i = 0; i < ids.length; i += MAX_IN_QUERIES) {
-                    const chunk = ids.slice(i, i + MAX_IN_QUERIES);
-                    const vendorsQuery = query(vendorsRef, where('__name__', 'in', chunk));
-                    vendorPromises.push(getDocs(vendorsQuery));
-                }
-                
-                const querySnapshots = await Promise.all(vendorPromises);
-                const vendorsList: Vendor[] = [];
-                querySnapshots.forEach(querySnapshot => {
-                    querySnapshot.forEach(doc => {
-                        vendorsList.push({ id: doc.id, ...doc.data() } as Vendor);
-                    });
-                });
-
-                setSavedVendors(vendorsList);
-            } catch (error) {
-                console.error("Error fetching saved vendors:", error);
-                setSavedVendors([]);
-            } finally {
-                setLoading(false);
-            }
-        }, (error) => {
-            console.error("Error listening to saved vendors:", error);
-            setLoading(false);
-        });
-
-        return () => unsubscribe();
-    }, [user, firestore]);
+    const { data: savedVendors, loading } = useList<Vendor>(myVendorsRef);
     
     return (
         <div className="flex flex-col flex-1 pb-20">
@@ -99,7 +52,7 @@ export default function MyVendorsPage() {
                         <Loader2 className="h-5 w-5 animate-spin" />
                         <span>Loading your vendors...</span>
                     </div>
-                ) : savedVendors.length > 0 ? (
+                ) : savedVendors && savedVendors.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {savedVendors.map(vendor => (
                             <Link href={`/vendors/${vendor.id}`} key={vendor.id} className="overflow-hidden group cursor-pointer">
