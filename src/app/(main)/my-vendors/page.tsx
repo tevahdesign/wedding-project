@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,13 @@ import Link from 'next/link';
 import { ref, remove } from 'firebase/database';
 import { useList } from '@/firebase/database/use-list';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { VendorForm } from './vendor-form';
 
 type Vendor = {
     id: string;
@@ -29,6 +36,7 @@ export default function MyVendorsPage() {
     const { user } = useAuth();
     const database = useDatabase();
     const { toast } = useToast();
+    const [isFormOpen, setIsFormOpen] = useState(false);
     
     const myVendorsRef = useMemo(() => {
         if (!user || !database) return null;
@@ -69,13 +77,28 @@ export default function MyVendorsPage() {
     return (
         <div className="flex flex-col flex-1 pb-20">
             <PageHeader title="My Vendors" showBackButton>
-                <Button asChild>
-                    <Link href="/vendors">
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" asChild>
+                        <Link href="/vendors">
+                            <Search className="mr-2 h-4 w-4" />
+                            Discover
+                        </Link>
+                    </Button>
+                    <Button onClick={() => setIsFormOpen(true)}>
                         <PlusCircle className="mr-2 h-4 w-4" />
-                        Discover Vendors
-                    </Link>
-                </Button>
+                        Create Vendor
+                    </Button>
+                </div>
             </PageHeader>
+            
+            <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Add Custom Vendor</DialogTitle>
+                    </DialogHeader>
+                    <VendorForm setDialogOpen={setIsFormOpen} />
+                </DialogContent>
+            </Dialog>
 
              <div className="p-4 pt-8">
                 {loading ? (
@@ -108,7 +131,7 @@ export default function MyVendorsPage() {
                                     </Button>
                                     <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
                                         <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                                        <span className="font-semibold">{vendor.rating.toFixed(1)}</span>
+                                        <span className="font-semibold">{vendor.rating?.toFixed(1)}</span>
                                         <span className="text-gray-300">|</span>
                                         <span>{vendor.reviewCount}</span>
                                     </div>
