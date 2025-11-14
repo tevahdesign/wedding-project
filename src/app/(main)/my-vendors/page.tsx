@@ -167,3 +167,4 @@ export default function MyVendorsPage() {
         </div>
     );
 }
+

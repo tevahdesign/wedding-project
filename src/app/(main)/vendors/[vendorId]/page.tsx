@@ -14,6 +14,7 @@ import {
   Phone,
   Star,
 } from 'lucide-react';
+import { get, ref, onValue } from 'firebase/database';
 
 import { useAuth, useDatabase, useFirestore } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
@@ -21,8 +22,6 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { ref } from 'firebase/database';
-import { useObjectValue } from '@/firebase/database/use-object-value';
 
 type Service = {
     name: string;
@@ -42,6 +41,7 @@ type Vendor = {
     logoImageId?: string;
     galleryImageIds?: string[];
     services?: Service[];
+    isCustom?: boolean;
 };
 
 export default function VendorDetailPage() {
@@ -54,28 +54,60 @@ export default function VendorDetailPage() {
     const { toast } = useToast();
     
     const [isFavorited, setIsFavorited] = useState(false);
+    const [vendor, setVendor] = useState<Vendor | null>(null);
+    const [loading, setLoading] = useState(true);
     
-    const vendorRef = useMemo(() => {
-        if (!database || !vendorId) return null;
-        return ref(database, `vendors/${vendorId}`);
-    }, [database, vendorId]);
-
-    const { data: vendor, loading } = useObjectValue<Vendor>(vendorRef);
 
     useEffect(() => {
-        if (!user || !firestore || !vendorId) return;
-        const savedVendorRef = doc(firestore, `users/${user.uid}/savedVendors/${vendorId}`);
-        const unsubscribe = onSnapshot(savedVendorRef, (doc) => {
-            setIsFavorited(doc.exists());
+        if (!database || !vendorId) return;
+
+        const fetchVendor = async () => {
+            setLoading(true);
+            // 1. Try fetching from public vendors
+            const publicVendorRef = ref(database, `vendors/${vendorId}`);
+            let snapshot = await get(publicVendorRef);
+
+            if (snapshot.exists()) {
+                setVendor({ id: snapshot.key, ...snapshot.val() });
+                setLoading(false);
+                return;
+            }
+
+            // 2. If not found and user is logged in, try fetching from user's private vendors
+            if (user) {
+                const privateVendorRef = ref(database, `users/${user.uid}/myVendors/${vendorId}`);
+                snapshot = await get(privateVendorRef);
+                if (snapshot.exists()) {
+                    setVendor({ id: snapshot.key, ...snapshot.val() });
+                    setLoading(false);
+                    return;
+                }
+            }
+
+            // 3. If still not found, set vendor to null
+            setVendor(null);
+            setLoading(false);
+        };
+
+        fetchVendor();
+    }, [database, vendorId, user]);
+
+
+    useEffect(() => {
+        if (!user || !database || !vendorId) return;
+        const savedVendorRef = ref(database, `users/${user.uid}/myVendors/${vendorId}`);
+        const unsubscribe = onValue(savedVendorRef, (snapshot) => {
+            setIsFavorited(snapshot.exists());
         });
         return () => unsubscribe();
-    }, [user, firestore, vendorId]);
+    }, [user, database, vendorId]);
+
 
     const toggleFavorite = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
 
-        if (!user || !firestore || !vendorId) {
+        if (!user || !database || !vendor) {
             toast({
                 variant: 'destructive',
                 title: 'Not logged in',
@@ -84,16 +116,13 @@ export default function VendorDetailPage() {
             return;
         }
 
-        const savedVendorRef = doc(firestore, `users/${user.uid}/savedVendors/${vendorId}`);
+        const savedVendorRef = ref(database, `users/${user.uid}/myVendors/${vendorId}`);
         try {
             if (isFavorited) {
-                await deleteDoc(savedVendorRef);
+                await remove(savedVendorRef);
                 toast({ title: 'Vendor removed from your list.' });
             } else {
-                await setDoc(savedVendorRef, { 
-                    vendorId: vendorId,
-                    savedAt: serverTimestamp() 
-                });
+                await set(savedVendorRef, vendor);
                 toast({ title: 'Vendor added to your list!' });
             }
         } catch (error) {
@@ -148,13 +177,15 @@ export default function VendorDetailPage() {
                     </Button>
                 </div>
                 <div className="absolute top-4 right-4 z-10">
-                     <Button variant="ghost" size="icon" className="rounded-full bg-black/30 hover:bg-black/50 text-white hover:text-white" onClick={toggleFavorite}>
+                     <Button variant="ghost" size="icon" className="rounded-full bg-black/30 hover:bg-black/50 text-white hover:text-white" onClick={toggleFavorite} disabled={vendor.isCustom}>
                         <Heart className={cn("h-6 w-6", isFavorited && "fill-red-500 text-red-500")} />
                     </Button>
                 </div>
 
                 <div className="absolute bottom-0 left-0 p-4 text-white z-10 w-full">
                     {vendor.isFeatured && <Badge className="mb-2 backdrop-blur-sm bg-white/20 border-none">Featured</Badge>}
+                    {vendor.isCustom && <Badge className="mb-2 backdrop-blur-sm bg-primary/80 border-none">My Private Vendor</Badge>}
+
                     <h1 className="text-3xl font-bold">{vendor.name}</h1>
                     <div className="flex items-center gap-4 text-sm mt-2">
                         <div className="flex items-center gap-1">
@@ -255,5 +286,3 @@ export default function VendorDetailPage() {
         </div>
     );
 }
-
-    
