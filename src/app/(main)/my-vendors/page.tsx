@@ -5,8 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart, Loader2, PlusCircle, Search, SlidersHorizontal, Star, Store } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Loader2, PlusCircle, Search, Star, Store } from 'lucide-react';
 import { PageHeader } from '@/components/app/page-header';
 import { useAuth, useFirestore } from '@/firebase';
 import Link from 'next/link';
@@ -27,43 +26,35 @@ type Vendor = {
 export default function MyVendorsPage() {
     const { user } = useAuth();
     const firestore = useFirestore();
-    const [savedVendorIds, setSavedVendorIds] = useState<string[]>([]);
     const [savedVendors, setSavedVendors] = useState<Vendor[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!user || !firestore) return;
+        if (!user || !firestore) {
+            setLoading(false);
+            return;
+        }
 
         setLoading(true);
         const savedVendorsRef = collection(firestore, `users/${user.uid}/savedVendors`);
-        const unsubscribe = onSnapshot(savedVendorsRef, (snapshot) => {
+        
+        const unsubscribe = onSnapshot(savedVendorsRef, async (snapshot) => {
             const ids = snapshot.docs.map(doc => doc.id);
-            setSavedVendorIds(ids);
-        });
-
-        return () => unsubscribe();
-    }, [user, firestore]);
-
-    useEffect(() => {
-        const fetchSavedVendors = async () => {
-            if (!firestore) return;
             
-            if (savedVendorIds.length === 0) {
+            if (ids.length === 0) {
                 setSavedVendors([]);
                 setLoading(false);
                 return;
             }
-            
-            setLoading(true);
+
             try {
                 const vendorsRef = collection(firestore, 'vendors');
+                const vendorPromises = [];
                 // Firestore 'in' queries are limited to 30 elements.
                 // If the user can save more, we need to batch the requests.
                 const MAX_IN_QUERIES = 30;
-                const vendorPromises = [];
-
-                for (let i = 0; i < savedVendorIds.length; i += MAX_IN_QUERIES) {
-                    const chunk = savedVendorIds.slice(i, i + MAX_IN_QUERIES);
+                for (let i = 0; i < ids.length; i += MAX_IN_QUERIES) {
+                    const chunk = ids.slice(i, i + MAX_IN_QUERIES);
                     const vendorsQuery = query(vendorsRef, where('__name__', 'in', chunk));
                     vendorPromises.push(getDocs(vendorsQuery));
                 }
@@ -71,7 +62,7 @@ export default function MyVendorsPage() {
                 const querySnapshots = await Promise.all(vendorPromises);
                 const vendorsList: Vendor[] = [];
                 querySnapshots.forEach(querySnapshot => {
-                    querySnapshot.docs.forEach(doc => {
+                    querySnapshot.forEach(doc => {
                         vendorsList.push({ id: doc.id, ...doc.data() } as Vendor);
                     });
                 });
@@ -79,13 +70,17 @@ export default function MyVendorsPage() {
                 setSavedVendors(vendorsList);
             } catch (error) {
                 console.error("Error fetching saved vendors:", error);
+                setSavedVendors([]);
             } finally {
                 setLoading(false);
             }
-        };
+        }, (error) => {
+            console.error("Error listening to saved vendors:", error);
+            setLoading(false);
+        });
 
-        fetchSavedVendors();
-    }, [firestore, savedVendorIds]);
+        return () => unsubscribe();
+    }, [user, firestore]);
     
     return (
         <div className="flex flex-col flex-1 pb-20">
