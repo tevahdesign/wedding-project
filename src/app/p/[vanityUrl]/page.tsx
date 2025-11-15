@@ -394,7 +394,7 @@ export default function PublicDashboardPage() {
                                         </TableBody>
                                     </Table>
                                 </div>
-                            ) : (<p className="text-muted-foreground text-center py-8">The guest list is not available yet.</p>)}
+                            ) : (<div className="text-muted-foreground text-center py-8">The guest list is not available yet.</div>)}
                         </>
                     )}
                 </CardContent>
@@ -407,20 +407,18 @@ export default function PublicDashboardPage() {
                     <CardTitle className="flex items-center gap-2">
                     Budget Overview
                     </CardTitle>
-                    <CardDescription>
-                        {loading ? <Skeleton className="h-4 w-40" /> : `₹${budgetStats.totalSpent.toLocaleString('en-IN')} spent of ₹${budgetStats.totalBudgeted.toLocaleString('en-IN')}`}
-                    </CardDescription>
+                    <div className="text-sm text-muted-foreground">{loading ? <Skeleton className="h-4 w-40" /> : `₹${budgetStats.totalSpent.toLocaleString('en-IN')} spent of ₹${budgetStats.totalBudgeted.toLocaleString('en-IN')}`}</div>
                 </CardHeader>
                 <CardContent>
                      {loading ? <SkeletonLoader /> : (
                         <>
                             <Progress value={budgetStats.progress} className="mb-2" />
-                            <p className={cn("text-sm font-medium", budgetStats.remaining < 0 ? "text-destructive" : "text-muted-foreground")}>
+                            <div className={cn("text-sm font-medium", budgetStats.remaining < 0 ? "text-destructive" : "text-muted-foreground")}>
                                 {budgetStats.remaining >= 0
                                     ? `₹${budgetStats.remaining.toLocaleString('en-IN')} remaining`
                                     : `₹${Math.abs(budgetStats.remaining).toLocaleString('en-IN')} over budget`
                                 }
-                            </p>
+                            </div>
                             {budgetItems.length > 0 ? (
                                 <div className="mt-4 max-h-96 overflow-y-auto">
                                     <Table>
@@ -440,7 +438,7 @@ export default function PublicDashboardPage() {
                                         </TableBody>
                                     </Table>
                                 </div>
-                            ) : (<p className="text-muted-foreground text-center py-8">The budget details are not available yet.</p>)}
+                            ) : (<div className="text-muted-foreground text-center py-8">The budget details are not available yet.</div>)}
                         </>
                      )}
                 </CardContent>
@@ -457,7 +455,7 @@ export default function PublicDashboardPage() {
                     </CardHeader>
                     <CardContent>
                         {loading ? <SkeletonLoader /> : savedVendors.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                             {savedVendors.map(vendor => (
                             <Link href={`/v/${vendor.id}`} key={vendor.id} className="group">
                                 <Card className="h-full hover:shadow-md transition-shadow">
@@ -473,7 +471,7 @@ export default function PublicDashboardPage() {
                             ))}
                         </div>
                         ) : (
-                        <p className="text-muted-foreground text-center py-8">No vendors have been saved yet.</p>
+                        <div className="text-muted-foreground text-center py-8">No vendors have been saved yet.</div>
                         )}
                     </CardContent>
                 </Card>
