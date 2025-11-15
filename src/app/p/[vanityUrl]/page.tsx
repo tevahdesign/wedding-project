@@ -218,9 +218,9 @@ export default function PublicDashboardPage() {
         attending: guests.filter(g => g.status === 'Attending').length,
         pending: guests.filter(g => g.status === 'Pending').length,
         declined: guests.filter(g => g.status === 'Declined').length,
-        bride: { ...initialStats },
-        groom: { ...initialStats },
-        other: { ...initialStats }
+        bride: { ...initialStats, guests: [] as Guest[] },
+        groom: { ...initialStats, guests: [] as Guest[] },
+        other: { ...initialStats, guests: [] as Guest[] }
     };
 
     guests.forEach(guest => {
@@ -232,6 +232,7 @@ export default function PublicDashboardPage() {
         }
         
         stats[group].total++;
+        stats[group].guests.push(guest);
         if (guest.status === 'Attending') stats[group].attending++;
         else if (guest.status === 'Pending') stats[group].pending++;
         else if (guest.status === 'Declined') stats[group].declined++;
@@ -355,6 +356,35 @@ export default function PublicDashboardPage() {
         </div>
     </div>
   );
+  
+  const renderGuestListTable = (title: string, guests: Guest[]) => {
+    if (guests.length === 0) return null;
+    return (
+        <div className='mt-6'>
+            <h4 className='font-semibold mb-2'>{title}</h4>
+            <div className="max-h-60 overflow-y-auto border rounded-lg">
+                <Table>
+                    <TableHeader className="sticky top-0 bg-muted">
+                        <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead className="text-right">Status</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {guests.map(guest => (
+                            <TableRow key={guest.id}>
+                                <TableCell>{guest.name}</TableCell>
+                                <TableCell className="text-right flex justify-end items-center gap-2">
+                                    {getStatusIcon(guest.status)} {guest.status}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
+        </div>
+    );
+  };
 
 
   return (
@@ -395,7 +425,7 @@ export default function PublicDashboardPage() {
                     <CardTitle className="flex items-center gap-2">
                     Guest List Overview
                     </CardTitle>
-                    {loading ? (
+                     {loading ? (
                         <div className="text-sm text-muted-foreground"><Skeleton className="h-4 w-24" /></div>
                     ) : (
                         <CardDescription>{`${guestStats.total} guests invited`}</CardDescription>
@@ -418,34 +448,16 @@ export default function PublicDashboardPage() {
                                 <div className="text-sm text-muted-foreground">Declined</div>
                             </div>
                             </div>
-
-                            <div className="grid md:grid-cols-2 gap-4 my-6">
+                            
+                            <div className="grid md:grid-cols-2 gap-6">
                                 {renderGuestGroupStats("Bride's Side", guestStats.bride)}
                                 {renderGuestGroupStats("Groom's Side", guestStats.groom)}
                             </div>
 
                             {guests.length > 0 ? (
-                                <div className="mt-4 max-h-96 overflow-y-auto">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Name</TableHead>
-                                                <TableHead>Group</TableHead>
-                                                <TableHead className="text-right">Status</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {guests.map(guest => (
-                                                <TableRow key={guest.id}>
-                                                    <TableCell>{guest.name}</TableCell>
-                                                    <TableCell><Badge variant="secondary">{guest.group || 'N/A'}</Badge></TableCell>
-                                                    <TableCell className="text-right flex justify-end items-center gap-2">
-                                                        {getStatusIcon(guest.status)} {guest.status}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
+                                <div className="mt-6 space-y-6">
+                                    {renderGuestListTable("Bride's Guests", guestStats.bride.guests)}
+                                    {renderGuestListTable("Groom's Guests", guestStats.groom.guests)}
                                 </div>
                             ) : (<div className="text-muted-foreground text-center py-8">The guest list is not available yet.</div>)}
                         </>
@@ -504,7 +516,7 @@ export default function PublicDashboardPage() {
                         <CardTitle className="flex items-center gap-2">
                         Saved Vendors
                         </CardTitle>
-                        {loading ? (
+                         {loading ? (
                             <div className="text-sm text-muted-foreground"><Skeleton className="h-4 w-24" /></div>
                         ) : (
                             <CardDescription>{`${savedVendors.length} vendors saved`}</CardDescription>
