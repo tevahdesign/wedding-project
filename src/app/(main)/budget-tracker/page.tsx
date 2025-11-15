@@ -45,7 +45,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-import { PlusCircle, MoreHorizontal, Loader2, PiggyBank, Trash2, Edit, Pencil } from "lucide-react"
+import { PlusCircle, MoreHorizontal, Loader2, PiggyBank, Trash2, Edit, Pencil, FileText } from "lucide-react"
 import { useMemo, useState, useEffect } from "react"
 import { useAuth, useDatabase } from "@/firebase"
 import { useList } from "@/firebase/database/use-list"
@@ -55,6 +55,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useObjectValue } from "@/firebase/database/use-object-value"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 
 export default function BudgetTrackerPage() {
   const { user } = useAuth()
@@ -157,6 +159,110 @@ export default function BudgetTrackerPage() {
       setIsDeleting(false);
     }
   }
+  
+  const handleDownload = (format: 'csv' | 'pdf') => {
+    if (!budgetData || budgetData.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No expenses",
+        description: "There are no expenses to download.",
+      });
+      return;
+    }
+    
+    if (format === 'csv') {
+        downloadCSV(budgetData);
+    } else {
+        downloadPDF(budgetData);
+    }
+
+    toast({
+      title: "Download Started",
+      description: `Your budget details are being downloaded as a ${format.toUpperCase()} file.`,
+    });
+  }
+
+  const downloadCSV = (data: BudgetItem[]) => {
+    const headers = ["Category", "Budgeted", "Spent", "Notes"];
+    
+    const itemRows = data.map(item => [
+      `"${item.name}"`,
+      item.budget,
+      item.spent,
+      `"${item.notes || ''}"`
+    ].join(","));
+
+    const summaryRows = [
+        "", // Blank line
+        `"Total Budget",${totalBudget || 0}`,
+        `"Total Spent",${totalSpent}`,
+        `"Remaining Budget",${remainingBudget}`
+    ];
+    
+    const csvContent = [
+      headers.join(","),
+      ...itemRows,
+      ...summaryRows
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "budget-details.csv");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  const downloadPDF = (data: BudgetItem[]) => {
+    const doc = new jsPDF();
+    const tableColumns = ["Category", "Budgeted", "Spent", "Notes"];
+    const tableRows = data.map(item => [
+      item.name,
+      `₹${item.budget.toLocaleString('en-IN')}`,
+      `₹${item.spent.toLocaleString('en-IN')}`,
+      item.notes || '',
+    ]);
+
+    doc.setFontSize(18);
+    doc.text("Wedding Budget Details", 14, 22);
+    
+    autoTable(doc, {
+        startY: 30,
+        head: [tableColumns],
+        body: tableRows,
+        theme: 'grid',
+        headStyles: { fillColor: [22, 163, 74] },
+        columnStyles: {
+            1: { halign: 'right' },
+            2: { halign: 'right' },
+        },
+    });
+
+    const finalY = (doc as any).lastAutoTable.finalY;
+    
+    const summaryData = [
+        ['Total Budget', `₹${(totalBudget || 0).toLocaleString('en-IN')}`],
+        ['Total Spent', `₹${totalSpent.toLocaleString('en-IN')}`],
+        ['Remaining Budget', `₹${remainingBudget.toLocaleString('en-IN')}`],
+    ];
+
+    autoTable(doc, {
+        startY: finalY + 10,
+        body: summaryData,
+        theme: 'plain',
+        styles: { fontSize: 12 },
+        columnStyles: {
+            0: { fontStyle: 'bold' },
+            1: { halign: 'right' },
+        },
+    });
+
+    doc.save("budget-details.pdf");
+  };
+
 
   const loading = itemsLoading || totalBudgetLoading;
 
@@ -167,10 +273,32 @@ export default function BudgetTrackerPage() {
         description="Keep your wedding finances in order."
         showBackButton
       >
-        <Button onClick={handleAddClick}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Expense
-        </Button>
+        <div className="flex items-center gap-2">
+            <Button onClick={handleAddClick} size="sm">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Expense
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" disabled={!budgetData || budgetData.length === 0}>
+                    <MoreHorizontal className="h-5 w-5" />
+                    <span className="sr-only">More actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Download Options</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleDownload('pdf')}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    <span>Download as PDF</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleDownload('csv')}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    <span>Download as CSV</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
       </PageHeader>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -354,5 +482,3 @@ export default function BudgetTrackerPage() {
     </div>
   )
 }
-
-    
