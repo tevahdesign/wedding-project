@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -42,6 +41,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 type Guest = {
@@ -147,7 +147,9 @@ export default function PublicDashboardPage() {
       } catch (err) {
         setError('Failed to load dashboard information.');
       } finally {
-        setLoading(false);
+        if (!hasAccessInSession) {
+            setLoading(false);
+        }
       }
     };
 
@@ -230,14 +232,48 @@ export default function PublicDashboardPage() {
     if (status === 'Declined') return <XCircle className="h-4 w-4 text-red-500" />;
     return null;
   };
+  
+  const SkeletonLoader = () => (
+    <div className="space-y-6">
+        <div className="space-y-2">
+            <Skeleton className="h-6 w-1/2" />
+            <Skeleton className="h-4 w-1/3" />
+        </div>
+        <div className="space-y-4">
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-40 w-full" />
+        </div>
+    </div>
+  );
 
-  if (loading && !dashboardData) {
+
+  if (loading && !dashboardData && !error) {
     return (
       <div className="flex h-screen items-center justify-center bg-muted">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="ml-4">Loading Shared Dashboard...</p>
       </div>
     );
+  }
+
+  if (error && !isAuthenticated) {
+     return (
+       <div className="flex h-screen w-full items-center justify-center bg-gray-100 dark:bg-gray-950 p-4">
+        <Card className="w-full max-w-sm z-10">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-headline text-destructive">Error</CardTitle>
+            <CardDescription>
+                {error}
+            </CardDescription>
+          </CardHeader>
+          <CardFooter>
+            <Button onClick={() => router.push('/')} className="w-full">
+                Go to Homepage
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+     )
   }
 
   if (!isAuthenticated) {
@@ -316,46 +352,50 @@ export default function PublicDashboardPage() {
                     <CardTitle className="flex items-center gap-2">
                     Guest List Overview
                     </CardTitle>
-                    <CardDescription>{guestStats.total} guests invited</CardDescription>
+                    <CardDescription>{loading ? <Skeleton className="h-4 w-24" /> : `${guestStats.total} guests invited`}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-3 gap-4 text-center mb-6">
-                    <div>
-                        <p className="text-2xl font-bold text-green-500">{guestStats.attending}</p>
-                        <p className="text-sm text-muted-foreground">Attending</p>
-                    </div>
-                    <div>
-                        <p className="text-2xl font-bold text-yellow-500">{guestStats.pending}</p>
-                        <p className="text-sm text-muted-foreground">Pending</p>
-                    </div>
-                    <div>
-                        <p className="text-2xl font-bold text-red-500">{guestStats.declined}</p>
-                        <p className="text-sm text-muted-foreground">Declined</p>
-                    </div>
-                    </div>
-                    {guests.length > 0 && (
-                        <div className="mt-4 max-h-96 overflow-y-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>Group</TableHead>
-                                        <TableHead className="text-right">Status</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {guests.map(guest => (
-                                        <TableRow key={guest.id}>
-                                            <TableCell>{guest.name}</TableCell>
-                                            <TableCell><Badge variant="secondary">{guest.group || 'N/A'}</Badge></TableCell>
-                                            <TableCell className="text-right flex justify-end items-center gap-2">
-                                                {getStatusIcon(guest.status)} {guest.status}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
+                    {loading ? <SkeletonLoader /> : (
+                        <>
+                            <div className="grid grid-cols-3 gap-4 text-center mb-6">
+                            <div>
+                                <p className="text-2xl font-bold text-green-500">{guestStats.attending}</p>
+                                <p className="text-sm text-muted-foreground">Attending</p>
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-yellow-500">{guestStats.pending}</p>
+                                <p className="text-sm text-muted-foreground">Pending</p>
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-red-500">{guestStats.declined}</p>
+                                <p className="text-sm text-muted-foreground">Declined</p>
+                            </div>
+                            </div>
+                            {guests.length > 0 ? (
+                                <div className="mt-4 max-h-96 overflow-y-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Name</TableHead>
+                                                <TableHead>Group</TableHead>
+                                                <TableHead className="text-right">Status</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {guests.map(guest => (
+                                                <TableRow key={guest.id}>
+                                                    <TableCell>{guest.name}</TableCell>
+                                                    <TableCell><Badge variant="secondary">{guest.group || 'N/A'}</Badge></TableCell>
+                                                    <TableCell className="text-right flex justify-end items-center gap-2">
+                                                        {getStatusIcon(guest.status)} {guest.status}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            ) : (<p className="text-muted-foreground text-center py-8">The guest list is not available yet.</p>)}
+                        </>
                     )}
                 </CardContent>
                 </Card>
@@ -368,37 +408,41 @@ export default function PublicDashboardPage() {
                     Budget Overview
                     </CardTitle>
                     <CardDescription>
-                        ₹{budgetStats.totalSpent.toLocaleString('en-IN')} spent of ₹{budgetStats.totalBudgeted.toLocaleString('en-IN')}
+                        {loading ? <Skeleton className="h-4 w-40" /> : `₹${budgetStats.totalSpent.toLocaleString('en-IN')} spent of ₹${budgetStats.totalBudgeted.toLocaleString('en-IN')}`}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Progress value={budgetStats.progress} className="mb-2" />
-                    <p className={cn("text-sm font-medium", budgetStats.remaining < 0 ? "text-destructive" : "text-muted-foreground")}>
-                        {budgetStats.remaining >= 0
-                            ? `₹${budgetStats.remaining.toLocaleString('en-IN')} remaining`
-                            : `₹${Math.abs(budgetStats.remaining).toLocaleString('en-IN')} over budget`
-                        }
-                    </p>
-                    {budgetItems.length > 0 && (
-                        <div className="mt-4 max-h-96 overflow-y-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Category</TableHead>
-                                        <TableHead className="text-right">Spent</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {budgetItems.map(item => (
-                                        <TableRow key={item.id}>
-                                            <TableCell>{item.name}</TableCell>
-                                            <TableCell className="text-right">₹{Number(item.spent).toLocaleString('en-IN')}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    )}
+                     {loading ? <SkeletonLoader /> : (
+                        <>
+                            <Progress value={budgetStats.progress} className="mb-2" />
+                            <p className={cn("text-sm font-medium", budgetStats.remaining < 0 ? "text-destructive" : "text-muted-foreground")}>
+                                {budgetStats.remaining >= 0
+                                    ? `₹${budgetStats.remaining.toLocaleString('en-IN')} remaining`
+                                    : `₹${Math.abs(budgetStats.remaining).toLocaleString('en-IN')} over budget`
+                                }
+                            </p>
+                            {budgetItems.length > 0 ? (
+                                <div className="mt-4 max-h-96 overflow-y-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Category</TableHead>
+                                                <TableHead className="text-right">Spent</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {budgetItems.map(item => (
+                                                <TableRow key={item.id}>
+                                                    <TableCell>{item.name}</TableCell>
+                                                    <TableCell className="text-right">₹{Number(item.spent).toLocaleString('en-IN')}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            ) : (<p className="text-muted-foreground text-center py-8">The budget details are not available yet.</p>)}
+                        </>
+                     )}
                 </CardContent>
                 </Card>
             </TabsContent>
@@ -409,10 +453,10 @@ export default function PublicDashboardPage() {
                         <CardTitle className="flex items-center gap-2">
                         Saved Vendors
                         </CardTitle>
-                        <CardDescription>{savedVendors.length} vendors saved</CardDescription>
+                        <CardDescription>{loading ? <Skeleton className="h-4 w-24" /> : `${savedVendors.length} vendors saved`}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {savedVendors.length > 0 ? (
+                        {loading ? <SkeletonLoader /> : savedVendors.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             {savedVendors.map(vendor => (
                             <Link href={`/v/${vendor.id}`} key={vendor.id} className="group">
@@ -439,3 +483,5 @@ export default function PublicDashboardPage() {
     </div>
   );
 }
+
+    
