@@ -445,13 +445,14 @@ export default function BudgetTrackerPage() {
                     <TableHead>Category</TableHead>
                     <TableHead className="text-right">Budget</TableHead>
                     <TableHead className="text-right">Spent</TableHead>
+                    <TableHead className="text-right">Remaining</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading && (
                     <TableRow>
-                      <TableCell colSpan={4} className="h-24 text-center">
+                      <TableCell colSpan={5} className="h-24 text-center">
                         <div className="flex justify-center items-center gap-2 text-muted-foreground">
                             <Loader2 className="h-5 w-5 animate-spin" />
                             <span>Loading expenses...</span>
@@ -461,7 +462,7 @@ export default function BudgetTrackerPage() {
                   )}
                   {!loading && budgetData?.length === 0 && (
                      <TableRow>
-                      <TableCell colSpan={4} className="h-48 text-center">
+                      <TableCell colSpan={5} className="h-48 text-center">
                          <div className="flex flex-col items-center gap-4">
                             <PiggyBank className="h-12 w-12 text-muted-foreground/50" />
                             <h3 className="text-lg font-semibold">No expenses yet</h3>
@@ -476,6 +477,7 @@ export default function BudgetTrackerPage() {
                   )}
                   {budgetData?.map((item) => {
                     const vendorName = item.vendorId ? vendorMap.get(item.vendorId) : null;
+                    const remaining = (Number(item.budget) || 0) - (Number(item.spent) || 0);
                     return (
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">
@@ -494,6 +496,9 @@ export default function BudgetTrackerPage() {
                         </TableCell>
                         <TableCell className="text-right">
                           ₹{Number(item.spent).toLocaleString()}
+                        </TableCell>
+                         <TableCell className={cn("text-right", remaining < 0 && "text-destructive")}>
+                           {remaining < 0 && "-"}₹{Math.abs(remaining).toLocaleString()}
                         </TableCell>
                         <TableCell>
                           <DropdownMenu>
