@@ -211,12 +211,35 @@ export default function PublicDashboardPage() {
   }
   
   const guestStats = useMemo(() => {
-    const attending = guests.filter(g => g.status === 'Attending').length;
-    const pending = guests.filter(g => g.status === 'Pending').length;
-    const declined = guests.filter(g => g.status === 'Declined').length;
-    const total = guests.length;
-    return { attending, pending, declined, total };
+    const initialStats = { total: 0, attending: 0, pending: 0, declined: 0 };
+    
+    const stats = {
+        total: guests.length,
+        attending: guests.filter(g => g.status === 'Attending').length,
+        pending: guests.filter(g => g.status === 'Pending').length,
+        declined: guests.filter(g => g.status === 'Declined').length,
+        bride: { ...initialStats },
+        groom: { ...initialStats },
+        other: { ...initialStats }
+    };
+
+    guests.forEach(guest => {
+        let group: 'bride' | 'groom' | 'other' = 'other';
+        if (guest.group?.toLowerCase() === 'bride') {
+            group = 'bride';
+        } else if (guest.group?.toLowerCase() === 'groom') {
+            group = 'groom';
+        }
+        
+        stats[group].total++;
+        if (guest.status === 'Attending') stats[group].attending++;
+        else if (guest.status === 'Pending') stats[group].pending++;
+        else if (guest.status === 'Declined') stats[group].declined++;
+    });
+
+    return stats;
   }, [guests]);
+
 
   const budgetStats = useMemo(() => {
     const totalSpent = budgetItems.reduce((sum, item) => sum + (Number(item.spent) || 0), 0);
@@ -313,6 +336,26 @@ export default function PublicDashboardPage() {
     );
   }
 
+  const renderGuestGroupStats = (title: string, stats: { total: number, attending: number, pending: number, declined: number }) => (
+    <div>
+        <h4 className="font-semibold mb-2">{title} ({stats.total} Guests)</h4>
+        <div className="grid grid-cols-3 gap-2 text-center text-sm p-2 rounded-md bg-muted/50">
+            <div>
+                <div className="font-bold text-green-500">{stats.attending}</div>
+                <div className="text-xs text-muted-foreground">Attending</div>
+            </div>
+            <div>
+                <div className="font-bold text-yellow-500">{stats.pending}</div>
+                <div className="text-xs text-muted-foreground">Pending</div>
+            </div>
+            <div>
+                <div className="font-bold text-red-500">{stats.declined}</div>
+                <div className="text-xs text-muted-foreground">Declined</div>
+            </div>
+        </div>
+    </div>
+  );
+
 
   return (
     <div className="bg-muted min-h-screen">
@@ -324,7 +367,7 @@ export default function PublicDashboardPage() {
               <AvatarFallback>{profile?.displayName?.charAt(0) || 'U'}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm text-muted-foreground">The Wedding Plan for</p>
+              <div className="text-sm text-muted-foreground">The Wedding Plan for</div>
               <h1 className="text-lg font-bold">{profile?.displayName || 'The Happy Couple'}</h1>
             </div>
           </div>
@@ -361,7 +404,7 @@ export default function PublicDashboardPage() {
                 <CardContent>
                     {loading ? <SkeletonLoader /> : (
                         <>
-                            <div className="grid grid-cols-3 gap-4 text-center mb-6">
+                            <div className="grid grid-cols-3 gap-4 text-center mb-6 p-4 border rounded-lg">
                             <div>
                                 <div className="text-2xl font-bold text-green-500">{guestStats.attending}</div>
                                 <div className="text-sm text-muted-foreground">Attending</div>
@@ -375,6 +418,12 @@ export default function PublicDashboardPage() {
                                 <div className="text-sm text-muted-foreground">Declined</div>
                             </div>
                             </div>
+
+                            <div className="grid md:grid-cols-2 gap-4 my-6">
+                                {renderGuestGroupStats("Bride's Side", guestStats.bride)}
+                                {renderGuestGroupStats("Groom's Side", guestStats.groom)}
+                            </div>
+
                             {guests.length > 0 ? (
                                 <div className="mt-4 max-h-96 overflow-y-auto">
                                     <Table>
@@ -489,4 +538,3 @@ export default function PublicDashboardPage() {
     </div>
   );
 }
-
