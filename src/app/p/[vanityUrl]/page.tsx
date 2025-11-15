@@ -128,10 +128,6 @@ export default function PublicDashboardPage() {
       const sessionKey = `dashboard_access_${vanityUrl}`;
       const hasAccessInSession = sessionStorage.getItem(sessionKey) === 'true';
 
-      if (hasAccessInSession) {
-          setIsAuthenticated(true);
-      }
-
       try {
         const dashboardRef = ref(database, `publicDashboards/${vanityUrl}`);
         const snapshot = await get(dashboardRef);
@@ -139,8 +135,8 @@ export default function PublicDashboardPage() {
         if (snapshot.exists()) {
           const data = snapshot.val() as Omit<PublicDashboardData, 'vanityUrl'>;
           setDashboardData({ ...data, vanityUrl });
-           if (!hasAccessInSession) {
-            setError('Please provide an access code.');
+           if (hasAccessInSession) {
+            setIsAuthenticated(true);
           }
         } else {
           setError('This shared dashboard does not exist.');
@@ -163,7 +159,8 @@ export default function PublicDashboardPage() {
       setLoading(true);
       try {
         const ownerId = dashboardData.ownerId;
-        const userSnapshot = await get(ref(database, `users/${ownerId}`));
+        const userRef = ref(database, `users/${ownerId}`);
+        const userSnapshot = await get(userRef);
         
         if (userSnapshot.exists()) {
             const userData = userSnapshot.val();
@@ -240,7 +237,7 @@ export default function PublicDashboardPage() {
     );
   }
 
-  if (!isAuthenticated || (vanityUrl !== 'preview' && error && !dashboardData?.shareCode)) {
+  if (!isAuthenticated) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-gray-100 dark:bg-gray-950 p-4">
         <Card className="w-full max-w-sm z-10">
@@ -402,10 +399,10 @@ export default function PublicDashboardPage() {
                 {savedVendors.map(vendor => (
                   <Card key={vendor.id}>
                     <CardContent className="p-3 flex items-center gap-3">
-                        <Store className="w-8 h-8 text-primary" />
-                        <div>
+                        <Store className="w-8 h-8 text-primary flex-shrink-0" />
+                        <div className="flex-grow min-w-0">
                             <p className="font-semibold truncate">{vendor.name}</p>
-                            <p className="text-sm text-muted-foreground">{vendor.category}</p>
+                            <p className="text-sm text-muted-foreground truncate">{vendor.category}</p>
                         </div>
                     </CardContent>
                   </Card>
