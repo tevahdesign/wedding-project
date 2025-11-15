@@ -3,8 +3,8 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { get, ref, child } from 'firebase/database';
+import { useParams, useRouter } from 'next/navigation';
+import { get, ref } from 'firebase/database';
 import { useDatabase, useAuth } from '@/firebase';
 import {
   Heart,
@@ -79,7 +79,6 @@ export default function PublicDashboardPage() {
   const router = useRouter();
   const database = useDatabase();
   const { user, loading: authLoading } = useAuth();
-  const searchParams = useSearchParams();
 
   const vanityUrl = params.vanityUrl as string;
 
@@ -92,6 +91,7 @@ export default function PublicDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [accessCodeInput, setAccessCodeInput] = useState('');
 
 
   useEffect(() => {
@@ -117,6 +117,7 @@ export default function PublicDashboardPage() {
           }
         } else {
           setError("You must be logged in to see a preview.");
+          router.push('/login?redirect=/p/preview');
         }
         setLoading(false);
         return;
@@ -137,17 +138,7 @@ export default function PublicDashboardPage() {
         if (snapshot.exists()) {
           const data = snapshot.val() as Omit<PublicDashboardData, 'vanityUrl'>;
           setDashboardData({ ...data, vanityUrl });
-
-          const code = searchParams.get('code');
-          if (code) { // Check for access code in URL
-            if (code.toUpperCase() === data.shareCode) {
-              sessionStorage.setItem(sessionKey, 'true');
-              setIsAuthenticated(true);
-              router.replace(`/p/${vanityUrl}`); // Remove code from URL
-            } else {
-              if (!hasAccessInSession) setError('Invalid access code provided.');
-            }
-          } else if (!hasAccessInSession) {
+           if (!hasAccessInSession) {
             setError('Please provide an access code.');
           }
         } else {
@@ -161,7 +152,7 @@ export default function PublicDashboardPage() {
     };
 
     checkAuthAndFetchMeta();
-  }, [database, vanityUrl, user, authLoading, searchParams, router]);
+  }, [database, vanityUrl, user, authLoading, router]);
 
 
   useEffect(() => {
@@ -179,7 +170,7 @@ export default function PublicDashboardPage() {
 
             setProfile({
               displayName: details.coupleNames || 'The Happy Couple',
-              photoURL: userData.photoURL || '' // Assuming photoURL might be at the root of user data
+              photoURL: userData.photoURL || ''
             });
 
             const guestList: Guest[] = userData.guests ? Object.keys(userData.guests).map(key => ({ id: key, ...userData.guests[key]})) : [];
@@ -203,6 +194,18 @@ export default function PublicDashboardPage() {
     };
     fetchData();
   }, [dashboardData, database, isAuthenticated]);
+
+  const handleCodeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (dashboardData && accessCodeInput.toUpperCase() === dashboardData.shareCode) {
+        const sessionKey = `dashboard_access_${vanityUrl}`;
+        sessionStorage.setItem(sessionKey, 'true');
+        setIsAuthenticated(true);
+        setError(null);
+    } else {
+        setError('Invalid access code. Please try again.');
+    }
+  }
   
   const guestStats = useMemo(() => {
     const attending = guests.filter(g => g.status === 'Attending').length;
@@ -236,25 +239,41 @@ export default function PublicDashboardPage() {
     );
   }
 
-  if (error && !isAuthenticated) {
+  if (!isAuthenticated || vanityUrl !== 'preview' && error) {
     return (
-      <div className="flex h-screen items-center justify-center bg-muted text-center p-4">
-        <div>
-          <h2 className="text-2xl font-bold text-destructive mb-2">Access Denied</h2>
-          <p className="text-muted-foreground">{error || 'Please use the guest login page to access this dashboard.'}</p>
-          <Button onClick={() => router.push('/guest-login')} className="mt-6">Go to Guest Login</Button>
-        </div>
+      <div className="flex h-screen w-full items-center justify-center bg-gray-100 dark:bg-gray-950 p-4">
+        <Card className="w-full max-w-sm z-10">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-headline">Dashboard Access</CardTitle>
+            <CardDescription>
+              Enter the access code to view the wedding plan for <span className="font-bold text-primary">{vanityUrl}</span>.
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={handleCodeSubmit}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="access-code">Access Code</Label>
+                <Input
+                  id="access-code"
+                  type="text"
+                  placeholder="Enter code..."
+                  value={accessCodeInput}
+                  onChange={(e) => setAccessCodeInput(e.target.value)}
+                  required
+                  className="font-mono tracking-widest text-center"
+                />
+              </div>
+              {error && <p className="text-sm text-destructive text-center">{error}</p>}
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" className="w-full">
+                 <KeyRound className="mr-2 h-4 w-4" /> Unlock Dashboard
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
       </div>
     );
-  }
-  
-  if (!isAuthenticated) {
-    return (
-        <div className="flex h-screen items-center justify-center bg-muted">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="ml-4">Verifying access...</p>
-        </div>
-    )
   }
 
 
@@ -400,5 +419,3 @@ export default function PublicDashboardPage() {
     </div>
   );
 }
-
-    

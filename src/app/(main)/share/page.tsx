@@ -36,7 +36,7 @@ export default function SharePage() {
   const [isCopiedLink, setIsCopiedLink] = useState(false);
   const [loading, setLoading] = useState(true);
   const [initialVanityUrl, setInitialVanityUrl] = useState<string | null>(null);
-  const [guestLoginUrl, setGuestLoginUrl] = useState('');
+  const [publicDashboardUrl, setPublicDashboardUrl] = useState('');
   
   const userWebsiteRef = useMemo(() => {
     if (!user || !database) return null;
@@ -45,10 +45,10 @@ export default function SharePage() {
 
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setGuestLoginUrl(`${window.location.origin}/guest-login`);
+    if (initialVanityUrl && typeof window !== 'undefined') {
+      setPublicDashboardUrl(`${window.location.origin}/p/${initialVanityUrl}`);
     }
-  }, []);
+  }, [initialVanityUrl]);
 
 
   const resetFormToDefaults = () => {
@@ -64,13 +64,15 @@ export default function SharePage() {
           return;
         }
 
+        setLoading(true);
         try {
             const snapshot = await get(userWebsiteRef);
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                setVanityUrl(data.details?.vanityUrl || `wedding-${user!.uid.slice(0,6)}`);
-                setShareCode(data.details?.shareCode || generateShareCode());
-                setInitialVanityUrl(data.details?.vanityUrl || null);
+                const details = data.details || {};
+                setVanityUrl(details.vanityUrl || `wedding-${user!.uid.slice(0,6)}`);
+                setShareCode(details.shareCode || generateShareCode());
+                setInitialVanityUrl(details.vanityUrl || null);
             } else {
                 resetFormToDefaults();
             }
@@ -83,7 +85,7 @@ export default function SharePage() {
     }
     fetchWebsiteData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, userWebsiteRef]);
+  }, [userWebsiteRef, user]);
 
 
   const handleSave = async () => {
@@ -187,7 +189,7 @@ export default function SharePage() {
             <CardHeader>
               <CardTitle>Guest Access Settings</CardTitle>
               <CardDescription>
-                Set a memorable Wedding ID and a private Access Code. Guests will use these at the Guest Login page to view your dashboard.
+                Set a memorable Wedding ID and a private Access Code. Guests will use these at your public dashboard link to gain access.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -252,22 +254,22 @@ export default function SharePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                  <div className="space-y-2">
-                    <Label>Guest Login Page</Label>
+                    <Label>Your Public Dashboard Link</Label>
                     <div className="flex items-center space-x-2">
-                        <Input readOnly value={guestLoginUrl} className="bg-muted"/>
-                         <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(guestLoginUrl, 'link')} disabled={!guestLoginUrl}>
+                        <Input readOnly value={publicDashboardUrl} className="bg-muted"/>
+                         <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(publicDashboardUrl, 'link')} disabled={!publicDashboardUrl}>
                             {isCopiedLink ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                         </Button>
                     </div>
-                     <p className="text-xs text-muted-foreground">Share this link with your guests.</p>
+                     <p className="text-xs text-muted-foreground">Share this single link with your guests.</p>
                 </div>
                 <div className='flex gap-4'>
                     <div className="space-y-2 flex-1">
-                        <Label>Your Wedding ID</Label>
+                        <Label>Guest Wedding ID</Label>
                         <p className="font-semibold text-primary p-2 border rounded-md bg-muted">{vanityUrl}</p>
                     </div>
                      <div className="space-y-2 flex-1">
-                        <Label>Your Access Code</Label>
+                        <Label>Guest Access Code</Label>
                         <p className="font-semibold text-primary p-2 border rounded-md bg-muted font-mono tracking-widest">{shareCode}</p>
                     </div>
                 </div>
