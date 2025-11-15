@@ -176,7 +176,7 @@ export default function SharePage() {
                <div className="space-y-2">
                 <Label htmlFor="share-code">Dashboard Access Code</Label>
                  <div className="flex items-center space-x-2">
-                    <Input id="share-code" value={shareCode} readOnly className="font-mono tracking-widest" />
+                    <Input id="share-code" value={shareCode} onChange={(e) => setShareCode(e.target.value.toUpperCase())} className="font-mono tracking-widest" />
                     <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(shareCode, 'code')}>
                         {isCopiedCode ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                     </Button>
