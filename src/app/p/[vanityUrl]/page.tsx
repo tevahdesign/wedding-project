@@ -357,31 +357,30 @@ export default function PublicDashboardPage() {
     </div>
   );
   
-  const renderGuestListTable = (title: string, guests: Guest[]) => {
-    if (guests.length === 0) return null;
+  const renderGuestListTable = (guests: Guest[]) => {
+    if (guests.length === 0) return (
+        <div className="text-muted-foreground text-center py-8">No guests in this group.</div>
+    );
     return (
-        <div className='mt-6'>
-            <h4 className='font-semibold mb-2'>{title}</h4>
-            <div className="max-h-60 overflow-y-auto border rounded-lg">
-                <Table>
-                    <TableHeader className="sticky top-0 bg-muted">
-                        <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead className="text-right">Status</TableHead>
+        <div className="max-h-60 overflow-y-auto border rounded-lg">
+            <Table>
+                <TableHeader className="sticky top-0 bg-muted">
+                    <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead className="text-right">Status</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {guests.map(guest => (
+                        <TableRow key={guest.id}>
+                            <TableCell>{guest.name}</TableCell>
+                            <TableCell className="text-right flex justify-end items-center gap-2">
+                                {getStatusIcon(guest.status)} {guest.status}
+                            </TableCell>
                         </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {guests.map(guest => (
-                            <TableRow key={guest.id}>
-                                <TableCell>{guest.name}</TableCell>
-                                <TableCell className="text-right flex justify-end items-center gap-2">
-                                    {getStatusIcon(guest.status)} {guest.status}
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
+                    ))}
+                </TableBody>
+            </Table>
         </div>
     );
   };
@@ -455,10 +454,18 @@ export default function PublicDashboardPage() {
                             </div>
 
                             {guests.length > 0 ? (
-                                <div className="mt-6 space-y-6">
-                                    {renderGuestListTable("Bride's Guests", guestStats.bride.guests)}
-                                    {renderGuestListTable("Groom's Guests", guestStats.groom.guests)}
-                                </div>
+                                <Tabs defaultValue="bride" className="w-full mt-6">
+                                    <TabsList className="grid w-full grid-cols-2">
+                                        <TabsTrigger value="bride">Bride's Guests ({guestStats.bride.guests.length})</TabsTrigger>
+                                        <TabsTrigger value="groom">Groom's Guests ({guestStats.groom.guests.length})</TabsTrigger>
+                                    </TabsList>
+                                    <TabsContent value="bride" className="mt-4">
+                                        {renderGuestListTable(guestStats.bride.guests)}
+                                    </TabsContent>
+                                    <TabsContent value="groom" className="mt-4">
+                                        {renderGuestListTable(guestStats.groom.guests)}
+                                    </TabsContent>
+                                </Tabs>
                             ) : (<div className="text-muted-foreground text-center py-8">The guest list is not available yet.</div>)}
                         </>
                     )}
@@ -472,7 +479,9 @@ export default function PublicDashboardPage() {
                     <CardTitle className="flex items-center gap-2">
                     Budget Overview
                     </CardTitle>
-                    <div className="text-sm text-muted-foreground">{loading ? <Skeleton className="h-4 w-40" /> : `₹${budgetStats.totalSpent.toLocaleString('en-IN')} spent of ₹${budgetStats.totalBudgeted.toLocaleString('en-IN')}`}</div>
+                    <div className="text-sm text-muted-foreground">
+                        {loading ? <Skeleton className="h-4 w-40" /> : `₹${budgetStats.totalSpent.toLocaleString('en-IN')} spent of ₹${budgetStats.totalBudgeted.toLocaleString('en-IN')}`}
+                    </div>
                 </CardHeader>
                 <CardContent>
                      {loading ? <SkeletonLoader /> : (
@@ -550,3 +559,5 @@ export default function PublicDashboardPage() {
     </div>
   );
 }
+
+    
