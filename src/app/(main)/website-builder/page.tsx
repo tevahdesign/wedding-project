@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
-import { doc, setDoc, deleteDoc, getDoc } from 'firebase/firestore'
+import { ref, set, remove, get } from 'firebase/database'
 import { format } from 'date-fns'
 
 import { PageHeader } from '@/components/app/page-header'
@@ -19,7 +19,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { useAuth, useFirestore } from '@/firebase'
+import { useAuth, useDatabase } from '@/firebase'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2, Trash2, Globe } from 'lucide-react'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
@@ -28,7 +28,7 @@ import Link from 'next/link'
 
 export default function WebsiteBuilderPage() {
   const { user } = useAuth()
-  const firestore = useFirestore()
+  const database = useDatabase()
   const { toast } = useToast()
 
   const [coupleNames, setCoupleNames] = useState('')
@@ -51,9 +51,9 @@ export default function WebsiteBuilderPage() {
     selectedTemplate === 'template-1' ? template1 : template2
 
   const userWebsiteRef = useMemo(() => {
-    if (!user || !firestore) return null;
-    return doc(firestore, `users/${user.uid}/website`, 'details');
-  }, [user, firestore]);
+    if (!user || !database) return null;
+    return ref(database, `users/${user.uid}/website/details`);
+  }, [user, database]);
 
 
   const resetFormToDefaults = () => {
@@ -67,9 +67,9 @@ export default function WebsiteBuilderPage() {
     async function fetchWebsiteData() {
         if (userWebsiteRef) {
             setLoading(true);
-            const docSnap = await getDoc(userWebsiteRef);
-            if (docSnap.exists()) {
-                const data = docSnap.data();
+            const snapshot = await get(userWebsiteRef);
+            if (snapshot.exists()) {
+                const data = snapshot.val();
                 setCoupleNames(data.coupleNames || 'Alex & Jordan');
                 setWeddingDate(data.weddingDate ? new Date(data.weddingDate) : new Date());
                 setWelcomeMessage(data.welcomeMessage || 'We can\'t wait to celebrate our special day with you! Join us as we say "I do".');
@@ -88,7 +88,7 @@ export default function WebsiteBuilderPage() {
 
 
   const handleSave = async () => {
-    if (!userWebsiteRef || !firestore || !user) {
+    if (!userWebsiteRef || !database || !user) {
        toast({
         variant: 'destructive',
         title: 'Error',
@@ -98,7 +98,12 @@ export default function WebsiteBuilderPage() {
     }
     setIsSaving(true)
     try {
+      
+      const snapshot = await get(userWebsiteRef);
+      const existingData = snapshot.exists() ? snapshot.val() : {};
+
       const dataToSave = {
+        ...existingData,
         coupleNames,
         weddingDate: weddingDate ? weddingDate.toISOString() : null,
         welcomeMessage,
@@ -106,16 +111,11 @@ export default function WebsiteBuilderPage() {
         ownerId: user.uid,
       };
 
-      // Save/merge into user's private collection
-      await setDoc(userWebsiteRef, dataToSave, { merge: true });
+      await set(userWebsiteRef, dataToSave);
       
-      const docSnap = await getDoc(userWebsiteRef);
-      const fullData = docSnap.data();
-
-      // If a public URL exists, update the public doc too
-      if (fullData && fullData.vanityUrl) {
-          const publicWebsiteRef = doc(firestore, 'websites', fullData.vanityUrl);
-          await setDoc(publicWebsiteRef, fullData, { merge: true });
+      if (dataToSave.vanityUrl) {
+          const publicWebsiteRef = ref(database, `websites/${dataToSave.vanityUrl}`);
+          await set(publicWebsiteRef, dataToSave);
       }
       
       toast({
@@ -135,19 +135,17 @@ export default function WebsiteBuilderPage() {
   }
 
   const handleDelete = async () => {
-      if (!user || !firestore || !initialVanityUrl) return;
+      if (!user || !database || !initialVanityUrl) return;
 
       setIsDeleting(true);
       try {
-        // Delete user's private doc
-        if(userWebsiteRef) await deleteDoc(userWebsiteRef);
+        if(userWebsiteRef) await remove(userWebsiteRef);
         
-        // Delete public doc
-        const publicWebsiteRef = doc(firestore, 'websites', initialVanityUrl);
-        await deleteDoc(publicWebsiteRef);
+        const publicWebsiteRef = ref(database, `websites/${initialVanityUrl}`);
+        await remove(publicWebsiteRef);
         
-        const publicDashboardRef = doc(firestore, 'publicDashboards', initialVanityUrl);
-        await deleteDoc(publicDashboardRef);
+        const publicDashboardRef = ref(database, `publicDashboards/${initialVanityUrl}`);
+        await remove(publicDashboardRef);
 
 
         toast({

@@ -4,36 +4,36 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
-import { doc, getDoc } from 'firebase/firestore'
+import { ref, get } from 'firebase/database'
 import { format } from 'date-fns'
 
 import { Button } from '@/components/ui/button'
-import { useFirestore } from '@/firebase'
+import { useDatabase } from '@/firebase'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { Gem } from 'lucide-react'
 
 export default function PublicWebsitePage() {
   const params = useParams()
   const { vanityUrl } = params as { vanityUrl: string }
-  const firestore = useFirestore()
+  const database = useDatabase()
   const [websiteData, setWebsiteData] = useState<any | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchWebsiteData = async () => {
-      if (!firestore || !vanityUrl) {
+      if (!database || !vanityUrl) {
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true)
-        const websiteRef = doc(firestore, 'websites', vanityUrl);
-        const docSnap = await getDoc(websiteRef);
+        const websiteRef = ref(database, `websites/${vanityUrl}`);
+        const docSnap = await get(websiteRef);
         
         if (docSnap.exists()) {
-          setWebsiteData(docSnap.data());
+          setWebsiteData(docSnap.val());
         } else {
           setError('This wedding website does not exist.')
         }
@@ -46,7 +46,7 @@ export default function PublicWebsitePage() {
     }
 
     fetchWebsiteData()
-  }, [firestore, vanityUrl])
+  }, [database, vanityUrl])
 
   if (loading) {
     return (

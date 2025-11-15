@@ -1,7 +1,8 @@
+
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore'
+import { ref, set, get, remove } from 'firebase/database'
 import {
   Card,
   CardContent,
@@ -12,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { useAuth, useFirestore } from '@/firebase'
+import { useAuth, useDatabase } from '@/firebase'
 import { useToast } from '@/hooks/use-toast'
 import { Copy, Link as LinkIcon, Loader2, Check, RefreshCw, Share2, Eye } from 'lucide-react'
 import Link from 'next/link'
@@ -24,7 +25,7 @@ function generateShareCode() {
 
 export default function SharePage() {
   const { user } = useAuth()
-  const firestore = useFirestore()
+  const database = useDatabase()
   const { toast } = useToast()
 
   const [vanityUrl, setVanityUrl] = useState('')
@@ -36,9 +37,9 @@ export default function SharePage() {
   const [initialVanityUrl, setInitialVanityUrl] = useState<string | null>(null);
   
   const userWebsiteRef = useMemo(() => {
-    if (!user || !firestore) return null;
-    return doc(firestore, `users/${user.uid}/website`, 'details');
-  }, [user, firestore]);
+    if (!user || !database) return null;
+    return ref(database, `users/${user.uid}/website`);
+  }, [user, database]);
 
 
   const resetFormToDefaults = () => {
@@ -55,12 +56,12 @@ export default function SharePage() {
         }
 
         try {
-            const docSnap = await getDoc(userWebsiteRef);
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                setVanityUrl(data.vanityUrl || `wedding-${user!.uid.slice(0,6)}`);
-                setShareCode(data.shareCode || generateShareCode());
-                setInitialVanityUrl(data.vanityUrl || null);
+            const snapshot = await get(userWebsiteRef);
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                setVanityUrl(data.details?.vanityUrl || `wedding-${user!.uid.slice(0,6)}`);
+                setShareCode(data.details?.shareCode || generateShareCode());
+                setInitialVanityUrl(data.details?.vanityUrl || null);
             } else {
                 resetFormToDefaults();
             }
@@ -77,7 +78,7 @@ export default function SharePage() {
 
 
   const handleSave = async () => {
-    if (!userWebsiteRef || !firestore || !user || !vanityUrl) {
+    if (!userWebsiteRef || !database || !user || !vanityUrl) {
        toast({
         variant: 'destructive',
         title: 'Error',
@@ -87,42 +88,37 @@ export default function SharePage() {
     }
     setIsSaving(true)
     try {
-      const docSnap = await getDoc(userWebsiteRef);
-      const existingData = docSnap.exists() ? docSnap.data() : {};
+      const snapshot = await get(userWebsiteRef);
+      const existingData = snapshot.exists() ? snapshot.val().details : {};
 
       const finalShareCode = shareCode || generateShareCode();
       if (!shareCode) setShareCode(finalShareCode);
 
-      // This object contains only the settings from THIS page.
       const sharingSettings = {
         vanityUrl,
         ownerId: user.uid,
         shareCode: finalShareCode,
       }
 
-      // Merge with existing website content data before saving.
       const dataToSave = {
         ...existingData,
         ...sharingSettings
       };
-
-      // Save to user's private collection
-      await setDoc(userWebsiteRef, dataToSave, { merge: true });
       
-      // Save to public dashboard collection
-      const publicDashboardRef = doc(firestore, 'publicDashboards', vanityUrl);
-      await setDoc(publicDashboardRef, { ownerId: user.uid, shareCode: finalShareCode }, { merge: true });
+      const detailsRef = ref(database, `users/${user.uid}/website/details`);
+      await set(detailsRef, dataToSave);
 
-      // Save to public website collection
-      const publicWebsiteRef = doc(firestore, 'websites', vanityUrl);
-      await setDoc(publicWebsiteRef, dataToSave, { merge: true });
+      const publicDashboardRef = ref(database, `publicDashboards/${vanityUrl}`);
+      await set(publicDashboardRef, { ownerId: user.uid, shareCode: finalShareCode });
+
+      const publicWebsiteRef = ref(database, `websites/${vanityUrl}`);
+      await set(publicWebsiteRef, dataToSave);
       
-      // if vanityUrl changed, delete old public docs
       if (initialVanityUrl && initialVanityUrl !== vanityUrl) {
-        const oldPublicDashboardRef = doc(firestore, 'publicDashboards', initialVanityUrl);
-        await deleteDoc(oldPublicDashboardRef);
-        const oldPublicWebsiteRef = doc(firestore, 'websites', initialVanityUrl);
-        await deleteDoc(oldPublicWebsiteRef);
+        const oldPublicDashboardRef = ref(database, `publicDashboards/${initialVanityUrl}`);
+        await remove(oldPublicDashboardRef);
+        const oldPublicWebsiteRef = ref(database, `websites/${initialVanityUrl}`);
+        await remove(oldPublicWebsiteRef);
       }
       
       setInitialVanityUrl(vanityUrl);

@@ -4,8 +4,8 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { doc, getDoc, collection, getDocs, query } from 'firebase/firestore';
-import { useFirestore, useAuth } from '@/firebase';
+import { get, ref, child } from 'firebase/database';
+import { useDatabase, useAuth } from '@/firebase';
 import {
   Heart,
   Loader2,
@@ -76,7 +76,7 @@ type PublicDashboardData = {
 export default function PublicDashboardPage() {
   const params = useParams();
   const router = useRouter();
-  const firestore = useFirestore();
+  const database = useDatabase();
   const { user, loading: authLoading } = useAuth();
   const searchParams = useSearchParams();
 
@@ -109,15 +109,15 @@ export default function PublicDashboardPage() {
 
   useEffect(() => {
     const fetchDashboardMeta = async () => {
-      if (!firestore || !vanityUrl) return;
+      if (!database || !vanityUrl) return;
 
       if (vanityUrl === 'preview') {
          if (authLoading) return;
          if (user) {
-            const userWebsiteRef = doc(firestore, `users/${user.uid}/website`, 'details');
-            const docSnap = await getDoc(userWebsiteRef);
-            if (docSnap.exists()) {
-                setDashboardData({ ownerId: user.uid, ...(docSnap.data() as any) });
+            const userWebsiteRef = ref(database, `users/${user.uid}/website/details`);
+            const snapshot = await get(userWebsiteRef);
+            if (snapshot.exists()) {
+                setDashboardData({ ownerId: user.uid, ...(snapshot.val() as any) });
             } else {
                  setError("You haven't set up your share settings yet.");
             }
@@ -129,10 +129,10 @@ export default function PublicDashboardPage() {
       }
       
       try {
-        const dashboardRef = doc(firestore, 'publicDashboards', vanityUrl);
-        const docSnap = await getDoc(dashboardRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data() as PublicDashboardData
+        const dashboardRef = ref(database, `publicDashboards/${vanityUrl}`);
+        const snapshot = await get(dashboardRef);
+        if (snapshot.exists()) {
+          const data = snapshot.val() as Omit<PublicDashboardData, 'vanityUrl'>;
           setDashboardData({ ...data, vanityUrl });
 
           const code = searchParams.get('code');
@@ -140,7 +140,6 @@ export default function PublicDashboardPage() {
              if (code.toUpperCase() === data.shareCode) {
                 sessionStorage.setItem(`dashboard_access_${vanityUrl}`, 'true');
                 setIsAuthenticated(true);
-                // clean the code from URL
                 router.replace(`/p/${vanityUrl}`);
              } else {
                 setError('Invalid access code provided.');
@@ -157,36 +156,36 @@ export default function PublicDashboardPage() {
       }
     };
     fetchDashboardMeta();
-  }, [firestore, vanityUrl, user, authLoading, searchParams, router]);
+  }, [database, vanityUrl, user, authLoading, searchParams, router]);
 
   useEffect(() => {
-    if (!dashboardData?.ownerId || !firestore || !isAuthenticated) return;
+    if (!dashboardData?.ownerId || !database || !isAuthenticated) return;
 
     const fetchData = async () => {
       setLoading(true);
       try {
         const ownerId = dashboardData.ownerId;
-        // Fetch profile
-        const profileRef = doc(firestore, 'users', ownerId);
-        const profileSnap = await getDoc(profileRef);
-        if (profileSnap.exists()) {
-          setProfile(profileSnap.data() as UserProfile);
-        }
-
-        // Fetch guests
-        const guestsQuery = query(collection(firestore, 'users', ownerId, 'guests'));
-        const guestsSnap = await getDocs(guestsQuery);
-        setGuests(guestsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Guest)));
-
-        // Fetch budget items
-        const budgetItemsQuery = query(collection(firestore, 'users', ownerId, 'budgetItems'));
-        const budgetItemsSnap = await getDocs(budgetItemsQuery);
-        setBudgetItems(budgetItemsSnap.docs.map(d => ({ id: d.id, ...d.data() } as BudgetItem)));
+        const dbRef = ref(database);
         
-        // Fetch saved vendors
-        const vendorsQuery = query(collection(firestore, 'users', ownerId, 'savedVendors'));
-        const vendorsSnap = await getDocs(vendorsQuery);
-        setSavedVendors(vendorsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Vendor)));
+        // Fetch all user data at once
+        const userSnapshot = await get(child(dbRef, `users/${ownerId}`));
+        if (userSnapshot.exists()) {
+            const userData = userSnapshot.val();
+            
+            // Set profile, guests, budget, and vendors from the single snapshot
+            setProfile(userData.profile || null);
+
+            const guestList: Guest[] = userData.guests ? Object.keys(userData.guests).map(key => ({ id: key, ...userData.guests[key]})) : [];
+            setGuests(guestList);
+
+            const budgetList: BudgetItem[] = userData.budgetItems ? Object.keys(userData.budgetItems).map(key => ({ id: key, ...userData.budgetItems[key]})) : [];
+            setBudgetItems(budgetList);
+
+            const vendorList: Vendor[] = userData.myVendors ? Object.keys(userData.myVendors).map(key => ({ id: key, ...userData.myVendors[key]})) : [];
+            setSavedVendors(vendorList);
+        } else {
+            setError('Could not find data for this user.');
+        }
 
       } catch (err) {
         console.error(err);
@@ -196,7 +195,7 @@ export default function PublicDashboardPage() {
       }
     };
     fetchData();
-  }, [dashboardData, firestore, isAuthenticated]);
+  }, [dashboardData, database, isAuthenticated]);
   
   const guestStats = useMemo(() => {
     const attending = guests.filter(g => g.status === 'Attending').length;
