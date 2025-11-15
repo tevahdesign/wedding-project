@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo } from "react";
@@ -30,6 +29,7 @@ import {
   PenSquare,
   Heart,
   LogIn,
+  Share2,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/firebase";
@@ -46,6 +46,7 @@ const navItems = [
     { href: "/invitations", label: "Invitations", icon: Mail },
     { href: "/registry", label: "Registry", icon: Gift },
     { href: "/website-builder", label: "Website", icon: PenSquare },
+    { href: "/p/preview", label: "Share", icon: Share2 },
 ];
 
 function AppSidebar() {

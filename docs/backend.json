@@ -90,6 +90,15 @@
       },
       "required": ["coupleNames", "weddingDate", "templateId", "ownerId"]
     },
+    "PublicDashboard": {
+        "title": "Public Dashboard",
+        "description": "Stores the owner ID for a public dashboard.",
+        "type": "object",
+        "properties": {
+            "ownerId": { "type": "string", "description": "The UID of the user who owns the dashboard." }
+        },
+        "required": ["ownerId"]
+    },
     "Vendor": {
       "title": "Vendor",
       "description": "Represents a wedding vendor.",
@@ -187,6 +196,10 @@
     "/websites/{vanityUrl}": {
         "schema": { "$ref": "#/entities/WeddingWebsite" },
         "description": "Publicly accessible collection of wedding websites, identified by their vanity URL."
+    },
+    "/publicDashboards/{vanityUrl}": {
+        "schema": { "$ref": "#/entities/PublicDashboard" },
+        "description": "Publicly accessible collection of dashboard metadata, identified by their vanity URL."
     },
     "/vendors/{vendorId}": {
         "schema": { "$ref": "#/entities/Vendor" },

@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
@@ -22,7 +21,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { useAuth, useFirestore } from '@/firebase'
 import { useToast } from '@/hooks/use-toast'
-import { Copy, Link as LinkIcon, Loader2, Check, Trash2, Globe } from 'lucide-react'
+import { Copy, Link as LinkIcon, Loader2, Check, Trash2, Globe, Share2 } from 'lucide-react'
 import Link from 'next/link'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 
@@ -44,6 +43,7 @@ export default function WebsiteBuilderPage() {
   
   const websiteOrigin = typeof window !== 'undefined' ? window.location.origin : '';
   const shareableUrl = `${websiteOrigin}/${vanityUrl}`;
+  const shareableDashboardUrl = `${websiteOrigin}/p/${vanityUrl}`;
 
 
   const template1 = PlaceHolderImages.find(
@@ -117,11 +117,16 @@ export default function WebsiteBuilderPage() {
       // Save to public collection
       const publicWebsiteRef = doc(firestore, 'websites', vanityUrl);
       await setDoc(publicWebsiteRef, dataToSave);
+      
+      const publicDashboardRef = doc(firestore, 'publicDashboards', vanityUrl);
+      await setDoc(publicDashboardRef, { ownerId: user.uid });
 
       // if vanityUrl changed, delete old public doc
       if (initialVanityUrl && initialVanityUrl !== vanityUrl) {
         const oldPublicWebsiteRef = doc(firestore, 'websites', initialVanityUrl);
         await deleteDoc(oldPublicWebsiteRef);
+        const oldPublicDashboardRef = doc(firestore, 'publicDashboards', initialVanityUrl);
+        await deleteDoc(oldPublicDashboardRef);
       }
       
       // Save to user's private collection
@@ -156,6 +161,10 @@ export default function WebsiteBuilderPage() {
         // Delete public doc
         const publicWebsiteRef = doc(firestore, 'websites', initialVanityUrl);
         await deleteDoc(publicWebsiteRef);
+        
+        const publicDashboardRef = doc(firestore, 'publicDashboards', initialVanityUrl);
+        await deleteDoc(publicDashboardRef);
+
 
         toast({
             title: "Website Deleted",
@@ -174,13 +183,13 @@ export default function WebsiteBuilderPage() {
 
   }
 
-  const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText(shareableUrl).then(() => {
+  const handleCopyToClipboard = (url: string) => {
+    navigator.clipboard.writeText(url).then(() => {
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
        toast({
         title: "Link Copied!",
-        description: "Your website URL is now in your clipboard.",
+        description: "The URL is now in your clipboard.",
       });
     });
   };
@@ -355,20 +364,36 @@ export default function WebsiteBuilderPage() {
            {initialVanityUrl && !loading && (
              <Card>
                 <CardHeader>
-                    <CardTitle>Your Link is Ready!</CardTitle>
-                    <CardDescription>Share your beautiful website with your guests.</CardDescription>
+                    <CardTitle>Your Links are Ready!</CardTitle>
+                    <CardDescription>Share your beautiful website and dashboard with your guests.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                        <LinkIcon className="h-4 w-4 text-muted-foreground" />
-                        <Link href={shareableUrl} target="_blank" className="text-sm font-medium text-primary hover:underline truncate">
-                            {shareableUrl}
-                        </Link>
+                <CardContent className="space-y-6">
+                    <div className='space-y-4'>
+                        <Label>Public Website URL</Label>
+                        <div className="flex items-center space-x-2">
+                            <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                            <Link href={shareableUrl} target="_blank" className="text-sm font-medium text-primary hover:underline truncate">
+                                {shareableUrl}
+                            </Link>
+                        </div>
+                        <Button onClick={() => handleCopyToClipboard(shareableUrl)} className="w-full">
+                            {isCopied ? <Check className="mr-2" /> : <Copy className="mr-2" />}
+                            {isCopied ? 'Copied!' : 'Copy Website Link'}
+                        </Button>
                     </div>
-                    <Button onClick={handleCopyToClipboard} className="w-full">
-                        {isCopied ? <Check className="mr-2" /> : <Copy className="mr-2" />}
-                        {isCopied ? 'Copied!' : 'Copy Link'}
-                    </Button>
+                     <div className='space-y-4'>
+                        <Label>Shareable Dashboard URL</Label>
+                        <div className="flex items-center space-x-2">
+                            <Share2 className="h-4 w-4 text-muted-foreground" />
+                            <Link href={shareableDashboardUrl} target="_blank" className="text-sm font-medium text-primary hover:underline truncate">
+                                {shareableDashboardUrl}
+                            </Link>
+                        </div>
+                        <Button onClick={() => handleCopyToClipboard(shareableDashboardUrl)} className="w-full" variant="secondary">
+                            {isCopied ? <Check className="mr-2" /> : <Copy className="mr-2" />}
+                            {isCopied ? 'Copied!' : 'Copy Dashboard Link'}
+                        </Button>
+                    </div>
                 </CardContent>
              </Card>
            )}
