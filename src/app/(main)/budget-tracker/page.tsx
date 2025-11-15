@@ -221,8 +221,8 @@ export default function BudgetTrackerPage() {
     const tableColumns = ["Category", "Budgeted", "Spent", "Notes"];
     const tableRows = data.map(item => [
       item.name,
-      `₹${item.budget.toLocaleString('en-IN')}`,
-      `₹${item.spent.toLocaleString('en-IN')}`,
+      `₹${Number(item.budget).toLocaleString('en-IN')}`,
+      `₹${Number(item.spent).toLocaleString('en-IN')}`,
       item.notes || '',
     ]);
 
@@ -234,10 +234,15 @@ export default function BudgetTrackerPage() {
         head: [tableColumns],
         body: tableRows,
         theme: 'grid',
-        headStyles: { fillColor: [22, 163, 74] },
+        headStyles: { 
+            fillColor: [22, 163, 74],
+            halign: 'center'
+        },
         columnStyles: {
+            0: { halign: 'left' },
             1: { halign: 'right' },
             2: { halign: 'right' },
+            3: { halign: 'left' },
         },
     });
 
@@ -482,3 +487,5 @@ export default function BudgetTrackerPage() {
     </div>
   )
 }
+
+    
