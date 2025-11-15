@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from "react";
@@ -46,7 +47,7 @@ const navItems = [
     { href: "/invitations", label: "Invitations", icon: Mail },
     { href: "/registry", label: "Registry", icon: Gift },
     { href: "/website-builder", label: "Website", icon: PenSquare },
-    { href: "/p/preview", label: "Share", icon: Share2 },
+    { href: "/website-builder", label: "Share", icon: Share2 },
 ];
 
 function AppSidebar() {
@@ -78,10 +79,10 @@ function AppSidebar() {
             <SidebarContent>
                  <SidebarMenu>
                     {navItems.map((item) => (
-                        <SidebarMenuItem key={item.href}>
+                        <SidebarMenuItem key={item.label}>
                             <Link href={item.href}>
                                 <SidebarMenuButton
-                                    isActive={pathname.startsWith(item.href)}
+                                    isActive={pathname.startsWith(item.href) && item.href !== '/website-builder' || pathname === '/website-builder' && (item.label === 'Website' || item.label === 'Share')}
                                     icon={<item.icon />}
                                     tooltip={item.label}
                                 >
