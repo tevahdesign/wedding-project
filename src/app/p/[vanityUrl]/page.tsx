@@ -328,7 +328,7 @@ export default function PublicDashboardPage() {
                   className="font-mono tracking-widest text-center"
                 />
               </div>
-              {error && <p className="text-sm text-destructive text-center">{error}</p>}
+              {error && <div className="text-sm text-destructive text-center">{error}</div>}
             </CardContent>
             <CardFooter>
               <Button type="submit" className="w-full">
@@ -479,21 +479,18 @@ export default function PublicDashboardPage() {
                             </div>
                             </div>
                             
-                            <div className="space-y-6">
-                                {renderGuestGroupStats("Bride's Side", guestStats.bride, brideFilter, setBrideFilter)}
-                                {renderGuestGroupStats("Groom's Side", guestStats.groom, groomFilter, setGroomFilter)}
-                            </div>
-
                             {guests.length > 0 ? (
                                 <Tabs defaultValue="bride" className="w-full mt-6">
                                     <TabsList className="grid w-full grid-cols-2">
                                         <TabsTrigger value="bride">Bride's Guests ({guestStats.bride.guests.length})</TabsTrigger>
                                         <TabsTrigger value="groom">Groom's Guests ({guestStats.groom.guests.length})</TabsTrigger>
                                     </TabsList>
-                                    <TabsContent value="bride" className="mt-4">
+                                    <TabsContent value="bride" className="mt-4 space-y-4">
+                                        {renderGuestGroupStats("Bride's Side", guestStats.bride, brideFilter, setBrideFilter)}
                                         {renderGuestListTable(guestStats.bride.guests, brideFilter)}
                                     </TabsContent>
-                                    <TabsContent value="groom" className="mt-4">
+                                    <TabsContent value="groom" className="mt-4 space-y-4">
+                                        {renderGuestGroupStats("Groom's Side", guestStats.groom, groomFilter, setGroomFilter)}
                                         {renderGuestListTable(guestStats.groom.guests, groomFilter)}
                                     </TabsContent>
                                 </Tabs>
