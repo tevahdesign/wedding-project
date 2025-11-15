@@ -70,6 +70,7 @@ type PublicDashboardData = {
     ownerId: string;
     shareCode: string;
     vanityUrl: string;
+    coupleNames?: string;
 };
 
 
@@ -152,7 +153,9 @@ export default function PublicDashboardPage() {
       } catch (err) {
         setError('Failed to load dashboard information.');
       } finally {
-        setLoading(false);
+        if (vanityUrl !== 'preview') {
+            setLoading(false);
+        }
       }
     };
     fetchDashboardMeta();
@@ -165,15 +168,16 @@ export default function PublicDashboardPage() {
       setLoading(true);
       try {
         const ownerId = dashboardData.ownerId;
-        const dbRef = ref(database);
+        const userSnapshot = await get(ref(database, `users/${ownerId}`));
         
-        // Fetch all user data at once
-        const userSnapshot = await get(child(dbRef, `users/${ownerId}`));
         if (userSnapshot.exists()) {
             const userData = userSnapshot.val();
-            
-            // Set profile, guests, budget, and vendors from the single snapshot
-            setProfile(userData.profile || null);
+            const details = userData.website?.details || {};
+
+            setProfile({
+              displayName: details.coupleNames || 'The Happy Couple',
+              photoURL: userData.photoURL || '' // Assuming photoURL might be at the root of user data
+            });
 
             const guestList: Guest[] = userData.guests ? Object.keys(userData.guests).map(key => ({ id: key, ...userData.guests[key]})) : [];
             setGuests(guestList);
@@ -383,3 +387,5 @@ export default function PublicDashboardPage() {
     </div>
   );
 }
+
+    
