@@ -1,7 +1,11 @@
 
+
 import { get, ref } from "firebase/database";
 import { initializeFirebase } from "@/firebase";
 import { HomePageClient } from "./(main)/home-client";
+import { getAuth } from "firebase/auth";
+import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 
 type Vendor = {
   id: string;
@@ -61,6 +65,20 @@ async function getVendorsAndCategories() {
 
 
 export default async function RootPage() {
+    const cookieStore = cookies();
+    const userCookie = cookieStore.get('user');
+
+    if (userCookie) {
+        try {
+            const user = JSON.parse(userCookie.value);
+            if (user && user.uid) {
+                redirect('/dashboard');
+            }
+        } catch (e) {
+            // Invalid cookie, treat as logged out
+        }
+    }
+
   const { vendors, categories } = await getVendorsAndCategories();
 
   return <HomePageClient vendors={vendors} categories={categories} />;

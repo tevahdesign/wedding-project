@@ -23,6 +23,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
 import { PageHeader } from "@/components/app/page-header"
+import { useEffect } from "react"
 
 const features = [
   {
@@ -70,11 +71,26 @@ const features = [
 ]
 
 export default function DashboardPage() {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
   const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
 
   const getHref = (feature: typeof features[number]) => {
     return feature.href;
+  }
+
+  if (loading || !user) {
+    return (
+        <div className="flex h-screen items-center justify-center">
+            <Heart className="w-12 h-12 animate-spin text-primary" />
+        </div>
+    );
   }
 
   return (
@@ -105,4 +121,3 @@ export default function DashboardPage() {
     </div>
   )
 }
-
