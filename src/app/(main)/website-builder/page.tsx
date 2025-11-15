@@ -12,7 +12,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,10 +21,8 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { useAuth, useFirestore } from '@/firebase'
 import { useToast } from '@/hooks/use-toast'
-import { Copy, Link as LinkIcon, Loader2, Check, Trash2, Globe, Share2, RefreshCw } from 'lucide-react'
-import Link from 'next/link'
+import { Loader2, Trash2, Globe } from 'lucide-react'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Separator } from '@/components/ui/separator'
 
 function generateShareCode() {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -44,14 +41,8 @@ export default function WebsiteBuilderPage() {
   const [selectedTemplate, setSelectedTemplate] = useState('template-1')
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [isCopied, setIsCopied] = useState(false)
   const [loading, setLoading] = useState(true);
   const [initialVanityUrl, setInitialVanityUrl] = useState<string | null>(null);
-  
-  const websiteOrigin = typeof window !== 'undefined' ? window.location.origin : '';
-  const shareableUrl = `${websiteOrigin}/${vanityUrl}`;
-  const shareableDashboardUrl = `${websiteOrigin}/p/${vanityUrl}`;
-
 
   const template1 = PlaceHolderImages.find(
     (img) => img.id === 'website-template-1'
@@ -196,21 +187,10 @@ export default function WebsiteBuilderPage() {
 
   }
 
-  const handleCopyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
-       toast({
-        title: "Copied to Clipboard!",
-        description: "The content is now in your clipboard.",
-      });
-    });
-  };
-
   const formattedDate = weddingDate ? format(weddingDate, 'MMMM do, yyyy') : 'Select a date'
 
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col flex-1 pb-20">
       <PageHeader
         title="Website Builder"
         description="Craft a beautiful home for your wedding story."
@@ -252,42 +232,7 @@ export default function WebsiteBuilderPage() {
               </div>
             </CardContent>
           </Card>
-           <Card>
-            <CardHeader>
-              <CardTitle>Sharing & Security</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                 <div className="space-y-2">
-                <Label htmlFor="vanity-url">Your Custom URL</Label>
-                <div className="flex items-center">
-                  <span className="text-sm text-muted-foreground bg-muted px-3 py-2.5 rounded-l-md border border-r-0 h-10 flex items-center truncate">
-                    {websiteOrigin.replace('https://', '')}/
-                  </span>
-                  <Input
-                    id="vanity-url"
-                    placeholder="alex-and-jordan"
-                    className="rounded-l-none"
-                    value={vanityUrl}
-                    onChange={(e) => setVanityUrl(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-               <div className="space-y-2">
-                <Label htmlFor="share-code">Dashboard Access Code</Label>
-                 <div className="flex items-center space-x-2">
-                    <Input id="share-code" value={shareCode} readOnly className="font-mono tracking-widest" />
-                    <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(shareCode)}>
-                        <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => setShareCode(generateShareCode())}>
-                        <RefreshCw className="h-4 w-4" />
-                    </Button>
-                 </div>
-                 <p className="text-xs text-muted-foreground">Share this code with guests so they can view your dashboard.</p>
-              </div>
-            </CardContent>
-           </Card>
+          
           <Card>
             <CardHeader>
               <CardTitle>Choose a Template</CardTitle>
@@ -394,41 +339,6 @@ export default function WebsiteBuilderPage() {
           </div>
         </div>
         <div className="lg:col-span-2 space-y-6">
-           {initialVanityUrl && !loading && (
-             <Card>
-                <CardHeader>
-                    <CardTitle>Your Links are Ready!</CardTitle>
-                    <CardDescription>Share your beautiful website and dashboard with your guests.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div>
-                        <Label>Public Website URL</Label>
-                        <div className="flex items-center space-x-2 mt-2">
-                             <Input value={shareableUrl} readOnly />
-                             <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(shareableUrl)}>
-                                {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                            </Button>
-                             <Link href={shareableUrl} target="_blank">
-                                <Button variant="ghost" size="icon"><LinkIcon className="h-4 w-4" /></Button>
-                             </Link>
-                        </div>
-                    </div>
-                     <Separator />
-                     <div>
-                        <Label>Shareable Dashboard URL</Label>
-                        <div className="flex items-center space-x-2 mt-2">
-                             <Input value={shareableDashboardUrl} readOnly />
-                             <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(shareableDashboardUrl)}>
-                                {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                            </Button>
-                             <Link href={shareableDashboardUrl} target="_blank">
-                                <Button variant="ghost" size="icon"><Share2 className="h-4 w-4" /></Button>
-                             </Link>
-                        </div>
-                    </div>
-                </CardContent>
-             </Card>
-           )}
            <Card>
             <CardHeader>
               <CardTitle>Live Preview</CardTitle>
@@ -464,7 +374,6 @@ export default function WebsiteBuilderPage() {
               </div>
             </CardContent>
           </Card>
-
         </div>
       </div>
     </div>
