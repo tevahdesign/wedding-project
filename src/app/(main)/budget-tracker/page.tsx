@@ -49,7 +49,7 @@ import { PlusCircle, MoreHorizontal, Loader2, PiggyBank, Trash2, Edit, Pencil, F
 import { useMemo, useState, useEffect } from "react"
 import { useAuth, useDatabase } from "@/firebase"
 import { useList } from "@/firebase/database/use-list"
-import { ref, remove, update, set } from "firebase/database"
+import { ref, remove, set } from "firebase/database"
 import { BudgetForm, type BudgetItem } from "./budget-form"
 import { useToast } from "@/hooks/use-toast"
 import { useObjectValue } from "@/firebase/database/use-object-value"
@@ -161,7 +161,7 @@ export default function BudgetTrackerPage() {
   }
   
   const handleDownload = (format: 'csv' | 'pdf') => {
-    if (!budgetData || budgetData.length === 0) {
+    if (!budgetData) {
       toast({
         variant: "destructive",
         title: "No expenses",
@@ -209,7 +209,7 @@ export default function BudgetTrackerPage() {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", "budget-details.csv");
+    link.setAttribute("download", "wedding-budget.csv");
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -218,31 +218,35 @@ export default function BudgetTrackerPage() {
 
   const downloadPDF = (data: BudgetItem[]) => {
     const doc = new jsPDF();
-    const tableColumns = ["Category", "Budgeted", "Spent", "Notes"];
-    const tableRows = data.map(item => [
-      item.name,
-      `₹${Number(item.budget).toLocaleString('en-IN')}`,
-      `₹${Number(item.spent).toLocaleString('en-IN')}`,
-      item.notes || '',
-    ]);
+    
+    const tableColumns = [
+        { header: 'Category', dataKey: 'name' },
+        { header: 'Budgeted', dataKey: 'budget' },
+        { header: 'Spent', dataKey: 'spent' },
+        { header: 'Notes', dataKey: 'notes' }
+    ];
+
+    const tableRows = data.map(item => ({
+      name: item.name,
+      budget: `₹${Number(item.budget).toLocaleString('en-IN')}`,
+      spent: `₹${Number(item.spent).toLocaleString('en-IN')}`,
+      notes: item.notes || '',
+    }));
 
     doc.setFontSize(18);
-    doc.text("Wedding Budget Details", 14, 22);
+    doc.text("Wedding Budget Report", 14, 22);
     
     autoTable(doc, {
         startY: 30,
-        head: [tableColumns],
+        columns: tableColumns,
         body: tableRows,
         theme: 'grid',
         headStyles: { 
             fillColor: [22, 163, 74],
-            halign: 'center'
         },
         columnStyles: {
-            0: { halign: 'left' },
-            1: { halign: 'right' },
-            2: { halign: 'right' },
-            3: { halign: 'left' },
+            budget: { halign: 'right' },
+            spent: { halign: 'right' },
         },
     });
 
@@ -265,7 +269,7 @@ export default function BudgetTrackerPage() {
         },
     });
 
-    doc.save("budget-details.pdf");
+    doc.save("wedding-budget.pdf");
   };
 
 
@@ -285,7 +289,7 @@ export default function BudgetTrackerPage() {
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" disabled={!budgetData || budgetData.length === 0}>
+                <Button variant="ghost" size="icon" disabled={!budgetData}>
                     <MoreHorizontal className="h-5 w-5" />
                     <span className="sr-only">More actions</span>
                 </Button>
@@ -293,11 +297,11 @@ export default function BudgetTrackerPage() {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Download Options</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleDownload('pdf')}>
+                <DropdownMenuItem onClick={() => handleDownload('pdf')} disabled={!budgetData || budgetData.length === 0}>
                     <FileText className="mr-2 h-4 w-4" />
                     <span>Download as PDF</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleDownload('csv')}>
+                <DropdownMenuItem onClick={() => handleDownload('csv')} disabled={!budgetData || budgetData.length === 0}>
                     <FileText className="mr-2 h-4 w-4" />
                     <span>Download as CSV</span>
                 </DropdownMenuItem>
