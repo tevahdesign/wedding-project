@@ -1,9 +1,10 @@
+
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { doc, getDoc, collection, getDocs, query } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useAuth } from '@/firebase';
 import {
   Heart,
   Loader2,
@@ -66,6 +67,7 @@ export default function PublicDashboardPage() {
   const params = useParams();
   const router = useRouter();
   const firestore = useFirestore();
+  const { user, loading: authLoading } = useAuth();
 
   const vanityUrl = params.vanityUrl as string;
 
@@ -80,11 +82,15 @@ export default function PublicDashboardPage() {
 
   useEffect(() => {
     const fetchOwnerId = async () => {
-      if (!firestore || !vanityUrl) return;
-
+      if (!firestore || !vanityUrl || authLoading) return;
+      
       if (vanityUrl === 'preview') {
-         setError("This is a preview page. To share your dashboard, please set a custom URL in the Website Builder and use that link.");
-         setLoading(false);
+         if (user) {
+            setOwnerId(user.uid);
+         } else {
+            setError("You must be logged in to see a preview of your shared dashboard.");
+            setLoading(false);
+         }
          return;
       }
       
@@ -103,7 +109,7 @@ export default function PublicDashboardPage() {
       }
     };
     fetchOwnerId();
-  }, [firestore, vanityUrl]);
+  }, [firestore, vanityUrl, user, authLoading]);
 
   useEffect(() => {
     if (!ownerId || !firestore) return;
@@ -166,7 +172,7 @@ export default function PublicDashboardPage() {
     return null;
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-muted">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -329,3 +335,5 @@ export default function PublicDashboardPage() {
     </div>
   );
 }
+
+    
