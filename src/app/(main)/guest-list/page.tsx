@@ -168,7 +168,8 @@ export default function GuestListPage() {
     }
     
     const listToDownload = group ? guests.filter(g => g.group === group) : guests;
-    const fileName = group ? `${group.toLowerCase()}-guest-list` : 'guest-list';
+    const baseFileName = group ? `${group.toLowerCase()}-guest-list` : 'guest-list';
+    const title = group ? `${group.toUpperCase()} GUEST-LIST` : 'GUEST LIST'
 
     if (listToDownload.length === 0) {
         toast({
@@ -180,9 +181,9 @@ export default function GuestListPage() {
     }
 
     if (format === 'csv') {
-        downloadCSV(listToDownload, fileName);
+        downloadCSV(listToDownload, baseFileName);
     } else {
-        downloadPDF(listToDownload, fileName);
+        downloadPDF(listToDownload, baseFileName, title);
     }
 
     toast({
@@ -217,21 +218,38 @@ export default function GuestListPage() {
     }
   }
 
-  const downloadPDF = (data: Guest[], fileName: string) => {
+  const downloadPDF = (data: Guest[], fileName: string, title: string) => {
     const doc = new jsPDF();
+    const tableColumns = [
+        { header: 'Name', dataKey: 'name' },
+        { header: 'Email', dataKey: 'email' },
+        { header: 'Phone Number', dataKey: 'phoneNumber' }
+    ];
+
+    const tableRows = data.map(guest => ({
+      name: guest.name || "",
+      email: guest.email || "",
+      phoneNumber: guest.phoneNumber || "",
+    }));
+
+    doc.setFontSize(18);
+    doc.text(title, 14, 22);
+
     autoTable(doc, {
-      head: [["Name", "Email", "Phone Number", "Group", "Status"]],
-      body: data.map(guest => [
-        guest.name || "",
-        guest.email || "",
-        guest.phoneNumber || "",
-        guest.group || "",
-        guest.status || ""
-      ]),
-      didDrawPage: (data) => {
-        doc.text(`${fileName.replace('-', ' ').toUpperCase()}`, data.settings.margin.left, 15);
-      },
+        startY: 30,
+        columns: tableColumns,
+        body: tableRows,
+        theme: 'grid',
+        headStyles: { 
+            fillColor: [41, 128, 185], // A nice blue color
+            textColor: 255,
+            fontStyle: 'bold'
+        },
+        alternateRowStyles: {
+            fillColor: [245, 245, 245]
+        }
     });
+
     doc.save(`${fileName}.pdf`);
   };
 
@@ -422,5 +440,3 @@ export default function GuestListPage() {
     </div>
   )
 }
-
-    
