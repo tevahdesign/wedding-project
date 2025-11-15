@@ -161,7 +161,7 @@ export default function SharePage() {
                 <Label htmlFor="vanity-url">Your Custom Share URL</Label>
                 <div className="flex items-center">
                   <span className="text-sm text-muted-foreground bg-muted px-3 py-2.5 rounded-l-md border border-r-0 h-10 flex items-center truncate">
-                    {websiteOrigin.replace('https://', '')}/p/
+                    /p/
                   </span>
                   <Input
                     id="vanity-url"
