@@ -45,13 +45,16 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-import { PlusCircle, MoreHorizontal, Loader2, PiggyBank, Trash2, Edit } from "lucide-react"
-import { useMemo, useState } from "react"
+import { PlusCircle, MoreHorizontal, Loader2, PiggyBank, Trash2, Edit, Pencil } from "lucide-react"
+import { useMemo, useState, useEffect } from "react"
 import { useAuth, useDatabase } from "@/firebase"
 import { useList } from "@/firebase/database/use-list"
-import { ref, remove } from "firebase/database"
+import { ref, remove, update, set } from "firebase/database"
 import { BudgetForm, type BudgetItem } from "./budget-form"
 import { useToast } from "@/hooks/use-toast"
+import { useObjectValue } from "@/firebase/database/use-object-value"
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 
 export default function BudgetTrackerPage() {
   const { user } = useAuth()
@@ -63,28 +66,54 @@ export default function BudgetTrackerPage() {
   const [selectedItem, setSelectedItem] = useState<BudgetItem | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
+  // Fetch individual budget items
   const budgetItemsRef = useMemo(() => {
     if (!user || !database) return null
     return ref(database, `users/${user.uid}/budgetItems`)
   }, [user, database])
+  const { data: budgetData, loading: itemsLoading } = useList<BudgetItem>(budgetItemsRef)
 
-  const { data: budgetData, loading } = useList<BudgetItem>(budgetItemsRef)
+  // Fetch and manage total budget
+  const totalBudgetRef = useMemo(() => {
+    if (!user || !database) return null;
+    return ref(database, `users/${user.uid}/budget/total`);
+  }, [user, database]);
+  const { data: totalBudget, loading: totalBudgetLoading } = useObjectValue<number>(totalBudgetRef);
+  
+  const [localTotalBudget, setLocalTotalBudget] = useState(0);
+  const [isEditingBudget, setIsEditingBudget] = useState(false);
 
-  const { totalBudget, totalSpent } = useMemo(() => {
-    if (!budgetData) return { totalBudget: 0, totalSpent: 0 }
+  useEffect(() => {
+      setLocalTotalBudget(totalBudget ?? 0);
+  }, [totalBudget]);
+
+
+  const { totalSpent } = useMemo(() => {
+    if (!budgetData) return { totalSpent: 0 }
     return budgetData.reduce(
       (acc, item) => {
-        acc.totalBudget += Number(item.budget) || 0
         acc.totalSpent += Number(item.spent) || 0
         return acc
       },
-      { totalBudget: 0, totalSpent: 0 }
+      { totalSpent: 0 }
     )
   }, [budgetData])
-
-  const remainingBudget = totalBudget - totalSpent;
-  const progressValue = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0
   
+  const handleTotalBudgetSave = async () => {
+    if (!totalBudgetRef) return;
+    try {
+      await set(totalBudgetRef, localTotalBudget);
+      toast({ title: "Total budget updated!" });
+    } catch (error) {
+      toast({ variant: "destructive", title: "Failed to update budget." });
+    } finally {
+        setIsEditingBudget(false);
+    }
+  }
+
+  const remainingBudget = (totalBudget || 0) - totalSpent;
+  const progressValue = (totalBudget || 0) > 0 ? (totalSpent / (totalBudget || 1)) * 100 : 0
+
   const handleAddClick = () => {
     setSelectedItem(null)
     setIsFormOpen(true)
@@ -123,6 +152,8 @@ export default function BudgetTrackerPage() {
       setIsDeleting(false);
     }
   }
+
+  const loading = itemsLoading || totalBudgetLoading;
 
   return (
     <div className="flex flex-col flex-1 pb-20">
@@ -184,11 +215,37 @@ export default function BudgetTrackerPage() {
         <Card>
           <CardHeader>
             <CardTitle>Budget Overview</CardTitle>
-            <CardDescription>
-              {loading
-                ? "Loading budget..."
-                : `You've spent ₹${totalSpent.toLocaleString()} of your ₹${totalBudget.toLocaleString()} budget.`}
-            </CardDescription>
+            <div className="flex justify-between items-end">
+                <CardDescription>
+                {loading
+                    ? "Loading budget..."
+                    : `You've spent ₹${totalSpent.toLocaleString()} of your budget.`}
+                </CardDescription>
+                <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Total Budget: ₹</span>
+                    {isEditingBudget ? (
+                        <Input 
+                            type="number" 
+                            value={localTotalBudget} 
+                            onChange={(e) => setLocalTotalBudget(Number(e.target.value))}
+                            onBlur={handleTotalBudgetSave}
+                            onKeyDown={(e) => e.key === 'Enter' && handleTotalBudgetSave()}
+                            className="w-32 h-8"
+                            autoFocus
+                        />
+                    ) : (
+                        <span 
+                            className="font-semibold text-lg text-primary"
+                            onClick={() => setIsEditingBudget(true)}
+                        >
+                            {(totalBudget ?? 0).toLocaleString()}
+                        </span>
+                    )}
+                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditingBudget(true)}>
+                        <Pencil className="h-4 w-4 text-muted-foreground"/>
+                    </Button>
+                </div>
+            </div>
           </CardHeader>
           <CardContent>
             <Progress
@@ -197,7 +254,7 @@ export default function BudgetTrackerPage() {
             />
           </CardContent>
           <CardFooter>
-            <p className="text-sm text-muted-foreground">
+            <p className={cn("text-sm", remainingBudget < 0 ? "text-destructive" : "text-muted-foreground")}>
               {remainingBudget >= 0
                 ? `₹${remainingBudget.toLocaleString()} remaining.`
                 : `₹${Math.abs(remainingBudget).toLocaleString()} over budget.`
