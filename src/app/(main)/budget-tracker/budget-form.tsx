@@ -73,14 +73,17 @@ export function BudgetForm({ setDialogOpen, itemToEdit }: BudgetFormProps) {
 
   useEffect(() => {
     if (isEditMode && itemToEdit) {
-      form.reset(itemToEdit)
+      form.reset({
+        ...itemToEdit,
+        vendorId: itemToEdit.vendorId || "no-vendor"
+      })
     } else {
         form.reset({
             name: "",
             budget: 0,
             spent: 0,
             notes: "",
-            vendorId: "",
+            vendorId: "no-vendor",
         })
     }
   }, [isEditMode, itemToEdit, form])
@@ -96,11 +99,16 @@ export function BudgetForm({ setDialogOpen, itemToEdit }: BudgetFormProps) {
     }
 
     setIsSubmitting(true)
+    
+    const dataToSave = {
+        ...data,
+        vendorId: data.vendorId === "no-vendor" ? "" : data.vendorId
+    };
 
     try {
       if (isEditMode && itemToEdit?.id) {
           const itemRef = ref(database, `users/${user.uid}/budgetItems/${itemToEdit.id}`);
-          await set(itemRef, data);
+          await set(itemRef, dataToSave);
           toast({
             title: "Item Updated!",
             description: `The ${data.name} item has been updated.`,
@@ -108,7 +116,7 @@ export function BudgetForm({ setDialogOpen, itemToEdit }: BudgetFormProps) {
       } else {
           const itemsRef = ref(database, `users/${user.uid}/budgetItems`);
           const newItemRef = push(itemsRef);
-          await set(newItemRef, { ...data, id: newItemRef.key });
+          await set(newItemRef, { ...dataToSave, id: newItemRef.key });
           toast({
             title: "Item Added!",
             description: `The ${data.name} item has been added to your budget.`,
@@ -172,14 +180,14 @@ export function BudgetForm({ setDialogOpen, itemToEdit }: BudgetFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Link to Vendor (Optional)</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || 'no-vendor'}>
                   <FormControl>
                     <SelectTrigger disabled={vendorsLoading}>
                       <SelectValue placeholder={vendorsLoading ? "Loading vendors..." : "Select a vendor"} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="no-vendor">None</SelectItem>
                     {myVendors?.map(vendor => (
                       <SelectItem key={vendor.id} value={vendor.id}>{vendor.name}</SelectItem>
                     ))}
