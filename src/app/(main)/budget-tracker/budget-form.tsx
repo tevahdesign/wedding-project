@@ -39,6 +39,7 @@ export type BudgetItem = BudgetItemFormValues & { id: string }
 type Vendor = {
   id: string
   name: string
+  category: string;
 }
 
 type BudgetFormProps = {
@@ -70,6 +71,19 @@ export function BudgetForm({ setDialogOpen, itemToEdit }: BudgetFormProps) {
       vendorId: "",
     },
   })
+
+  const { setValue, watch } = form;
+  const selectedVendorId = watch('vendorId');
+
+  useEffect(() => {
+    if (selectedVendorId && selectedVendorId !== 'no-vendor' && myVendors) {
+        const selectedVendor = myVendors.find(v => v.id === selectedVendorId);
+        if (selectedVendor && selectedVendor.category) {
+            setValue('name', selectedVendor.category);
+        }
+    }
+  }, [selectedVendorId, myVendors, setValue]);
+
 
   useEffect(() => {
     if (isEditMode && itemToEdit) {
@@ -140,6 +154,29 @@ export function BudgetForm({ setDialogOpen, itemToEdit }: BudgetFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[80vh] overflow-y-auto pr-4">
         <FormField
             control={form.control}
+            name="vendorId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Link to Vendor (Optional)</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || 'no-vendor'}>
+                  <FormControl>
+                    <SelectTrigger disabled={vendorsLoading}>
+                      <SelectValue placeholder={vendorsLoading ? "Loading vendors..." : "Select a vendor"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="no-vendor">None</SelectItem>
+                    {myVendors?.map(vendor => (
+                      <SelectItem key={vendor.id} value={vendor.id}>{vendor.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        <FormField
+            control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
@@ -173,30 +210,6 @@ export function BudgetForm({ setDialogOpen, itemToEdit }: BudgetFormProps) {
                 )}
             />
         </div>
-
-        <FormField
-            control={form.control}
-            name="vendorId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Link to Vendor (Optional)</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || 'no-vendor'}>
-                  <FormControl>
-                    <SelectTrigger disabled={vendorsLoading}>
-                      <SelectValue placeholder={vendorsLoading ? "Loading vendors..." : "Select a vendor"} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="no-vendor">None</SelectItem>
-                    {myVendors?.map(vendor => (
-                      <SelectItem key={vendor.id} value={vendor.id}>{vendor.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
         <FormField
             control={form.control}
