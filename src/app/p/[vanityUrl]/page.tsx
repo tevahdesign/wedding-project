@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -13,7 +14,8 @@ import {
   CheckCircle,
   Circle,
   XCircle,
-  Store
+  Store,
+  KeyRound,
 } from 'lucide-react';
 import {
   Card,
@@ -36,6 +38,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 type Guest = {
   id: string;
@@ -63,6 +66,54 @@ type UserProfile = {
   photoURL: string;
 };
 
+type PublicDashboardData = {
+    ownerId: string;
+    shareCode: string;
+};
+
+
+function AccessGate({ onSubmit, loading, error }: { onSubmit: (code: string) => void, loading: boolean, error: string | null }) {
+    const [code, setCode] = useState('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSubmit(code);
+    }
+
+    return (
+         <div className="flex h-screen items-center justify-center bg-muted p-4">
+            <Card className="w-full max-w-sm text-center">
+                <CardHeader>
+                    <div className="mx-auto bg-primary/10 rounded-full p-3 w-fit mb-4">
+                        <KeyRound className="w-8 h-8 text-primary" />
+                    </div>
+                    <CardTitle>Access Required</CardTitle>
+                    <CardDescription>Please enter the access code to view this dashboard.</CardDescription>
+                </CardHeader>
+                <form onSubmit={handleSubmit}>
+                    <CardContent>
+                        <Input 
+                            type="text" 
+                            placeholder="Enter code..." 
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            className="text-center font-mono tracking-widest"
+                            autoFocus
+                        />
+                        {error && <p className="text-destructive text-sm mt-2">{error}</p>}
+                    </CardContent>
+                    <CardFooter>
+                        <Button className="w-full" type="submit" disabled={loading}>
+                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Unlock Dashboard
+                        </Button>
+                    </CardFooter>
+                </form>
+            </Card>
+        </div>
+    )
+}
+
 export default function PublicDashboardPage() {
   const params = useParams();
   const router = useRouter();
@@ -71,22 +122,28 @@ export default function PublicDashboardPage() {
 
   const vanityUrl = params.vanityUrl as string;
 
-  const [ownerId, setOwnerId] = useState<string | null>(null);
+  const [dashboardData, setDashboardData] = useState<PublicDashboardData | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [guests, setGuests] = useState<Guest[]>([]);
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [savedVendors, setSavedVendors] = useState<Vendor[]>([]);
-  const [totalBudget, setTotalBudget] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [accessCodeError, setAccessCodeError] = useState<string | null>(null);
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
+
 
   useEffect(() => {
-    const fetchOwnerId = async () => {
-      if (!firestore || !vanityUrl || authLoading) return;
+    const fetchDashboardMeta = async () => {
+      if (!firestore || !vanityUrl) return;
       
       if (vanityUrl === 'preview') {
+         if (authLoading) return;
          if (user) {
-            setOwnerId(user.uid);
+            setDashboardData({ ownerId: user.uid, shareCode: 'preview' });
+            setIsAuthenticated(true);
          } else {
             setError("You must be logged in to see a preview of your shared dashboard.");
             setLoading(false);
@@ -98,25 +155,26 @@ export default function PublicDashboardPage() {
         const dashboardRef = doc(firestore, 'publicDashboards', vanityUrl);
         const docSnap = await getDoc(dashboardRef);
         if (docSnap.exists()) {
-          setOwnerId(docSnap.data().ownerId);
+          setDashboardData(docSnap.data() as PublicDashboardData);
         } else {
           setError('This shared dashboard does not exist.');
-          setLoading(false);
         }
       } catch (err) {
         setError('Failed to load dashboard information.');
+      } finally {
         setLoading(false);
       }
     };
-    fetchOwnerId();
+    fetchDashboardMeta();
   }, [firestore, vanityUrl, user, authLoading]);
 
   useEffect(() => {
-    if (!ownerId || !firestore) return;
+    if (!dashboardData?.ownerId || !firestore || !isAuthenticated) return;
 
     const fetchData = async () => {
       setLoading(true);
       try {
+        const ownerId = dashboardData.ownerId;
         // Fetch profile
         const profileRef = doc(firestore, 'users', ownerId);
         const profileSnap = await getDoc(profileRef);
@@ -147,7 +205,22 @@ export default function PublicDashboardPage() {
       }
     };
     fetchData();
-  }, [ownerId, firestore]);
+  }, [dashboardData, firestore, isAuthenticated]);
+  
+  const handleCodeSubmit = (code: string) => {
+      if (!dashboardData) return;
+      setIsVerifyingCode(true);
+      setAccessCodeError(null);
+      if (code.toUpperCase() === dashboardData.shareCode) {
+          setTimeout(() => setIsAuthenticated(true), 500); // Simulate network
+      } else {
+          setTimeout(() => {
+              setAccessCodeError("Incorrect code. Please try again.");
+              setIsVerifyingCode(false);
+          }, 500);
+      }
+  }
+
 
   const guestStats = useMemo(() => {
     const attending = guests.filter(g => g.status === 'Attending').length;
@@ -172,7 +245,7 @@ export default function PublicDashboardPage() {
     return null;
   };
 
-  if (loading || authLoading) {
+  if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-muted">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -191,6 +264,10 @@ export default function PublicDashboardPage() {
         </div>
       </div>
     );
+  }
+  
+  if (!isAuthenticated) {
+      return <AccessGate onSubmit={handleCodeSubmit} loading={isVerifyingCode} error={accessCodeError} />
   }
 
   return (
@@ -335,5 +412,3 @@ export default function PublicDashboardPage() {
     </div>
   );
 }
-
-    

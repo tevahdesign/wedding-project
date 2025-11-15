@@ -86,7 +86,8 @@
         "welcomeMessage": { "type": "string", "description": "A welcome message for the guests." },
         "vanityUrl": { "type": "string", "description": "The custom vanity URL for the website." },
         "templateId": { "type": "string", "description": "The ID of the chosen website template." },
-        "ownerId": { "type": "string", "description": "The UID of the user who owns the website."}
+        "ownerId": { "type": "string", "description": "The UID of the user who owns the website."},
+        "shareCode": { "type": "string", "description": "A unique code to access the shared dashboard." }
       },
       "required": ["coupleNames", "weddingDate", "templateId", "ownerId"]
     },

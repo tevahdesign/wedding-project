@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
@@ -21,9 +22,14 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { useAuth, useFirestore } from '@/firebase'
 import { useToast } from '@/hooks/use-toast'
-import { Copy, Link as LinkIcon, Loader2, Check, Trash2, Globe, Share2 } from 'lucide-react'
+import { Copy, Link as LinkIcon, Loader2, Check, Trash2, Globe, Share2, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+import { Separator } from '@/components/ui/separator'
+
+function generateShareCode() {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
 
 export default function WebsiteBuilderPage() {
   const { user } = useAuth()
@@ -34,6 +40,7 @@ export default function WebsiteBuilderPage() {
   const [weddingDate, setWeddingDate] = useState<Date | undefined>(undefined)
   const [welcomeMessage, setWelcomeMessage] = useState('')
   const [vanityUrl, setVanityUrl] = useState('')
+  const [shareCode, setShareCode] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState('template-1')
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -66,6 +73,7 @@ export default function WebsiteBuilderPage() {
     setWeddingDate(new Date());
     setWelcomeMessage('We can\'t wait to celebrate our special day with you! Join us as we say "I do".');
     setVanityUrl(user ? `wedding-${user.uid.slice(0,6)}` : 'our-wedding');
+    setShareCode(generateShareCode());
     setSelectedTemplate('template-1');
     setInitialVanityUrl(null);
   }
@@ -81,6 +89,7 @@ export default function WebsiteBuilderPage() {
                 setWeddingDate(data.weddingDate ? new Date(data.weddingDate) : new Date());
                 setWelcomeMessage(data.welcomeMessage || 'We can\'t wait to celebrate our special day with you! Join us as we say "I do".');
                 setVanityUrl(data.vanityUrl || '');
+                setShareCode(data.shareCode || generateShareCode());
                 setInitialVanityUrl(data.vanityUrl || null);
                 setSelectedTemplate(data.templateId || 'template-1');
             } else {
@@ -105,6 +114,9 @@ export default function WebsiteBuilderPage() {
     }
     setIsSaving(true)
     try {
+      const finalShareCode = shareCode || generateShareCode();
+      if (!shareCode) setShareCode(finalShareCode);
+
       const dataToSave = {
         coupleNames,
         weddingDate: weddingDate ? weddingDate.toISOString() : null,
@@ -112,6 +124,7 @@ export default function WebsiteBuilderPage() {
         vanityUrl,
         templateId: selectedTemplate,
         ownerId: user.uid,
+        shareCode: finalShareCode,
       };
 
       // Save to public collection
@@ -119,7 +132,7 @@ export default function WebsiteBuilderPage() {
       await setDoc(publicWebsiteRef, dataToSave);
       
       const publicDashboardRef = doc(firestore, 'publicDashboards', vanityUrl);
-      await setDoc(publicDashboardRef, { ownerId: user.uid });
+      await setDoc(publicDashboardRef, { ownerId: user.uid, shareCode: finalShareCode });
 
       // if vanityUrl changed, delete old public doc
       if (initialVanityUrl && initialVanityUrl !== vanityUrl) {
@@ -183,13 +196,13 @@ export default function WebsiteBuilderPage() {
 
   }
 
-  const handleCopyToClipboard = (url: string) => {
-    navigator.clipboard.writeText(url).then(() => {
+  const handleCopyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
        toast({
-        title: "Link Copied!",
-        description: "The URL is now in your clipboard.",
+        title: "Copied to Clipboard!",
+        description: "The content is now in your clipboard.",
       });
     });
   };
@@ -237,7 +250,14 @@ export default function WebsiteBuilderPage() {
                   disabled={loading}
                 />
               </div>
-              <div className="space-y-2">
+            </CardContent>
+          </Card>
+           <Card>
+            <CardHeader>
+              <CardTitle>Sharing & Security</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                 <div className="space-y-2">
                 <Label htmlFor="vanity-url">Your Custom URL</Label>
                 <div className="flex items-center">
                   <span className="text-sm text-muted-foreground bg-muted px-3 py-2.5 rounded-l-md border border-r-0 h-10 flex items-center truncate">
@@ -253,8 +273,21 @@ export default function WebsiteBuilderPage() {
                   />
                 </div>
               </div>
+               <div className="space-y-2">
+                <Label htmlFor="share-code">Dashboard Access Code</Label>
+                 <div className="flex items-center space-x-2">
+                    <Input id="share-code" value={shareCode} readOnly className="font-mono tracking-widest" />
+                    <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(shareCode)}>
+                        <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => setShareCode(generateShareCode())}>
+                        <RefreshCw className="h-4 w-4" />
+                    </Button>
+                 </div>
+                 <p className="text-xs text-muted-foreground">Share this code with guests so they can view your dashboard.</p>
+              </div>
             </CardContent>
-          </Card>
+           </Card>
           <Card>
             <CardHeader>
               <CardTitle>Choose a Template</CardTitle>
@@ -367,32 +400,31 @@ export default function WebsiteBuilderPage() {
                     <CardTitle>Your Links are Ready!</CardTitle>
                     <CardDescription>Share your beautiful website and dashboard with your guests.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className='space-y-4'>
+                <CardContent className="space-y-4">
+                    <div>
                         <Label>Public Website URL</Label>
-                        <div className="flex items-center space-x-2">
-                            <LinkIcon className="h-4 w-4 text-muted-foreground" />
-                            <Link href={shareableUrl} target="_blank" className="text-sm font-medium text-primary hover:underline truncate">
-                                {shareableUrl}
-                            </Link>
+                        <div className="flex items-center space-x-2 mt-2">
+                             <Input value={shareableUrl} readOnly />
+                             <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(shareableUrl)}>
+                                {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                            </Button>
+                             <Link href={shareableUrl} target="_blank">
+                                <Button variant="ghost" size="icon"><LinkIcon className="h-4 w-4" /></Button>
+                             </Link>
                         </div>
-                        <Button onClick={() => handleCopyToClipboard(shareableUrl)} className="w-full">
-                            {isCopied ? <Check className="mr-2" /> : <Copy className="mr-2" />}
-                            {isCopied ? 'Copied!' : 'Copy Website Link'}
-                        </Button>
                     </div>
-                     <div className='space-y-4'>
+                     <Separator />
+                     <div>
                         <Label>Shareable Dashboard URL</Label>
-                        <div className="flex items-center space-x-2">
-                            <Share2 className="h-4 w-4 text-muted-foreground" />
-                            <Link href={shareableDashboardUrl} target="_blank" className="text-sm font-medium text-primary hover:underline truncate">
-                                {shareableDashboardUrl}
-                            </Link>
+                        <div className="flex items-center space-x-2 mt-2">
+                             <Input value={shareableDashboardUrl} readOnly />
+                             <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(shareableDashboardUrl)}>
+                                {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                            </Button>
+                             <Link href={shareableDashboardUrl} target="_blank">
+                                <Button variant="ghost" size="icon"><Share2 className="h-4 w-4" /></Button>
+                             </Link>
                         </div>
-                        <Button onClick={() => handleCopyToClipboard(shareableDashboardUrl)} className="w-full" variant="secondary">
-                            {isCopied ? <Check className="mr-2" /> : <Copy className="mr-2" />}
-                            {isCopied ? 'Copied!' : 'Copy Dashboard Link'}
-                        </Button>
                     </div>
                 </CardContent>
              </Card>
