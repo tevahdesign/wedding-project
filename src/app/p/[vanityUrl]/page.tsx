@@ -44,10 +44,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 
 
+type GuestStatus = 'Attending' | 'Pending' | 'Declined';
 type Guest = {
   id: string;
   name: string;
-  status: 'Attending' | 'Pending' | 'Declined';
+  status: GuestStatus;
   group?: string;
 };
 
@@ -96,7 +97,10 @@ export default function PublicDashboardPage() {
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [accessCodeInput, setAccessCodeInput] = useState('');
-
+  
+  type FilterStatus = GuestStatus | 'All';
+  const [brideFilter, setBrideFilter] = useState<FilterStatus>('All');
+  const [groomFilter, setGroomFilter] = useState<FilterStatus>('All');
 
   useEffect(() => {
     const checkAuthAndFetchMeta = async () => {
@@ -337,30 +341,57 @@ export default function PublicDashboardPage() {
     );
   }
 
-  const renderGuestGroupStats = (title: string, stats: { total: number, attending: number, pending: number, declined: number }) => (
-    <div>
-        <h4 className="font-semibold mb-2">{title} ({stats.total} Guests)</h4>
-        <div className="grid grid-cols-3 gap-2 text-center text-sm p-2 rounded-md bg-muted/50">
-            <div>
-                <div className="font-bold text-green-500">{stats.attending}</div>
-                <div className="text-xs text-muted-foreground">Attending</div>
+  const renderGuestGroupStats = (
+      title: string, 
+      stats: { total: number, attending: number, pending: number, declined: number },
+      activeFilter: FilterStatus,
+      setFilter: (status: FilterStatus) => void
+    ) => {
+    
+    const statItems: { label: GuestStatus, value: number, color: string }[] = [
+        { label: 'Attending', value: stats.attending, color: 'text-green-500' },
+        { label: 'Pending', value: stats.pending, color: 'text-yellow-500' },
+        { label: 'Declined', value: stats.declined, color: 'text-red-500' },
+    ];
+
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-2">
+                <h4 className="font-semibold">{title} ({stats.total} Guests)</h4>
+                {activeFilter !== 'All' && (
+                    <Button variant="link" size="sm" className="h-auto p-0" onClick={() => setFilter('All')}>
+                        Clear filter
+                    </Button>
+                )}
             </div>
-            <div>
-                <div className="font-bold text-yellow-500">{stats.pending}</div>
-                <div className="text-xs text-muted-foreground">Pending</div>
-            </div>
-            <div>
-                <div className="font-bold text-red-500">{stats.declined}</div>
-                <div className="text-xs text-muted-foreground">Declined</div>
+            <div className="grid grid-cols-3 gap-2 text-center text-sm">
+                {statItems.map(item => (
+                    <div 
+                        key={item.label}
+                        onClick={() => setFilter(item.label)}
+                        className={cn(
+                            "p-2 rounded-md cursor-pointer transition-colors",
+                            activeFilter === item.label ? 'bg-primary/20' : 'bg-muted/50 hover:bg-muted'
+                        )}
+                    >
+                        <div className={`font-bold ${item.color}`}>{item.value}</div>
+                        <div className="text-xs text-muted-foreground">{item.label}</div>
+                    </div>
+                ))}
             </div>
         </div>
-    </div>
-  );
-  
-  const renderGuestListTable = (guests: Guest[]) => {
-    if (guests.length === 0) return (
-        <div className="text-muted-foreground text-center py-8">No guests in this group.</div>
     );
+  };
+  
+  const renderGuestListTable = (guests: Guest[], filter: FilterStatus) => {
+    const filteredGuests = filter === 'All' ? guests : guests.filter(g => g.status === filter);
+    
+    if (filteredGuests.length === 0) return (
+        <div className="text-muted-foreground text-center py-8">
+            {filter === 'All' ? 'No guests in this group.' : `No guests with status "${filter}".`}
+        </div>
+    );
+
     return (
         <div className="max-h-60 overflow-y-auto border rounded-lg">
             <Table>
@@ -371,7 +402,7 @@ export default function PublicDashboardPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {guests.map(guest => (
+                    {filteredGuests.map(guest => (
                         <TableRow key={guest.id}>
                             <TableCell>{guest.name}</TableCell>
                             <TableCell className="text-right flex justify-end items-center gap-2">
@@ -448,9 +479,9 @@ export default function PublicDashboardPage() {
                             </div>
                             </div>
                             
-                            <div className="grid md:grid-cols-2 gap-6">
-                                {renderGuestGroupStats("Bride's Side", guestStats.bride)}
-                                {renderGuestGroupStats("Groom's Side", guestStats.groom)}
+                            <div className="space-y-6">
+                                {renderGuestGroupStats("Bride's Side", guestStats.bride, brideFilter, setBrideFilter)}
+                                {renderGuestGroupStats("Groom's Side", guestStats.groom, groomFilter, setGroomFilter)}
                             </div>
 
                             {guests.length > 0 ? (
@@ -460,10 +491,10 @@ export default function PublicDashboardPage() {
                                         <TabsTrigger value="groom">Groom's Guests ({guestStats.groom.guests.length})</TabsTrigger>
                                     </TabsList>
                                     <TabsContent value="bride" className="mt-4">
-                                        {renderGuestListTable(guestStats.bride.guests)}
+                                        {renderGuestListTable(guestStats.bride.guests, brideFilter)}
                                     </TabsContent>
                                     <TabsContent value="groom" className="mt-4">
-                                        {renderGuestListTable(guestStats.groom.guests)}
+                                        {renderGuestListTable(guestStats.groom.guests, groomFilter)}
                                     </TabsContent>
                                 </Tabs>
                             ) : (<div className="text-muted-foreground text-center py-8">The guest list is not available yet.</div>)}
@@ -560,4 +591,3 @@ export default function PublicDashboardPage() {
   );
 }
 
-    
