@@ -51,22 +51,29 @@ export default function SharePage() {
   useEffect(() => {
     async function fetchWebsiteData() {
         if (userWebsiteRef) {
-            setLoading(true);
-            const docSnap = await getDoc(userWebsiteRef);
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                setVanityUrl(data.vanityUrl || `wedding-${user!.uid.slice(0,6)}`);
-                setShareCode(data.shareCode || generateShareCode());
-                setInitialVanityUrl(data.vanityUrl || null);
-            } else {
+            try {
+                const docSnap = await getDoc(userWebsiteRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    setVanityUrl(data.vanityUrl || `wedding-${user!.uid.slice(0,6)}`);
+                    setShareCode(data.shareCode || generateShareCode());
+                    setInitialVanityUrl(data.vanityUrl || null);
+                } else {
+                    resetFormToDefaults();
+                }
+            } catch (e) {
+                console.error("Failed to fetch website data: ", e);
                 resetFormToDefaults();
+            } finally {
+                setLoading(false);
             }
+        } else if (!user) {
             setLoading(false);
         }
     }
     fetchWebsiteData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userWebsiteRef]);
+  }, [user, userWebsiteRef]);
 
 
   const handleSave = async () => {
@@ -171,7 +178,7 @@ export default function SharePage() {
                         placeholder="e.g., alex-and-jordan"
                         value={vanityUrl}
                         onChange={(e) => setVanityUrl(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
-                        disabled={loading}
+                        disabled={loading || isSaving}
                     />
                     <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(vanityUrl, 'id')}>
                         {isCopiedId ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
@@ -182,7 +189,7 @@ export default function SharePage() {
                <div className="space-y-2">
                 <Label htmlFor="share-code">Access Code</Label>
                  <div className="flex items-center space-x-2">
-                    <Input id="share-code" value={shareCode} onChange={(e) => setShareCode(e.target.value.toUpperCase())} className="font-mono tracking-widest" />
+                    <Input id="share-code" value={shareCode} onChange={(e) => setShareCode(e.target.value.toUpperCase())} className="font-mono tracking-widest" disabled={loading || isSaving} />
                     <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(shareCode, 'code')}>
                         {isCopiedCode ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                     </Button>
