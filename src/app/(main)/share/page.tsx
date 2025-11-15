@@ -36,11 +36,19 @@ export default function SharePage() {
   const [isCopiedLink, setIsCopiedLink] = useState(false);
   const [loading, setLoading] = useState(true);
   const [initialVanityUrl, setInitialVanityUrl] = useState<string | null>(null);
+  const [guestLoginUrl, setGuestLoginUrl] = useState('');
   
   const userWebsiteRef = useMemo(() => {
     if (!user || !database) return null;
     return ref(database, `users/${user.uid}/website`);
   }, [user, database]);
+
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setGuestLoginUrl(`${window.location.origin}/guest-login`);
+    }
+  }, []);
 
 
   const resetFormToDefaults = () => {
@@ -159,8 +167,6 @@ export default function SharePage() {
     });
   };
 
-  const guestLoginUrl = `${window.location.origin}/guest-login`;
-
   return (
     <div className="flex flex-col flex-1 pb-20">
       <PageHeader
@@ -249,7 +255,7 @@ export default function SharePage() {
                     <Label>Guest Login Page</Label>
                     <div className="flex items-center space-x-2">
                         <Input readOnly value={guestLoginUrl} className="bg-muted"/>
-                         <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(guestLoginUrl, 'link')}>
+                         <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(guestLoginUrl, 'link')} disabled={!guestLoginUrl}>
                             {isCopiedLink ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                         </Button>
                     </div>
