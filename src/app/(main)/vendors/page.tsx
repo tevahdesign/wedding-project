@@ -200,7 +200,7 @@ export default function VendorsPage() {
                                                         {isSaved ? 'Added' : (<><Plus className="mr-2 h-4 w-4" /> Add</>)}
                                                     </Button>
                                                     <Button asChild size="sm" variant="outline" className="w-full">
-                                                        <Link href={`/vendors/${vendor.id}`}>
+                                                        <Link href={`/v/${vendor.id}`}>
                                                             <Eye className="mr-2 h-4 w-4" /> View
                                                         </Link>
                                                     </Button>

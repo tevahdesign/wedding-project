@@ -4,7 +4,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
-import { doc, onSnapshot, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import {
   ChevronLeft,
   Heart,
@@ -14,14 +13,15 @@ import {
   Phone,
   Star,
 } from 'lucide-react';
-import { get, ref, onValue } from 'firebase/database';
+import { get, ref } from 'firebase/database';
 
-import { useAuth, useDatabase, useFirestore } from '@/firebase';
+import { useAuth, useDatabase } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { set, remove, onValue } from 'firebase/database';
 
 type Service = {
     name: string;
@@ -44,12 +44,11 @@ type Vendor = {
     isCustom?: boolean;
 };
 
-export default function VendorDetailPage() {
+export default function PublicVendorDetailPage() {
     const params = useParams();
     const router = useRouter();
     const vendorId = params.vendorId as string;
     const database = useDatabase();
-    const firestore = useFirestore();
     const { user } = useAuth();
     const { toast } = useToast();
     
@@ -113,6 +112,7 @@ export default function VendorDetailPage() {
                 title: 'Not logged in',
                 description: 'You need to be logged in to save vendors.',
             });
+            router.push('/login');
             return;
         }
 

@@ -109,7 +109,7 @@ export default function MyVendorsPage() {
                 ) : savedVendors && savedVendors.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {savedVendors.map(vendor => (
-                            <Link href={`/vendors/${vendor.id}`} key={vendor.id} className="overflow-hidden group cursor-pointer">
+                            <Link href={`/v/${vendor.id}`} key={vendor.id} className="overflow-hidden group cursor-pointer">
                                 <Card className="h-full border shadow-sm transition-shadow hover:shadow-xl rounded-xl">
                                 <CardContent className="p-0">
                                     <div className="relative">

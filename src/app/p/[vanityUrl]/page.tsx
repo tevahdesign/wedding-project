@@ -398,8 +398,8 @@ export default function PublicDashboardPage() {
             {savedVendors.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {savedVendors.map(vendor => (
-                  <Link href={`/vendors/${vendor.id}`} key={vendor.id} className="group">
-                    <Card className="h-full">
+                  <Link href={`/v/${vendor.id}`} key={vendor.id} className="group">
+                    <Card className="h-full hover:shadow-md transition-shadow">
                       <CardContent className="p-3 flex items-center gap-3">
                           <Store className="w-8 h-8 text-primary flex-shrink-0" />
                           <div className="flex-grow min-w-0">
