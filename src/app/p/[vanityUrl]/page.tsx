@@ -39,6 +39,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 type Guest = {
   id: string;
@@ -239,7 +240,7 @@ export default function PublicDashboardPage() {
     );
   }
 
-  if (!isAuthenticated || vanityUrl !== 'preview' && error) {
+  if (!isAuthenticated || (vanityUrl !== 'preview' && error && !dashboardData?.shareCode)) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-gray-100 dark:bg-gray-950 p-4">
         <Card className="w-full max-w-sm z-10">
