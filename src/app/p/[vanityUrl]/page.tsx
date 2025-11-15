@@ -94,72 +94,75 @@ export default function PublicDashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
 
-  // This effect runs only once to check session storage.
   useEffect(() => {
-    const sessionKey = `dashboard_access_${vanityUrl}`;
-    const hasAccess = sessionStorage.getItem(sessionKey) === 'true';
-    
-    // Also check if owner is viewing
-    const isOwnerViewingPreview = vanityUrl === 'preview' && user;
-
-    if (hasAccess || isOwnerViewingPreview) {
-      setIsAuthenticated(true);
-    }
-  }, [vanityUrl, user]);
-
-
-  useEffect(() => {
-    const fetchDashboardMeta = async () => {
-      if (!database || !vanityUrl) return;
-
-      if (vanityUrl === 'preview') {
-         if (authLoading) return;
-         if (user) {
-            const userWebsiteRef = ref(database, `users/${user.uid}/website/details`);
-            const snapshot = await get(userWebsiteRef);
-            if (snapshot.exists()) {
-                setDashboardData({ ownerId: user.uid, ...(snapshot.val() as any) });
-            } else {
-                 setError("You haven't set up your share settings yet.");
-            }
-         } else {
-            setError("You must be logged in to see a preview.");
-         }
-         setLoading(false);
-         return;
+    const checkAuthAndFetchMeta = async () => {
+      if (!database || !vanityUrl) {
+          setLoading(false);
+          return;
       }
       
+      setLoading(true);
+
+      // Handle preview mode for logged-in owner
+      if (vanityUrl === 'preview') {
+        if (authLoading) return; // Wait for auth state
+        if (user) {
+          setIsAuthenticated(true);
+          const userWebsiteRef = ref(database, `users/${user.uid}/website/details`);
+          const snapshot = await get(userWebsiteRef);
+          if (snapshot.exists()) {
+            setDashboardData({ ownerId: user.uid, ...(snapshot.val() as any) });
+          } else {
+            setError("You haven't set up your share settings yet.");
+          }
+        } else {
+          setError("You must be logged in to see a preview.");
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Handle regular guest access
+      const sessionKey = `dashboard_access_${vanityUrl}`;
+      const hasAccessInSession = sessionStorage.getItem(sessionKey) === 'true';
+
+      if (hasAccessInSession) {
+          setIsAuthenticated(true);
+      }
+
       try {
         const dashboardRef = ref(database, `publicDashboards/${vanityUrl}`);
         const snapshot = await get(dashboardRef);
+
         if (snapshot.exists()) {
           const data = snapshot.val() as Omit<PublicDashboardData, 'vanityUrl'>;
           setDashboardData({ ...data, vanityUrl });
 
           const code = searchParams.get('code');
-          if (code) {
-             if (code.toUpperCase() === data.shareCode) {
-                sessionStorage.setItem(`dashboard_access_${vanityUrl}`, 'true');
-                setIsAuthenticated(true);
-                router.replace(`/p/${vanityUrl}`);
-             } else {
-                setError('Invalid access code provided.');
-             }
+          if (code) { // Check for access code in URL
+            if (code.toUpperCase() === data.shareCode) {
+              sessionStorage.setItem(sessionKey, 'true');
+              setIsAuthenticated(true);
+              router.replace(`/p/${vanityUrl}`); // Remove code from URL
+            } else {
+              if (!hasAccessInSession) setError('Invalid access code provided.');
+            }
+          } else if (!hasAccessInSession) {
+            setError('Please provide an access code.');
           }
-
         } else {
           setError('This shared dashboard does not exist.');
         }
       } catch (err) {
         setError('Failed to load dashboard information.');
       } finally {
-        if (vanityUrl !== 'preview') {
-            setLoading(false);
-        }
+        setLoading(false);
       }
     };
-    fetchDashboardMeta();
+
+    checkAuthAndFetchMeta();
   }, [database, vanityUrl, user, authLoading, searchParams, router]);
+
 
   useEffect(() => {
     if (!dashboardData?.ownerId || !database || !isAuthenticated) return;
@@ -224,7 +227,7 @@ export default function PublicDashboardPage() {
     return null;
   };
 
-  if (loading) {
+  if (loading && !dashboardData) {
     return (
       <div className="flex h-screen items-center justify-center bg-muted">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -233,7 +236,7 @@ export default function PublicDashboardPage() {
     );
   }
 
-  if (error || !isAuthenticated) {
+  if (error && !isAuthenticated) {
     return (
       <div className="flex h-screen items-center justify-center bg-muted text-center p-4">
         <div>
@@ -244,6 +247,16 @@ export default function PublicDashboardPage() {
       </div>
     );
   }
+  
+  if (!isAuthenticated) {
+    return (
+        <div className="flex h-screen items-center justify-center bg-muted">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="ml-4">Verifying access...</p>
+        </div>
+    )
+  }
+
 
   return (
     <div className="bg-muted min-h-screen">
