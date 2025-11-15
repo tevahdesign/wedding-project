@@ -40,6 +40,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import Link from 'next/link';
 
 type Guest = {
   id: string;
@@ -397,15 +398,17 @@ export default function PublicDashboardPage() {
             {savedVendors.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {savedVendors.map(vendor => (
-                  <Card key={vendor.id}>
-                    <CardContent className="p-3 flex items-center gap-3">
-                        <Store className="w-8 h-8 text-primary flex-shrink-0" />
-                        <div className="flex-grow min-w-0">
-                            <p className="font-semibold truncate">{vendor.name}</p>
-                            <p className="text-sm text-muted-foreground truncate">{vendor.category}</p>
-                        </div>
-                    </CardContent>
-                  </Card>
+                  <Link href={`/vendors/${vendor.id}`} key={vendor.id} className="group">
+                    <Card className="h-full">
+                      <CardContent className="p-3 flex items-center gap-3">
+                          <Store className="w-8 h-8 text-primary flex-shrink-0" />
+                          <div className="flex-grow min-w-0">
+                              <p className="font-semibold truncate">{vendor.name}</p>
+                              <p className="text-sm text-muted-foreground truncate">{vendor.category}</p>
+                          </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 ))}
               </div>
             ) : (

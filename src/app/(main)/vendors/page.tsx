@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, SlidersHorizontal, Star } from 'lucide-react';
+import { Plus, Search, SlidersHorizontal, Star, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PageHeader } from '@/components/app/page-header';
 import { useAuth, useDatabase } from '@/firebase';
@@ -167,7 +167,7 @@ export default function VendorsPage() {
                              const isSaved = savedVendorIds[vendor.id];
                              return (
                                 <Card key={vendor.id} className="overflow-hidden group cursor-pointer flex flex-col">
-                                    <Link href={`/vendors/${vendor.id}`} className="block h-full">
+                                    <div className="block h-full">
                                         <CardContent className="p-0 flex flex-col h-full">
                                             <div className="relative">
                                                 <Image
@@ -189,18 +189,25 @@ export default function VendorsPage() {
                                                 <p className="text-sm text-muted-foreground truncate">{vendor.category}</p>
                                                 <p className="text-sm font-bold mt-1">{vendor.priceRange}</p>
                                                 <div className="flex-grow"></div>
-                                                <Button
-                                                    size="sm"
-                                                    variant={isSaved ? 'secondary' : 'default'}
-                                                    className="w-full mt-3"
-                                                    onClick={(e) => handleAddVendor(e, vendor)}
-                                                    disabled={isSaved}
-                                                >
-                                                    {isSaved ? 'Added' : (<><Plus className="mr-2 h-4 w-4" /> Add</>)}
-                                                </Button>
+                                                <div className="flex gap-2 mt-3">
+                                                    <Button
+                                                        size="sm"
+                                                        variant={isSaved ? 'secondary' : 'default'}
+                                                        className="w-full"
+                                                        onClick={(e) => handleAddVendor(e, vendor)}
+                                                        disabled={isSaved}
+                                                    >
+                                                        {isSaved ? 'Added' : (<><Plus className="mr-2 h-4 w-4" /> Add</>)}
+                                                    </Button>
+                                                    <Button asChild size="sm" variant="outline" className="w-full">
+                                                        <Link href={`/vendors/${vendor.id}`}>
+                                                            <Eye className="mr-2 h-4 w-4" /> View
+                                                        </Link>
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </CardContent>
-                                    </Link>
+                                    </div>
                                 </Card>
                             )
                         })}
@@ -214,4 +221,3 @@ export default function VendorsPage() {
         </div>
     );
 }
-
