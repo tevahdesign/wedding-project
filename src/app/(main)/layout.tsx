@@ -129,6 +129,13 @@ export default function MainLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isGuestLogin = pathname === '/guest-login';
+  
+  if (isGuestLogin) {
+    return <>{children}</>;
+  }
+
 
   return (
       <SidebarProvider>

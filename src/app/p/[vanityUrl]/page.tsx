@@ -3,7 +3,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { doc, getDoc, collection, getDocs, query } from 'firebase/firestore';
 import { useFirestore, useAuth } from '@/firebase';
 import {
@@ -69,56 +69,16 @@ type UserProfile = {
 type PublicDashboardData = {
     ownerId: string;
     shareCode: string;
+    vanityUrl: string;
 };
 
-
-function AccessGate({ onSubmit, loading, error }: { onSubmit: (code: string) => void, loading: boolean, error: string | null }) {
-    const [code, setCode] = useState('');
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        onSubmit(code);
-    }
-
-    return (
-         <div className="flex h-screen items-center justify-center bg-muted p-4">
-            <Card className="w-full max-w-sm text-center">
-                <CardHeader>
-                    <div className="mx-auto bg-primary/10 rounded-full p-3 w-fit mb-4">
-                        <KeyRound className="w-8 h-8 text-primary" />
-                    </div>
-                    <CardTitle>Access Required</CardTitle>
-                    <CardDescription>Please enter the access code to view this dashboard.</CardDescription>
-                </CardHeader>
-                <form onSubmit={handleSubmit}>
-                    <CardContent>
-                        <Input 
-                            type="text" 
-                            placeholder="Enter code..." 
-                            value={code}
-                            onChange={(e) => setCode(e.target.value)}
-                            className="text-center font-mono tracking-widest"
-                            autoFocus
-                        />
-                        {error && <p className="text-destructive text-sm mt-2">{error}</p>}
-                    </CardContent>
-                    <CardFooter>
-                        <Button className="w-full" type="submit" disabled={loading}>
-                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Unlock Dashboard
-                        </Button>
-                    </CardFooter>
-                </form>
-            </Card>
-        </div>
-    )
-}
 
 export default function PublicDashboardPage() {
   const params = useParams();
   const router = useRouter();
   const firestore = useFirestore();
   const { user, loading: authLoading } = useAuth();
+  const searchParams = useSearchParams();
 
   const vanityUrl = params.vanityUrl as string;
 
@@ -131,23 +91,40 @@ export default function PublicDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [accessCodeError, setAccessCodeError] = useState<string | null>(null);
-  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
+
+
+  // This effect runs only once to check session storage.
+  useEffect(() => {
+    const sessionKey = `dashboard_access_${vanityUrl}`;
+    const hasAccess = sessionStorage.getItem(sessionKey) === 'true';
+    
+    // Also check if owner is viewing
+    const isOwnerViewingPreview = vanityUrl === 'preview' && user;
+
+    if (hasAccess || isOwnerViewingPreview) {
+      setIsAuthenticated(true);
+    }
+  }, [vanityUrl, user]);
 
 
   useEffect(() => {
     const fetchDashboardMeta = async () => {
       if (!firestore || !vanityUrl) return;
-      
+
       if (vanityUrl === 'preview') {
          if (authLoading) return;
          if (user) {
-            setDashboardData({ ownerId: user.uid, shareCode: 'preview' });
-            setIsAuthenticated(true);
+            const userWebsiteRef = doc(firestore, `users/${user.uid}/website`, 'details');
+            const docSnap = await getDoc(userWebsiteRef);
+            if (docSnap.exists()) {
+                setDashboardData({ ownerId: user.uid, ...(docSnap.data() as any) });
+            } else {
+                 setError("You haven't set up your share settings yet.");
+            }
          } else {
-            setError("You must be logged in to see a preview of your shared dashboard.");
-            setLoading(false);
+            setError("You must be logged in to see a preview.");
          }
+         setLoading(false);
          return;
       }
       
@@ -155,7 +132,21 @@ export default function PublicDashboardPage() {
         const dashboardRef = doc(firestore, 'publicDashboards', vanityUrl);
         const docSnap = await getDoc(dashboardRef);
         if (docSnap.exists()) {
-          setDashboardData(docSnap.data() as PublicDashboardData);
+          const data = docSnap.data() as PublicDashboardData
+          setDashboardData({ ...data, vanityUrl });
+
+          const code = searchParams.get('code');
+          if (code) {
+             if (code.toUpperCase() === data.shareCode) {
+                sessionStorage.setItem(`dashboard_access_${vanityUrl}`, 'true');
+                setIsAuthenticated(true);
+                // clean the code from URL
+                router.replace(`/p/${vanityUrl}`);
+             } else {
+                setError('Invalid access code provided.');
+             }
+          }
+
         } else {
           setError('This shared dashboard does not exist.');
         }
@@ -166,7 +157,7 @@ export default function PublicDashboardPage() {
       }
     };
     fetchDashboardMeta();
-  }, [firestore, vanityUrl, user, authLoading]);
+  }, [firestore, vanityUrl, user, authLoading, searchParams, router]);
 
   useEffect(() => {
     if (!dashboardData?.ownerId || !firestore || !isAuthenticated) return;
@@ -207,21 +198,6 @@ export default function PublicDashboardPage() {
     fetchData();
   }, [dashboardData, firestore, isAuthenticated]);
   
-  const handleCodeSubmit = (code: string) => {
-      if (!dashboardData) return;
-      setIsVerifyingCode(true);
-      setAccessCodeError(null);
-      if (code.toUpperCase() === dashboardData.shareCode) {
-          setTimeout(() => setIsAuthenticated(true), 500); // Simulate network
-      } else {
-          setTimeout(() => {
-              setAccessCodeError("Incorrect code. Please try again.");
-              setIsVerifyingCode(false);
-          }, 500);
-      }
-  }
-
-
   const guestStats = useMemo(() => {
     const attending = guests.filter(g => g.status === 'Attending').length;
     const pending = guests.filter(g => g.status === 'Pending').length;
@@ -254,20 +230,16 @@ export default function PublicDashboardPage() {
     );
   }
 
-  if (error) {
+  if (error || !isAuthenticated) {
     return (
       <div className="flex h-screen items-center justify-center bg-muted text-center p-4">
         <div>
-          <h2 className="text-2xl font-bold text-destructive mb-2">Oops!</h2>
-          <p className="text-muted-foreground">{error}</p>
-          <Button onClick={() => router.push('/')} className="mt-6">Go to Homepage</Button>
+          <h2 className="text-2xl font-bold text-destructive mb-2">Access Denied</h2>
+          <p className="text-muted-foreground">{error || 'Please use the guest login page to access this dashboard.'}</p>
+          <Button onClick={() => router.push('/guest-login')} className="mt-6">Go to Guest Login</Button>
         </div>
       </div>
     );
-  }
-  
-  if (!isAuthenticated) {
-      return <AccessGate onSubmit={handleCodeSubmit} loading={isVerifyingCode} error={accessCodeError} />
   }
 
   return (
