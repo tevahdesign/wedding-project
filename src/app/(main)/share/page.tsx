@@ -33,6 +33,7 @@ export default function SharePage() {
   const [isSaving, setIsSaving] = useState(false)
   const [isCopiedId, setIsCopiedId] = useState(false)
   const [isCopiedCode, setIsCopiedCode] = useState(false)
+  const [isCopiedLink, setIsCopiedLink] = useState(false);
   const [loading, setLoading] = useState(true);
   const [initialVanityUrl, setInitialVanityUrl] = useState<string | null>(null);
   
@@ -139,14 +140,16 @@ export default function SharePage() {
     }
   }
 
-  const handleCopyToClipboard = (text: string, type: 'id' | 'code') => {
+  const handleCopyToClipboard = (text: string, type: 'id' | 'code' | 'link') => {
     navigator.clipboard.writeText(text).then(() => {
       if (type === 'id') setIsCopiedId(true);
       if (type === 'code') setIsCopiedCode(true);
+      if (type === 'link') setIsCopiedLink(true);
 
       setTimeout(() => {
         setIsCopiedId(false);
         setIsCopiedCode(false);
+        setIsCopiedLink(false);
       }, 2000); 
 
       toast({
@@ -155,6 +158,8 @@ export default function SharePage() {
       });
     });
   };
+
+  const guestLoginUrl = `${window.location.origin}/guest-login`;
 
   return (
     <div className="flex flex-col flex-1 pb-20">
@@ -230,6 +235,39 @@ export default function SharePage() {
               )}
             </Button>
           </div>
+
+          {initialVanityUrl && (
+            <Card className="animate-fade-in">
+              <CardHeader>
+                <CardTitle>Share with Your Guests</CardTitle>
+                <CardDescription>
+                  Your sharing settings are live. Send the following details to your guests.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                 <div className="space-y-2">
+                    <Label>Guest Login Page</Label>
+                    <div className="flex items-center space-x-2">
+                        <Input readOnly value={guestLoginUrl} className="bg-muted"/>
+                         <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(guestLoginUrl, 'link')}>
+                            {isCopiedLink ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                        </Button>
+                    </div>
+                     <p className="text-xs text-muted-foreground">Share this link with your guests.</p>
+                </div>
+                <div className='flex gap-4'>
+                    <div className="space-y-2 flex-1">
+                        <Label>Your Wedding ID</Label>
+                        <p className="font-semibold text-primary p-2 border rounded-md bg-muted">{vanityUrl}</p>
+                    </div>
+                     <div className="space-y-2 flex-1">
+                        <Label>Your Access Code</Label>
+                        <p className="font-semibold text-primary p-2 border rounded-md bg-muted font-mono tracking-widest">{shareCode}</p>
+                    </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
