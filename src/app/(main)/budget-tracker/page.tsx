@@ -242,7 +242,12 @@ export default function BudgetTrackerPage() {
         body: tableRows,
         theme: 'grid',
         headStyles: { 
-            fillColor: [22, 163, 74],
+            fillColor: [214, 90, 90], // This is a close approximation to the primary color in HSL
+            textColor: 255,
+            fontStyle: 'bold'
+        },
+        alternateRowStyles: {
+            fillColor: [245, 245, 245]
         },
         columnStyles: {
             budget: { halign: 'right' },
@@ -491,5 +496,3 @@ export default function BudgetTrackerPage() {
     </div>
   )
 }
-
-    
