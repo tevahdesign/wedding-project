@@ -352,23 +352,27 @@ export default function PublicDashboardPage() {
                     <CardTitle className="flex items-center gap-2">
                     Guest List Overview
                     </CardTitle>
-                    <CardDescription>{loading ? <Skeleton className="h-4 w-24" /> : `${guestStats.total} guests invited`}</CardDescription>
+                    {loading ? (
+                        <div className="text-sm text-muted-foreground"><Skeleton className="h-4 w-24" /></div>
+                    ) : (
+                        <CardDescription>{`${guestStats.total} guests invited`}</CardDescription>
+                    )}
                 </CardHeader>
                 <CardContent>
                     {loading ? <SkeletonLoader /> : (
                         <>
                             <div className="grid grid-cols-3 gap-4 text-center mb-6">
                             <div>
-                                <p className="text-2xl font-bold text-green-500">{guestStats.attending}</p>
-                                <p className="text-sm text-muted-foreground">Attending</p>
+                                <div className="text-2xl font-bold text-green-500">{guestStats.attending}</div>
+                                <div className="text-sm text-muted-foreground">Attending</div>
                             </div>
                             <div>
-                                <p className="text-2xl font-bold text-yellow-500">{guestStats.pending}</p>
-                                <p className="text-sm text-muted-foreground">Pending</p>
+                                <div className="text-2xl font-bold text-yellow-500">{guestStats.pending}</div>
+                                <div className="text-sm text-muted-foreground">Pending</div>
                             </div>
                             <div>
-                                <p className="text-2xl font-bold text-red-500">{guestStats.declined}</p>
-                                <p className="text-sm text-muted-foreground">Declined</p>
+                                <div className="text-2xl font-bold text-red-500">{guestStats.declined}</div>
+                                <div className="text-sm text-muted-foreground">Declined</div>
                             </div>
                             </div>
                             {guests.length > 0 ? (
@@ -451,7 +455,11 @@ export default function PublicDashboardPage() {
                         <CardTitle className="flex items-center gap-2">
                         Saved Vendors
                         </CardTitle>
-                        <CardDescription>{loading ? <Skeleton className="h-4 w-24" /> : `${savedVendors.length} vendors saved`}</CardDescription>
+                        {loading ? (
+                            <div className="text-sm text-muted-foreground"><Skeleton className="h-4 w-24" /></div>
+                        ) : (
+                            <CardDescription>{`${savedVendors.length} vendors saved`}</CardDescription>
+                        )}
                     </CardHeader>
                     <CardContent>
                         {loading ? <SkeletonLoader /> : savedVendors.length > 0 ? (
@@ -482,4 +490,3 @@ export default function PublicDashboardPage() {
   );
 }
 
-    
