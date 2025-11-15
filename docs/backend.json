@@ -57,7 +57,8 @@
         "id": { "type": "string", "description": "The item's unique ID." },
         "name": { "type": "string", "description": "Name of the budget category." },
         "budget": { "type": "number", "description": "The allocated budget for this category." },
-        "spent": { "type": "number", "description": "The amount spent in this category." }
+        "spent": { "type": "number", "description": "The amount spent in this category." },
+        "vendorId": { "type": "string", "description": "The ID of the linked vendor." }
       },
       "required": ["id", "name", "budget", "spent"]
     },
@@ -200,5 +201,3 @@
     "rules": "rules.json"
   }
 }
-
-    

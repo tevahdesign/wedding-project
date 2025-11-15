@@ -5,4 +5,5 @@ export type BudgetItem = {
   budget: number;
   spent: number;
   notes?: string;
+  vendorId?: string;
 };

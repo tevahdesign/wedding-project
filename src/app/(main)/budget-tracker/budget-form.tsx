@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useForm, SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -21,17 +21,25 @@ import { useAuth, useDatabase } from "@/firebase"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useList } from "@/firebase/database/use-list"
 
 const budgetItemSchema = z.object({
   name: z.string().min(2, { message: "Category name must be at least 2 characters." }),
   budget: z.coerce.number().min(0, { message: "Budget must be a positive number." }),
   spent: z.coerce.number().min(0, { message: "Spent amount must be a positive number." }),
   notes: z.string().optional(),
+  vendorId: z.string().optional(),
 })
 
 export type BudgetItemFormValues = z.infer<typeof budgetItemSchema>
 
 export type BudgetItem = BudgetItemFormValues & { id: string }
+
+type Vendor = {
+  id: string
+  name: string
+}
 
 type BudgetFormProps = {
   setDialogOpen: (open: boolean) => void
@@ -46,6 +54,12 @@ export function BudgetForm({ setDialogOpen, itemToEdit }: BudgetFormProps) {
 
   const isEditMode = !!itemToEdit;
 
+  const myVendorsRef = useMemo(() => {
+    if (!user || !database) return null;
+    return ref(database, `users/${user.uid}/myVendors`);
+  }, [user, database]);
+  const { data: myVendors, loading: vendorsLoading } = useList<Vendor>(myVendorsRef);
+
   const form = useForm<BudgetItemFormValues>({
     resolver: zodResolver(budgetItemSchema),
     defaultValues: {
@@ -53,6 +67,7 @@ export function BudgetForm({ setDialogOpen, itemToEdit }: BudgetFormProps) {
       budget: 0,
       spent: 0,
       notes: "",
+      vendorId: "",
     },
   })
 
@@ -65,6 +80,7 @@ export function BudgetForm({ setDialogOpen, itemToEdit }: BudgetFormProps) {
             budget: 0,
             spent: 0,
             notes: "",
+            vendorId: "",
         })
     }
   }, [isEditMode, itemToEdit, form])
@@ -113,7 +129,7 @@ export function BudgetForm({ setDialogOpen, itemToEdit }: BudgetFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[80vh] overflow-y-auto pr-4">
         <FormField
             control={form.control}
             name="name"
@@ -149,6 +165,31 @@ export function BudgetForm({ setDialogOpen, itemToEdit }: BudgetFormProps) {
                 )}
             />
         </div>
+
+        <FormField
+            control={form.control}
+            name="vendorId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Link to Vendor (Optional)</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger disabled={vendorsLoading}>
+                      <SelectValue placeholder={vendorsLoading ? "Loading vendors..." : "Select a vendor"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    {myVendors?.map(vendor => (
+                      <SelectItem key={vendor.id} value={vendor.id}>{vendor.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
         <FormField
             control={form.control}
             name="notes"

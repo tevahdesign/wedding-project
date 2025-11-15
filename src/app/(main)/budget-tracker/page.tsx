@@ -45,7 +45,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-import { PlusCircle, MoreHorizontal, Loader2, PiggyBank, Trash2, Edit, Pencil, FileText } from "lucide-react"
+import { PlusCircle, MoreHorizontal, Loader2, PiggyBank, Trash2, Edit, Pencil, FileText, Store } from "lucide-react"
 import { useMemo, useState, useEffect } from "react"
 import { useAuth, useDatabase } from "@/firebase"
 import { useList } from "@/firebase/database/use-list"
@@ -57,6 +57,13 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
+import Link from "next/link"
+import { Badge } from "@/components/ui/badge"
+
+type Vendor = {
+  id: string;
+  name: string;
+}
 
 export default function BudgetTrackerPage() {
   const { user } = useAuth()
@@ -74,6 +81,22 @@ export default function BudgetTrackerPage() {
     return ref(database, `users/${user.uid}/budgetItems`)
   }, [user, database])
   const { data: budgetData, loading: itemsLoading } = useList<BudgetItem>(budgetItemsRef)
+
+  // Fetch vendors to get names for display
+  const myVendorsRef = useMemo(() => {
+    if (!user || !database) return null;
+    return ref(database, `users/${user.uid}/myVendors`);
+  }, [user, database]);
+  const { data: myVendors, loading: vendorsLoading } = useList<Vendor>(myVendorsRef);
+  
+  const vendorMap = useMemo(() => {
+    if (!myVendors) return new Map<string, string>();
+    return myVendors.reduce((acc, vendor) => {
+        acc.set(vendor.id, vendor.name);
+        return acc;
+    }, new Map<string, string>());
+  }, [myVendors]);
+
 
   // Fetch and manage total budget
   const totalBudgetRef = useMemo(() => {
@@ -278,7 +301,7 @@ export default function BudgetTrackerPage() {
   };
 
 
-  const loading = itemsLoading || totalBudgetLoading;
+  const loading = itemsLoading || totalBudgetLoading || vendorsLoading;
 
   return (
     <div className="flex flex-col flex-1 pb-20">
@@ -451,9 +474,21 @@ export default function BudgetTrackerPage() {
                       </TableCell>
                     </TableRow>
                   )}
-                  {budgetData?.map((item) => (
+                  {budgetData?.map((item) => {
+                    const vendorName = item.vendorId ? vendorMap.get(item.vendorId) : null;
+                    return (
                       <TableRow key={item.id}>
-                        <TableCell className="font-medium">{item.name}</TableCell>
+                        <TableCell className="font-medium">
+                          <div>{item.name}</div>
+                          {vendorName && item.vendorId && (
+                             <Link href={`/vendors/${item.vendorId}`} className="text-xs">
+                                <Badge variant="secondary" className="mt-1 cursor-pointer hover:bg-primary/20">
+                                    <Store className="mr-1.5 h-3 w-3" />
+                                    {vendorName}
+                                </Badge>
+                             </Link>
+                          )}
+                        </TableCell>
                         <TableCell className="text-right">
                           ₹{Number(item.budget).toLocaleString()}
                         </TableCell>
@@ -487,7 +522,8 @@ export default function BudgetTrackerPage() {
                           </DropdownMenu>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )
+                  })}
                 </TableBody>
               </Table>
             </CardContent>
@@ -496,5 +532,3 @@ export default function BudgetTrackerPage() {
     </div>
   )
 }
-
-    
