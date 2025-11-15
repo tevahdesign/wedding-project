@@ -80,11 +80,15 @@ export default function BudgetTrackerPage() {
   }, [user, database]);
   const { data: totalBudget, loading: totalBudgetLoading } = useObjectValue<number>(totalBudgetRef);
   
-  const [localTotalBudget, setLocalTotalBudget] = useState(0);
+  const [localTotalBudget, setLocalTotalBudget] = useState<number | string>(0);
   const [isEditingBudget, setIsEditingBudget] = useState(false);
 
   useEffect(() => {
-      setLocalTotalBudget(totalBudget ?? 0);
+    if (totalBudget !== null && totalBudget !== undefined) {
+      setLocalTotalBudget(totalBudget);
+    } else {
+      setLocalTotalBudget(0);
+    }
   }, [totalBudget]);
 
 
@@ -102,7 +106,8 @@ export default function BudgetTrackerPage() {
   const handleTotalBudgetSave = async () => {
     if (!totalBudgetRef) return;
     try {
-      await set(totalBudgetRef, localTotalBudget);
+      const newTotal = Number(localTotalBudget) || 0;
+      await set(totalBudgetRef, newTotal);
       toast({ title: "Total budget updated!" });
     } catch (error) {
       toast({ variant: "destructive", title: "Failed to update budget." });
@@ -225,9 +230,9 @@ export default function BudgetTrackerPage() {
                     <span className="text-sm text-muted-foreground">Total Budget: ₹</span>
                     {isEditingBudget ? (
                         <Input 
-                            type="number" 
+                            type="text" 
                             value={localTotalBudget} 
-                            onChange={(e) => setLocalTotalBudget(Number(e.target.value))}
+                            onChange={(e) => setLocalTotalBudget(e.target.value)}
                             onBlur={handleTotalBudgetSave}
                             onKeyDown={(e) => e.key === 'Enter' && handleTotalBudgetSave()}
                             className="w-32 h-8"
@@ -349,3 +354,5 @@ export default function BudgetTrackerPage() {
     </div>
   )
 }
+
+    
