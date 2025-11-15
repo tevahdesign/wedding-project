@@ -41,6 +41,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 
 type Guest = {
   id: string;
@@ -294,128 +296,145 @@ export default function PublicDashboardPage() {
         </div>
       </header>
 
-      <main className="container mx-auto p-4 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Guest List Card */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users /> Guest List Overview
-            </CardTitle>
-            <CardDescription>{guestStats.total} guests invited</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-around text-center">
-              <div>
-                <p className="text-2xl font-bold text-green-500">{guestStats.attending}</p>
-                <p className="text-sm text-muted-foreground">Attending</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-yellow-500">{guestStats.pending}</p>
-                <p className="text-sm text-muted-foreground">Pending</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-red-500">{guestStats.declined}</p>
-                <p className="text-sm text-muted-foreground">Declined</p>
-              </div>
-            </div>
-            {guests.length > 0 && (
-                <div className="mt-4 max-h-60 overflow-y-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Group</TableHead>
-                                <TableHead className="text-right">Status</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {guests.map(guest => (
-                                <TableRow key={guest.id}>
-                                    <TableCell>{guest.name}</TableCell>
-                                    <TableCell><Badge variant="secondary">{guest.group || 'N/A'}</Badge></TableCell>
-                                    <TableCell className="text-right flex justify-end items-center gap-2">
-                                        {getStatusIcon(guest.status)} {guest.status}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
-            )}
-          </CardContent>
-        </Card>
+      <main className="container mx-auto p-4">
+        <Tabs defaultValue="guests" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-4">
+                <TabsTrigger value="guests">
+                    <Users className="mr-2 h-4 w-4"/>Guests
+                </TabsTrigger>
+                <TabsTrigger value="budget">
+                    <PiggyBank className="mr-2 h-4 w-4"/>Budget
+                </TabsTrigger>
+                <TabsTrigger value="vendors">
+                    <Heart className="mr-2 h-4 w-4"/>Vendors
+                </TabsTrigger>
+            </TabsList>
 
-        {/* Budget Tracker Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PiggyBank /> Budget Overview
-            </CardTitle>
-             <CardDescription>
-                ₹{budgetStats.totalSpent.toLocaleString('en-IN')} spent of ₹{budgetStats.totalBudgeted.toLocaleString('en-IN')}
-             </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Progress value={budgetStats.progress} className="mb-2" />
-            <p className={cn("text-sm font-medium", budgetStats.remaining < 0 ? "text-destructive" : "text-muted-foreground")}>
-                {budgetStats.remaining >= 0
-                    ? `₹${budgetStats.remaining.toLocaleString('en-IN')} remaining`
-                    : `₹${Math.abs(budgetStats.remaining).toLocaleString('en-IN')} over budget`
-                }
-            </p>
-             {budgetItems.length > 0 && (
-                <div className="mt-4 max-h-60 overflow-y-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Category</TableHead>
-                                <TableHead className="text-right">Spent</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {budgetItems.map(item => (
-                                <TableRow key={item.id}>
-                                    <TableCell>{item.name}</TableCell>
-                                    <TableCell className="text-right">₹{Number(item.spent).toLocaleString('en-IN')}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
-             )}
-          </CardContent>
-        </Card>
+            <TabsContent value="guests">
+                <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                    Guest List Overview
+                    </CardTitle>
+                    <CardDescription>{guestStats.total} guests invited</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-3 gap-4 text-center mb-6">
+                    <div>
+                        <p className="text-2xl font-bold text-green-500">{guestStats.attending}</p>
+                        <p className="text-sm text-muted-foreground">Attending</p>
+                    </div>
+                    <div>
+                        <p className="text-2xl font-bold text-yellow-500">{guestStats.pending}</p>
+                        <p className="text-sm text-muted-foreground">Pending</p>
+                    </div>
+                    <div>
+                        <p className="text-2xl font-bold text-red-500">{guestStats.declined}</p>
+                        <p className="text-sm text-muted-foreground">Declined</p>
+                    </div>
+                    </div>
+                    {guests.length > 0 && (
+                        <div className="mt-4 max-h-96 overflow-y-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>Group</TableHead>
+                                        <TableHead className="text-right">Status</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {guests.map(guest => (
+                                        <TableRow key={guest.id}>
+                                            <TableCell>{guest.name}</TableCell>
+                                            <TableCell><Badge variant="secondary">{guest.group || 'N/A'}</Badge></TableCell>
+                                            <TableCell className="text-right flex justify-end items-center gap-2">
+                                                {getStatusIcon(guest.status)} {guest.status}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    )}
+                </CardContent>
+                </Card>
+            </TabsContent>
 
-        {/* Saved Vendors Card */}
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Heart /> Saved Vendors
-            </CardTitle>
-            <CardDescription>{savedVendors.length} vendors saved</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {savedVendors.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {savedVendors.map(vendor => (
-                  <Link href={`/v/${vendor.id}`} key={vendor.id} className="group">
-                    <Card className="h-full hover:shadow-md transition-shadow">
-                      <CardContent className="p-3 flex items-center gap-3">
-                          <Store className="w-8 h-8 text-primary flex-shrink-0" />
-                          <div className="flex-grow min-w-0">
-                              <p className="font-semibold truncate">{vendor.name}</p>
-                              <p className="text-sm text-muted-foreground truncate">{vendor.category}</p>
-                          </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted-foreground text-center py-8">No vendors have been saved yet.</p>
-            )}
-          </CardContent>
-        </Card>
+            <TabsContent value="budget">
+                <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                    Budget Overview
+                    </CardTitle>
+                    <CardDescription>
+                        ₹{budgetStats.totalSpent.toLocaleString('en-IN')} spent of ₹{budgetStats.totalBudgeted.toLocaleString('en-IN')}
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Progress value={budgetStats.progress} className="mb-2" />
+                    <p className={cn("text-sm font-medium", budgetStats.remaining < 0 ? "text-destructive" : "text-muted-foreground")}>
+                        {budgetStats.remaining >= 0
+                            ? `₹${budgetStats.remaining.toLocaleString('en-IN')} remaining`
+                            : `₹${Math.abs(budgetStats.remaining).toLocaleString('en-IN')} over budget`
+                        }
+                    </p>
+                    {budgetItems.length > 0 && (
+                        <div className="mt-4 max-h-96 overflow-y-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Category</TableHead>
+                                        <TableHead className="text-right">Spent</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {budgetItems.map(item => (
+                                        <TableRow key={item.id}>
+                                            <TableCell>{item.name}</TableCell>
+                                            <TableCell className="text-right">₹{Number(item.spent).toLocaleString('en-IN')}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    )}
+                </CardContent>
+                </Card>
+            </TabsContent>
+
+            <TabsContent value="vendors">
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                        Saved Vendors
+                        </CardTitle>
+                        <CardDescription>{savedVendors.length} vendors saved</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {savedVendors.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {savedVendors.map(vendor => (
+                            <Link href={`/v/${vendor.id}`} key={vendor.id} className="group">
+                                <Card className="h-full hover:shadow-md transition-shadow">
+                                <CardContent className="p-3 flex items-center gap-3">
+                                    <Store className="w-8 h-8 text-primary flex-shrink-0" />
+                                    <div className="flex-grow min-w-0">
+                                        <p className="font-semibold truncate">{vendor.name}</p>
+                                        <p className="text-sm text-muted-foreground truncate">{vendor.category}</p>
+                                    </div>
+                                </CardContent>
+                                </Card>
+                            </Link>
+                            ))}
+                        </div>
+                        ) : (
+                        <p className="text-muted-foreground text-center py-8">No vendors have been saved yet.</p>
+                        )}
+                    </CardContent>
+                </Card>
+            </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
