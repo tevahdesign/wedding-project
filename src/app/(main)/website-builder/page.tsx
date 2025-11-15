@@ -23,10 +23,8 @@ import { useAuth, useFirestore } from '@/firebase'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2, Trash2, Globe } from 'lucide-react'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+import Link from 'next/link'
 
-function generateShareCode() {
-    return Math.random().toString(36).substring(2, 8).toUpperCase();
-}
 
 export default function WebsiteBuilderPage() {
   const { user } = useAuth()
@@ -37,7 +35,6 @@ export default function WebsiteBuilderPage() {
   const [weddingDate, setWeddingDate] = useState<Date | undefined>(undefined)
   const [welcomeMessage, setWelcomeMessage] = useState('')
   const [vanityUrl, setVanityUrl] = useState('')
-  const [shareCode, setShareCode] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState('template-1')
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -63,10 +60,7 @@ export default function WebsiteBuilderPage() {
     setCoupleNames('Alex & Jordan');
     setWeddingDate(new Date());
     setWelcomeMessage('We can\'t wait to celebrate our special day with you! Join us as we say "I do".');
-    setVanityUrl(user ? `wedding-${user.uid.slice(0,6)}` : 'our-wedding');
-    setShareCode(generateShareCode());
     setSelectedTemplate('template-1');
-    setInitialVanityUrl(null);
   }
 
   useEffect(() => {
@@ -80,7 +74,6 @@ export default function WebsiteBuilderPage() {
                 setWeddingDate(data.weddingDate ? new Date(data.weddingDate) : new Date());
                 setWelcomeMessage(data.welcomeMessage || 'We can\'t wait to celebrate our special day with you! Join us as we say "I do".');
                 setVanityUrl(data.vanityUrl || '');
-                setShareCode(data.shareCode || generateShareCode());
                 setInitialVanityUrl(data.vanityUrl || null);
                 setSelectedTemplate(data.templateId || 'template-1');
             } else {
@@ -95,52 +88,39 @@ export default function WebsiteBuilderPage() {
 
 
   const handleSave = async () => {
-    if (!userWebsiteRef || !firestore || !user || !vanityUrl) {
+    if (!userWebsiteRef || !firestore || !user) {
        toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Cannot save. Please fill all fields and be logged in.',
+        description: 'Cannot save. Please be logged in.',
       })
       return;
     }
     setIsSaving(true)
     try {
-      const finalShareCode = shareCode || generateShareCode();
-      if (!shareCode) setShareCode(finalShareCode);
-
       const dataToSave = {
         coupleNames,
         weddingDate: weddingDate ? weddingDate.toISOString() : null,
         welcomeMessage,
-        vanityUrl,
         templateId: selectedTemplate,
         ownerId: user.uid,
-        shareCode: finalShareCode,
       };
 
-      // Save to public collection
-      const publicWebsiteRef = doc(firestore, 'websites', vanityUrl);
-      await setDoc(publicWebsiteRef, dataToSave);
+      // Save/merge into user's private collection
+      await setDoc(userWebsiteRef, dataToSave, { merge: true });
       
-      const publicDashboardRef = doc(firestore, 'publicDashboards', vanityUrl);
-      await setDoc(publicDashboardRef, { ownerId: user.uid, shareCode: finalShareCode });
+      const docSnap = await getDoc(userWebsiteRef);
+      const fullData = docSnap.data();
 
-      // if vanityUrl changed, delete old public doc
-      if (initialVanityUrl && initialVanityUrl !== vanityUrl) {
-        const oldPublicWebsiteRef = doc(firestore, 'websites', initialVanityUrl);
-        await deleteDoc(oldPublicWebsiteRef);
-        const oldPublicDashboardRef = doc(firestore, 'publicDashboards', initialVanityUrl);
-        await deleteDoc(oldPublicDashboardRef);
+      // If a public URL exists, update the public doc too
+      if (fullData && fullData.vanityUrl) {
+          const publicWebsiteRef = doc(firestore, 'websites', fullData.vanityUrl);
+          await setDoc(publicWebsiteRef, fullData, { merge: true });
       }
       
-      // Save to user's private collection
-      await setDoc(userWebsiteRef, dataToSave);
-
-      setInitialVanityUrl(vanityUrl);
-      
       toast({
-        title: 'Website Published!',
-        description: 'Your changes are live and the link is ready to share.',
+        title: 'Website Content Saved!',
+        description: 'Your changes have been saved. Publish them via the Share page.',
       })
     } catch (error) {
       console.error('Error saving website:', error)
@@ -194,7 +174,17 @@ export default function WebsiteBuilderPage() {
       <PageHeader
         title="Website Builder"
         description="Craft a beautiful home for your wedding story."
-      />
+        showBackButton
+      >
+          {vanityUrl && (
+             <Button asChild variant="outline">
+                <Link href={`/${vanityUrl}`} target="_blank">
+                    <Globe className="mr-2 h-4 w-4" />
+                    View Live Site
+                </Link>
+             </Button>
+          )}
+      </PageHeader>
       <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-6">
           <Card>
@@ -209,7 +199,7 @@ export default function WebsiteBuilderPage() {
                   placeholder="e.g., Alex & Jordan"
                   value={coupleNames}
                   onChange={(e) => setCoupleNames(e.target.value)}
-                  disabled={loading}
+                  disabled={loading || isSaving}
                 />
               </div>
               <div className="space-y-2">
@@ -217,7 +207,7 @@ export default function WebsiteBuilderPage() {
                 <DatePicker
                   date={weddingDate}
                   setDate={setWeddingDate}
-                  disabled={loading}
+                  disabled={loading || isSaving}
                 />
               </div>
               <div className="space-y-2">
@@ -227,7 +217,7 @@ export default function WebsiteBuilderPage() {
                   placeholder="Share a message with your guests..."
                   value={welcomeMessage}
                   onChange={(e) => setWelcomeMessage(e.target.value)}
-                  disabled={loading}
+                  disabled={loading || isSaving}
                 />
               </div>
             </CardContent>
@@ -305,7 +295,7 @@ export default function WebsiteBuilderPage() {
                 </>
               ) : (
               <>
-                  <Globe className="mr-2 h-4 w-4" /> Save & Publish
+                  <Globe className="mr-2 h-4 w-4" /> Save Website Content
               </>
               )}
             </Button>
@@ -315,7 +305,7 @@ export default function WebsiteBuilderPage() {
                   <AlertDialogTrigger asChild>
                       <Button variant="destructive" className="w-full" disabled={isDeleting}>
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Delete Website
+                          Delete Website & Sharing
                       </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
@@ -323,7 +313,7 @@ export default function WebsiteBuilderPage() {
                           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                           <AlertDialogDescription>
                               This action cannot be undone. This will permanently delete your
-                              wedding website and all of its data.
+                              wedding website and all of its sharing settings.
                           </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

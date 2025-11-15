@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
@@ -50,24 +49,25 @@ export default function SharePage() {
 
   useEffect(() => {
     async function fetchWebsiteData() {
-        if (userWebsiteRef) {
-            try {
-                const docSnap = await getDoc(userWebsiteRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    setVanityUrl(data.vanityUrl || `wedding-${user!.uid.slice(0,6)}`);
-                    setShareCode(data.shareCode || generateShareCode());
-                    setInitialVanityUrl(data.vanityUrl || null);
-                } else {
-                    resetFormToDefaults();
-                }
-            } catch (e) {
-                console.error("Failed to fetch website data: ", e);
+        if (!userWebsiteRef) {
+          if (!user) setLoading(false);
+          return;
+        }
+
+        try {
+            const docSnap = await getDoc(userWebsiteRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                setVanityUrl(data.vanityUrl || `wedding-${user!.uid.slice(0,6)}`);
+                setShareCode(data.shareCode || generateShareCode());
+                setInitialVanityUrl(data.vanityUrl || null);
+            } else {
                 resetFormToDefaults();
-            } finally {
-                setLoading(false);
             }
-        } else if (!user) {
+        } catch (e) {
+            console.error("Failed to fetch website data: ", e);
+            resetFormToDefaults();
+        } finally {
             setLoading(false);
         }
     }
@@ -93,22 +93,36 @@ export default function SharePage() {
       const finalShareCode = shareCode || generateShareCode();
       if (!shareCode) setShareCode(finalShareCode);
 
-      const dataToSave = {
-        ...existingData,
+      // This object contains only the settings from THIS page.
+      const sharingSettings = {
         vanityUrl,
         ownerId: user.uid,
         shareCode: finalShareCode,
+      }
+
+      // Merge with existing website content data before saving.
+      const dataToSave = {
+        ...existingData,
+        ...sharingSettings
       };
 
+      // Save to user's private collection
       await setDoc(userWebsiteRef, dataToSave, { merge: true });
       
+      // Save to public dashboard collection
       const publicDashboardRef = doc(firestore, 'publicDashboards', vanityUrl);
       await setDoc(publicDashboardRef, { ownerId: user.uid, shareCode: finalShareCode }, { merge: true });
+
+      // Save to public website collection
+      const publicWebsiteRef = doc(firestore, 'websites', vanityUrl);
+      await setDoc(publicWebsiteRef, dataToSave, { merge: true });
       
-      // if vanityUrl changed, delete old public doc
+      // if vanityUrl changed, delete old public docs
       if (initialVanityUrl && initialVanityUrl !== vanityUrl) {
         const oldPublicDashboardRef = doc(firestore, 'publicDashboards', initialVanityUrl);
         await deleteDoc(oldPublicDashboardRef);
+        const oldPublicWebsiteRef = doc(firestore, 'websites', initialVanityUrl);
+        await deleteDoc(oldPublicWebsiteRef);
       }
       
       setInitialVanityUrl(vanityUrl);
@@ -180,7 +194,7 @@ export default function SharePage() {
                         onChange={(e) => setVanityUrl(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
                         disabled={loading || isSaving}
                     />
-                    <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(vanityUrl, 'id')}>
+                    <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(vanityUrl, 'id')} disabled={!vanityUrl}>
                         {isCopiedId ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                     </Button>
                 </div>
@@ -190,10 +204,10 @@ export default function SharePage() {
                 <Label htmlFor="share-code">Access Code</Label>
                  <div className="flex items-center space-x-2">
                     <Input id="share-code" value={shareCode} onChange={(e) => setShareCode(e.target.value.toUpperCase())} className="font-mono tracking-widest" disabled={loading || isSaving} />
-                    <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(shareCode, 'code')}>
+                    <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(shareCode, 'code')} disabled={!shareCode}>
                         {isCopiedCode ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => setShareCode(generateShareCode())}>
+                    <Button variant="ghost" size="icon" onClick={() => setShareCode(generateShareCode())} disabled={loading || isSaving}>
                         <RefreshCw className="h-4 w-4" />
                     </Button>
                  </div>
@@ -207,7 +221,7 @@ export default function SharePage() {
               className="w-full"
               size="lg"
               onClick={handleSave}
-              disabled={isSaving || loading}
+              disabled={isSaving || loading || !vanityUrl || !shareCode}
             >
               {isSaving ? (
                 <>
