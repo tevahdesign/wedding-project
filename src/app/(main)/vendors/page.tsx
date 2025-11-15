@@ -166,9 +166,9 @@ export default function VendorsPage() {
                         {filteredVendors.map(vendor => {
                              const isSaved = savedVendorIds[vendor.id];
                              return (
-                                <Card key={vendor.id} className="overflow-hidden group cursor-pointer flex flex-col">
-                                    <div className="block h-full">
-                                        <CardContent className="p-0 flex flex-col h-full">
+                                <Card key={vendor.id} className="overflow-hidden group flex flex-col">
+                                    <CardContent className="p-0 flex flex-col h-full">
+                                        <Link href={`/v/${vendor.id}`} className="block h-full">
                                             <div className="relative">
                                                 <Image
                                                     src={vendor.imageId || "https://picsum.photos/seed/placeholder/400/300"}
@@ -188,26 +188,27 @@ export default function VendorsPage() {
                                                 <h3 className="font-bold text-base truncate">{vendor.name}</h3>
                                                 <p className="text-sm text-muted-foreground truncate">{vendor.category}</p>
                                                 <p className="text-sm font-bold mt-1">{vendor.priceRange}</p>
-                                                <div className="flex-grow"></div>
-                                                <div className="flex gap-2 mt-3">
-                                                    <Button
-                                                        size="sm"
-                                                        variant={isSaved ? 'secondary' : 'default'}
-                                                        className="w-full"
-                                                        onClick={(e) => handleAddVendor(e, vendor)}
-                                                        disabled={isSaved}
-                                                    >
-                                                        {isSaved ? 'Added' : (<><Plus className="mr-2 h-4 w-4" /> Add</>)}
-                                                    </Button>
-                                                    <Button asChild size="sm" variant="outline" className="w-full">
-                                                        <Link href={`/v/${vendor.id}`}>
-                                                            <Eye className="mr-2 h-4 w-4" /> View
-                                                        </Link>
-                                                    </Button>
-                                                </div>
                                             </div>
-                                        </CardContent>
-                                    </div>
+                                        </Link>
+                                        <div className="p-3 pt-0 mt-auto">
+                                            <div className="flex gap-2 mt-3">
+                                                <Button
+                                                    size="sm"
+                                                    variant={isSaved ? 'secondary' : 'default'}
+                                                    className="w-full"
+                                                    onClick={(e) => handleAddVendor(e, vendor)}
+                                                    disabled={isSaved}
+                                                >
+                                                    {isSaved ? 'Added' : (<><Plus className="mr-2 h-4 w-4" /> Add</>)}
+                                                </Button>
+                                                <Button asChild size="sm" variant="outline" className="w-full">
+                                                    <Link href={`/v/${vendor.id}`}>
+                                                        <Eye className="mr-2 h-4 w-4" /> View
+                                                    </Link>
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </CardContent>
                                 </Card>
                             )
                         })}
