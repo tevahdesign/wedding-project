@@ -21,7 +21,7 @@ export function PageHeader({ title, description, children, showBackButton = fals
       <div className="flex items-center gap-2">
         <SidebarTrigger className="md:hidden" />
         {showBackButton && (
-            <Button variant="ghost" size="icon" onClick={() => router.back()} className="hidden md:inline-flex !mt-0">
+            <Button variant="ghost" size="icon" onClick={() => router.back()} className="hidden md:inline-flex">
                 <ChevronLeft className="h-6 w-6" />
             </Button>
         )}

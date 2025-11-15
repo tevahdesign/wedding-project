@@ -2,25 +2,35 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Home, Compass, LayoutGrid, User, Heart } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { Home, Compass, LayoutGrid, User, Heart, LogOut, LogIn } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useAuth } from "@/firebase"
+import { getAuth, signOut } from "firebase/auth"
+import { Button } from "../ui/button"
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/vendors", label: "Discover", icon: Compass },
   { href: "/my-vendors", label: "My Vendors", icon: Heart },
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
-  { href: "/login", label: "Profile", icon: User },
-]
+];
 
 export function BottomNav() {
   const pathname = usePathname()
+  const router = useRouter()
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+
+  const handleLogout = async () => {
+      const auth = getAuth();
+      await signOut(auth);
+      router.push('/login');
+  }
 
   // This check determines if the current page is one of the main nav items.
-  const isKnownRoute = navItems.some(item => {
+  const isKnownRoute = [...navItems, { href: "/login" }].some(item => {
     if (item.href === "/") return pathname === "/";
     return pathname.startsWith(item.href);
   });
@@ -51,9 +61,25 @@ export function BottomNav() {
             </Link>
           )
         })}
+
+        {user ? (
+            <button onClick={handleLogout} className="flex flex-col items-center justify-center text-muted-foreground hover:text-destructive transition-colors w-1/5 pt-1">
+                 <LogOut className="h-6 w-6" />
+                 <span className="text-xs mt-1 text-muted-foreground">Logout</span>
+            </button>
+        ) : (
+            <Link href="/login" prefetch={true} className="flex flex-col items-center justify-center text-muted-foreground hover:text-primary transition-colors w-1/5 pt-1">
+              <User className={cn("h-6 w-6", pathname.startsWith("/login") && "text-primary")} />
+              <span className={cn(
+                "text-xs mt-1",
+                pathname.startsWith("/login") ? "text-primary font-semibold" : "text-muted-foreground"
+              )}>
+                Profile
+              </span>
+            </Link>
+        )}
+
       </div>
     </div>
   )
 }
-
-    

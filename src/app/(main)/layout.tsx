@@ -2,7 +2,7 @@
 'use client';
 
 import { useMemo } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   SidebarProvider,
@@ -29,10 +29,12 @@ import {
   LogOut,
   PenSquare,
   Heart,
+  LogIn,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/firebase";
 import { BottomNav } from "@/components/app/bottom-nav";
+import { getAuth, signOut } from "firebase/auth";
 
 
 const navItems = [
@@ -48,8 +50,15 @@ const navItems = [
 
 function AppSidebar() {
     const pathname = usePathname();
+    const router = useRouter();
     const { user } = useAuth();
     const { state } = useSidebar();
+
+    const handleLogout = async () => {
+      const auth = getAuth();
+      await signOut(auth);
+      router.push('/login');
+    }
     
     const sidebarTitle = useMemo(() => {
         if (state === 'collapsed') {
@@ -84,13 +93,28 @@ function AppSidebar() {
             </SidebarContent>
             <SidebarFooter>
                  <SidebarMenu>
-                    <SidebarMenuItem>
-                        <Link href="/login">
-                             <SidebarMenuButton icon={<Avatar className="h-7 w-7"><AvatarImage src={user?.photoURL || "https://i.pravatar.cc/150"} /><AvatarFallback>{user?.displayName?.charAt(0) || "U"}</AvatarFallback></Avatar>}>
-                                {user?.displayName}
-                            </SidebarMenuButton>
-                        </Link>
-                    </SidebarMenuItem>
+                    {user ? (
+                        <>
+                            <SidebarMenuItem>
+                                 <SidebarMenuButton icon={<Avatar className="h-7 w-7"><AvatarImage src={user?.photoURL || "https://i.pravatar.cc/150"} /><AvatarFallback>{user?.displayName?.charAt(0) || "U"}</AvatarFallback></Avatar>}>
+                                    {user?.displayName}
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                             <SidebarMenuItem>
+                                <SidebarMenuButton onClick={handleLogout} icon={<LogOut />} tooltip="Logout">
+                                    Logout
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </>
+                    ) : (
+                        <SidebarMenuItem>
+                            <Link href="/login">
+                                <SidebarMenuButton icon={<LogIn />} tooltip="Login">
+                                    Login
+                                </SidebarMenuButton>
+                            </Link>
+                        </SidebarMenuItem>
+                    )}
                 </SidebarMenu>
             </SidebarFooter>
         </Sidebar>
@@ -116,5 +140,3 @@ export default function MainLayout({
       </SidebarProvider>
   );
 }
-
-    
